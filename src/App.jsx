@@ -38,6 +38,7 @@ const errorMessage = (error) => error?.message || 'Terjadi kesalahan yang tidak 
 function App() {
   const [session, setSession] = useState(null);
   const [authReady, setAuthReady] = useState(false);
+  const [authTransitioning, setAuthTransitioning] = useState(false);
   const [authError, setAuthError] = useState('');
   const [store, setStore] = useState(null);
   const [page, setPage] = useState('dashboard');
@@ -76,10 +77,15 @@ function App() {
       setAuthReady(true);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
       setSession(nextSession);
       setStore(null);
       setAuthError('');
+      if (event === 'SIGNED_IN') {
+        setPage('dashboard');
+        setMobileMenu(false);
+        setAuthTransitioning(true);
+      }
     });
 
     return () => {
@@ -87,6 +93,13 @@ function App() {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (!authTransitioning) return undefined;
+    const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 700 : 1900;
+    const timeout = window.setTimeout(() => setAuthTransitioning(false), duration);
+    return () => window.clearTimeout(timeout);
+  }, [authTransitioning]);
 
   useEffect(() => {
     if (!session?.user?.id) return;
@@ -104,7 +117,7 @@ function App() {
           return;
         }
         if (!data?.store) {
-          setAuthError('Akun ini belum terhubung ke toko. Hubungi pemilik toko atau buat akun toko baru.');
+          setAuthError('Akun ini belum terhubung ke toko. Hubungi administrator toko.');
           return;
         }
         setStore({ ...data.store, role: data.role });
@@ -185,7 +198,9 @@ function App() {
     setPage(nextPage);
   };
   if (!authReady) return <LoadingScreen label="Menyiapkan aplikasi..." />;
-  if (!session) return <AuthScreen setupError={supabase ? '' : authError} />;
+  if (!session || authTransitioning) {
+    return <AuthScreen setupError={supabase ? '' : authError} transitioning={authTransitioning} />;
+  }
   if (!store) {
     return authError
       ? <AuthScreen setupError={authError} signedInEmail={session.user.email} onSignOut={signOut} />
@@ -242,13 +257,10 @@ function LoadingScreen({ label }) {
   return <div className="full-screen"><span className="spinner" /><p>{label}</p></div>;
 }
 
-function AuthScreen({ setupError = '', signedInEmail = '', onSignOut }) {
-  const [mode, setMode] = useState('signin');
+function AuthScreen({ setupError = '', signedInEmail = '', onSignOut, transitioning = false }) {
   const [email, setEmail] = useState(signedInEmail);
   const [password, setPassword] = useState('');
-  const [storeName, setStoreName] = useState('');
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
   const submit = async (event) => {
@@ -256,21 +268,9 @@ function AuthScreen({ setupError = '', signedInEmail = '', onSignOut }) {
     if (!supabase) return;
     setBusy(true);
     setError('');
-    setMessage('');
     try {
-      if (mode === 'signup') {
-        if (!storeName.trim()) throw new Error('Nama toko wajib diisi.');
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: { data: { store_name: storeName.trim() } },
-        });
-        if (signUpError) throw signUpError;
-        if (!data.session) setMessage('Akun berhasil dibuat. Periksa email untuk verifikasi, lalu masuk.');
-      } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-        if (signInError) throw signInError;
-      }
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      if (signInError) throw signInError;
     } catch (submitError) {
       setError(errorMessage(submitError));
     } finally {
@@ -284,14 +284,13 @@ function AuthScreen({ setupError = '', signedInEmail = '', onSignOut }) {
 
   return (
     <div className="auth-page">
-      <div className={`auth-shell ${mode === 'signup' ? 'register-mode' : ''}`}>
-        <section className={`auth-form-panel auth-login ${mode === 'signin' ? 'form-current' : ''}`} aria-hidden={mode !== 'signin'} inert={mode !== 'signin'}>
+      <div className={`auth-shell ${transitioning ? 'auth-success' : ''}`}>
+        <section className="auth-form-panel auth-login" aria-hidden={transitioning} inert={transitioning}>
           <div className="auth-form-inner">
             <Brand />
             <div className="auth-heading"><p className="eyebrow">MANAJEMEN TOKO YANG LEBIH MUDAH</p><h1>Selamat datang</h1><p>Masuk untuk melanjutkan ke ruang kerja toko.</p></div>
             {setupError && <div className="auth-message error-message">{setupError}</div>}
-            {mode === 'signin' && error && <div className="auth-message error-message" role="alert">{error}</div>}
-            {mode === 'signin' && message && <div className="auth-message success-message" role="status">{message}</div>}
+            {error && <div className="auth-message error-message" role="alert">{error}</div>}
             <form className="form-stack" onSubmit={submit}>
               <Field label="Email"><input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nama@email.com" required /></Field>
               <Field label="Kata sandi"><input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} minLength={6} placeholder="Minimal 6 karakter" required /></Field>
@@ -301,31 +300,11 @@ function AuthScreen({ setupError = '', signedInEmail = '', onSignOut }) {
           </div>
         </section>
 
-        <section className={`auth-form-panel auth-register ${mode === 'signup' ? 'form-current' : ''}`} aria-hidden={mode !== 'signup'} inert={mode !== 'signup'}>
-          <div className="auth-form-inner">
-            <Brand />
-            <div className="auth-heading"><p className="eyebrow">MULAI KELOLA TOKO</p><h1>Buat akun toko</h1><p>Daftarkan akun pemilik dan mulai catat operasional toko.</p></div>
-            {setupError && <div className="auth-message error-message">{setupError}</div>}
-            {mode === 'signup' && error && <div className="auth-message error-message" role="alert">{error}</div>}
-            {mode === 'signup' && message && <div className="auth-message success-message" role="status">{message}</div>}
-            <form className="form-stack" onSubmit={submit}>
-              <Field label="Nama toko"><input value={storeName} onChange={(event) => setStoreName(event.target.value)} placeholder="Contoh: Toko Cat Berkah" required /></Field>
-              <Field label="Email"><input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nama@email.com" required /></Field>
-              <Field label="Kata sandi"><input type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} minLength={6} placeholder="Minimal 6 karakter" required /></Field>
-              <button className="button button-primary full-button" disabled={busy || Boolean(setupError)}>{busy ? 'Memproses...' : 'Buat akun dan toko'}<ArrowRight size={17} /></button>
-            </form>
-            <p className="auth-security"><ShieldCheck size={15} /> Data toko dilindungi autentikasi dan kebijakan RLS.</p>
-          </div>
-        </section>
-
         <div className="auth-flow-panel" aria-live="polite">
           <img className="auth-flow-logo" src={`${import.meta.env.BASE_URL}icon-512.png`} alt="Logo Nazar Plant Acrylic Emulsion Paint" />
-          <p className="auth-flow-caption">Kasir &amp; manajemen stok</p>
+          <p className="auth-flow-caption">{transitioning ? 'Login berhasil' : 'Kasir & manajemen stok'}</p>
           <div className="auth-flow-prompt">
-            <p>{mode === 'signin' ? 'Belum punya akun toko?' : 'Sudah punya akun?'}</p>
-            <button type="button" onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); setMessage(''); }}>
-              {mode === 'signin' ? 'Daftar toko' : 'Masuk'}
-            </button>
+            <p>{transitioning ? 'Membuka dashboard...' : 'Akses toko Anda dengan aman.'}</p>
           </div>
         </div>
       </div>

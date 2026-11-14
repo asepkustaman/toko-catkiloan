@@ -13,10 +13,10 @@ Kasir dan manajemen stok berbasis React, Vite, dan Supabase.
    npm run dev
    ```
 
-4. Daftarkan akun pemilik toko dari halaman masuk. Trigger database akan membuat toko, pengaturan awal, dan kategori standar.
+4. Buat akun pengguna melalui **Supabase Authentication > Users**. Trigger database akan membuat toko, pengaturan awal, dan kategori standar; nama toko awalnya `Toko Baru` dan dapat diubah dari pengaturan aplikasi.
 5. Untuk menguji hasil produksi: `npm run build`, lalu `npm run preview`.
 
-Atur verifikasi email dan redirect URL di **Supabase Authentication > URL Configuration** sesuai alamat aplikasi. Akun baru akan membuat satu toko; data tiap toko dilindungi Row Level Security (RLS). Penjualan dan penerimaan stok dicatat melalui RPC transaksional agar pembaruan persediaan dan riwayatnya konsisten.
+Atur verifikasi email dan redirect URL di **Supabase Authentication > URL Configuration** sesuai alamat aplikasi. Halaman masuk hanya menerima akun yang sudah dibuat di Supabase; tidak ada pendaftaran dari aplikasi. Setiap akun baru akan membuat satu toko; data tiap toko dilindungi Row Level Security (RLS). Penjualan dan penerimaan stok dicatat melalui RPC transaksional agar pembaruan persediaan dan riwayatnya konsisten.
 
 ## Deploy ke GitHub Pages
 
