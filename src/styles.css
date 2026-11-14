@@ -247,7 +247,7 @@ td strong { color: #373c35; font-weight: 600; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .auth-page { display: grid; min-height: 100dvh; place-items: center; overflow: hidden; padding: 28px; background: radial-gradient(ellipse at 12% 12%, #fff8df 0, transparent 34%), radial-gradient(ellipse at 91% 88%, #ecefe6 0, transparent 36%), #f5f6f3; }
 .auth-shell { position: relative; isolation: isolate; width: min(960px, 100%); min-height: min(650px, calc(100dvh - 56px)); overflow: hidden; background: #fff; border: 1px solid #e8e9e3; border-radius: 27px; box-shadow: 0 28px 80px #3b42271c, 0 3px 12px #3b42270a; }
-.auth-shell::before { position: absolute; z-index: 3; top: 0; left: 50%; width: 300%; height: 100%; background: radial-gradient(ellipse at 70% 17%, #ffe98d 0, transparent 37%), radial-gradient(ellipse at 9% 92%, #edb12c 0, transparent 43%), #f6c943; border-radius: 150px; content: ''; transition: left 1.8s ease-in-out; }
+.auth-shell::before { position: absolute; z-index: 3; top: 0; left: 50%; width: 300%; height: 100%; background: #ffc228; border-radius: 150px; content: ''; transition: left 1.8s ease-in-out; }
 .auth-shell.register-mode::before { left: -250%; }
 .auth-form-panel { position: absolute; z-index: 1; top: 0; bottom: 0; display: flex; width: 50%; align-items: center; justify-content: center; overflow-y: auto; padding: clamp(26px, 5vw, 58px); background: #fff; }
 .auth-login { left: 0; visibility: visible; opacity: 1; transition: opacity .24s 1.2s, visibility 0s; }
