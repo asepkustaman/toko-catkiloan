@@ -3,7 +3,7 @@ import {
   ArrowDownToLine, ArrowRight, BarChart3, Boxes, BriefcaseBusiness, Check,
   ChevronDown, CircleDollarSign, ClipboardList, CreditCard, LayoutDashboard,
   LogOut, Menu, Package, Pencil, Plus, Search, Settings, ShieldCheck,
-  ShoppingCart, Store, Trash2, TrendingUp, Truck, X,
+  ShoppingCart, Trash2, TrendingUp, Truck, X,
 } from 'lucide-react';
 import { supabase, supabaseSetupError } from './lib/supabase.js';
 
@@ -212,7 +212,7 @@ function App() {
     <div className="app-shell">
       {mobileMenu && <button className="mobile-scrim" onClick={() => setMobileMenu(false)} aria-label="Tutup menu" />}
       <aside className={`sidebar ${mobileMenu ? 'sidebar-open' : ''}`}>
-        <div className="brand"><span className="brand-mark"><Store size={22} /></span><span>paint<span>store</span><small>POS & INVENTORY</small></span></div>
+        <Brand />
         <div className="store-switch"><span className="store-avatar">{store.name?.slice(0, 1) || 'T'}</span><span className="store-label"><strong>{store.name}</strong><small>Ruang kerja toko</small></span><ChevronDown size={16} /></div>
         <p className="nav-caption">MENU UTAMA</p>
         <nav className="nav-list">
@@ -301,7 +301,7 @@ function AuthScreen({ setupError = '', signedInEmail = '', onSignOut, transition
         </section>
 
         <div className="auth-flow-panel" aria-live="polite">
-          <img className="auth-flow-logo" src={`${import.meta.env.BASE_URL}icon-512.png`} alt="Logo Nazar Plant Acrylic Emulsion Paint" />
+          <img className="auth-flow-logo" src={`${import.meta.env.BASE_URL}paint-store-logo.png`} alt="Logo Paint Store" />
           <p className="auth-flow-caption">{transitioning ? 'Login berhasil' : 'Kasir & manajemen stok'}</p>
           <div className="auth-flow-prompt">
             <p>{transitioning ? 'Membuka dashboard...' : 'Akses toko Anda dengan aman.'}</p>
@@ -313,7 +313,7 @@ function AuthScreen({ setupError = '', signedInEmail = '', onSignOut, transition
 }
 
 function Brand() {
-  return <div className="brand auth-brand"><span className="brand-mark"><Store size={22} /></span><span>paint<span>store</span><small>POS & INVENTORY</small></span></div>;
+  return <div className="brand"><img className="brand-logo" src={`${import.meta.env.BASE_URL}paint-store-logo.png`} alt="Paint Store" /></div>;
 }
 
 function PageHeading({ eyebrow, title, description, action }) {

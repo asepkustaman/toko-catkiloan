@@ -1,6 +1,6 @@
 {
-  "name": "PaintStore Pro - Toko Cat Kiloan",
-  "short_name": "PaintStore",
+  "name": "Paint Store - Toko Cat Kiloan",
+  "short_name": "Paint Store",
   "description": "Aplikasi kasir dan manajemen stok untuk toko cat",
   "start_url": "./",
   "scope": "./",
