@@ -279,27 +279,56 @@ function AuthScreen({ setupError = '', signedInEmail = '', onSignOut }) {
   };
 
   if (signedInEmail) {
-    return <div className="auth-page"><div className="auth-card"><Brand /><div className="auth-message error-message">{setupError}</div><button className="button button-secondary full-button" onClick={onSignOut}><LogOut size={16} /> Keluar dari akun</button></div></div>;
+    return <div className="auth-page"><div className="auth-standalone"><Brand /><div className="auth-message error-message">{setupError}</div><button className="button button-secondary full-button" onClick={onSignOut}><LogOut size={16} /> Keluar dari akun</button></div></div>;
   }
 
   return (
     <div className="auth-page">
-      <div className="auth-card">
-        <Brand />
-        <div className="auth-heading"><p className="eyebrow">MANAJEMEN TOKO YANG LEBIH MUDAH</p><h1>{mode === 'signin' ? 'Selamat datang' : 'Buat toko Anda'}</h1><p>{mode === 'signin' ? 'Masuk untuk melanjutkan ke ruang kerja toko.' : 'Daftarkan akun pemilik dan mulai kelola toko.'}</p></div>
-        {setupError && <div className="auth-message error-message">{setupError}</div>}
-        {error && <div className="auth-message error-message">{error}</div>}
-        {message && <div className="auth-message success-message">{message}</div>}
-        <form className="form-stack" onSubmit={submit}>
-          {mode === 'signup' && <Field label="Nama toko"><input value={storeName} onChange={(event) => setStoreName(event.target.value)} placeholder="Contoh: Toko Cat Berkah" required /></Field>}
-          <Field label="Email"><input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nama@email.com" required /></Field>
-          <Field label="Kata sandi"><input type="password" autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} value={password} onChange={(event) => setPassword(event.target.value)} minLength={6} placeholder="Minimal 6 karakter" required /></Field>
-          <button className="button button-primary full-button" disabled={busy || Boolean(setupError)}>{busy ? 'Memproses...' : mode === 'signin' ? 'Masuk ke aplikasi' : 'Buat akun dan toko'}<ArrowRight size={17} /></button>
-        </form>
-        <p className="auth-switch">{mode === 'signin' ? 'Belum punya akun?' : 'Sudah punya akun?'} <button onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); setMessage(''); }}>{mode === 'signin' ? 'Daftar toko' : 'Masuk'}</button></p>
-        <p className="auth-security"><ShieldCheck size={15} /> Akses data dilindungi autentikasi dan kebijakan RLS.</p>
+      <div className={`auth-shell ${mode === 'signup' ? 'register-mode' : ''}`}>
+        <section className={`auth-form-panel auth-login ${mode === 'signin' ? 'form-current' : ''}`} aria-hidden={mode !== 'signin'} inert={mode !== 'signin'}>
+          <div className="auth-form-inner">
+            <Brand />
+            <div className="auth-heading"><p className="eyebrow">MANAJEMEN TOKO YANG LEBIH MUDAH</p><h1>Selamat datang</h1><p>Masuk untuk melanjutkan ke ruang kerja toko.</p></div>
+            {setupError && <div className="auth-message error-message">{setupError}</div>}
+            {mode === 'signin' && error && <div className="auth-message error-message" role="alert">{error}</div>}
+            {mode === 'signin' && message && <div className="auth-message success-message" role="status">{message}</div>}
+            <form className="form-stack" onSubmit={submit}>
+              <Field label="Email"><input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nama@email.com" required /></Field>
+              <Field label="Kata sandi"><input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} minLength={6} placeholder="Minimal 6 karakter" required /></Field>
+              <button className="button button-primary full-button" disabled={busy || Boolean(setupError)}>{busy ? 'Memproses...' : 'Masuk ke aplikasi'}<ArrowRight size={17} /></button>
+            </form>
+            <p className="auth-security"><ShieldCheck size={15} /> Akses data dilindungi autentikasi dan kebijakan RLS.</p>
+          </div>
+        </section>
+
+        <section className={`auth-form-panel auth-register ${mode === 'signup' ? 'form-current' : ''}`} aria-hidden={mode !== 'signup'} inert={mode !== 'signup'}>
+          <div className="auth-form-inner">
+            <Brand />
+            <div className="auth-heading"><p className="eyebrow">MULAI KELOLA TOKO</p><h1>Buat akun toko</h1><p>Daftarkan akun pemilik dan mulai catat operasional toko.</p></div>
+            {setupError && <div className="auth-message error-message">{setupError}</div>}
+            {mode === 'signup' && error && <div className="auth-message error-message" role="alert">{error}</div>}
+            {mode === 'signup' && message && <div className="auth-message success-message" role="status">{message}</div>}
+            <form className="form-stack" onSubmit={submit}>
+              <Field label="Nama toko"><input value={storeName} onChange={(event) => setStoreName(event.target.value)} placeholder="Contoh: Toko Cat Berkah" required /></Field>
+              <Field label="Email"><input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nama@email.com" required /></Field>
+              <Field label="Kata sandi"><input type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} minLength={6} placeholder="Minimal 6 karakter" required /></Field>
+              <button className="button button-primary full-button" disabled={busy || Boolean(setupError)}>{busy ? 'Memproses...' : 'Buat akun dan toko'}<ArrowRight size={17} /></button>
+            </form>
+            <p className="auth-security"><ShieldCheck size={15} /> Data toko dilindungi autentikasi dan kebijakan RLS.</p>
+          </div>
+        </section>
+
+        <div className="auth-flow-panel" aria-live="polite">
+          <img className="auth-flow-logo" src={`${import.meta.env.BASE_URL}icon-512.png`} alt="Logo Nazar Plant Acrylic Emulsion Paint" />
+          <p className="auth-flow-caption">Kasir &amp; manajemen stok</p>
+          <div className="auth-flow-prompt">
+            <p>{mode === 'signin' ? 'Belum punya akun toko?' : 'Sudah punya akun?'}</p>
+            <button type="button" onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); setMessage(''); }}>
+              {mode === 'signin' ? 'Daftar toko' : 'Masuk'}
+            </button>
+          </div>
+        </div>
       </div>
-      <div className="auth-decoration"><div className="decoration-orb orb-one" /><div className="decoration-orb orb-two" /><div className="decoration-copy"><span>CATAT RAPI.</span><span>STOK TERKENDALI.</span><span>USAHA BERTUMBUH.</span></div><div className="decoration-card"><span className="decoration-icon"><CircleDollarSign size={20} /></span><span><small>Semua operasional toko</small><strong>dalam satu tempat.</strong></span><ArrowRight size={18} /></div></div>
     </div>
   );
 }
