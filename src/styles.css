@@ -247,11 +247,11 @@ td strong { color: #373c35; font-weight: 600; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .auth-page { display: grid; min-height: 100dvh; place-items: center; overflow: hidden; padding: 28px; background: radial-gradient(ellipse at 12% 12%, #fff8df 0, transparent 34%), radial-gradient(ellipse at 91% 88%, #ecefe6 0, transparent 36%), #f5f6f3; }
 .auth-shell { position: relative; isolation: isolate; width: min(960px, 100%); min-height: min(650px, calc(100dvh - 56px)); overflow: hidden; background: #fff; border: 1px solid #e8e9e3; border-radius: 27px; box-shadow: 0 28px 80px #3b42271c, 0 3px 12px #3b42270a; }
-.auth-shell::before { position: absolute; z-index: 3; top: 0; left: 50%; width: 300%; height: 100%; background: #ffc228; border-radius: 150px; content: ''; transition: left 1.8s ease-in-out; }
-.auth-shell.register-mode::before { left: -250%; }
+.auth-shell::before { position: absolute; z-index: 3; top: 0; left: -250%; width: 300%; height: 100%; background: #ffc228; border-radius: 150px; content: ''; transition: left 1.8s ease-in-out; }
+.auth-shell.register-mode::before { left: 50%; }
 .auth-form-panel { position: absolute; z-index: 1; top: 0; bottom: 0; display: flex; width: 50%; align-items: center; justify-content: center; overflow-y: auto; padding: clamp(26px, 5vw, 58px); background: #fff; }
-.auth-login { left: 0; visibility: visible; opacity: 1; transition: opacity .24s 1.2s, visibility 0s; }
-.auth-register { right: 0; visibility: hidden; opacity: 0; transition: opacity .24s 1.2s, visibility 0s 1.8s; }
+.auth-login { right: 0; visibility: visible; opacity: 1; transition: opacity .24s 1.2s, visibility 0s; }
+.auth-register { left: 0; visibility: hidden; opacity: 0; transition: opacity .24s 1.2s, visibility 0s 1.8s; }
 .auth-shell.register-mode .auth-login { visibility: hidden; opacity: 0; transition: opacity .2s 1.2s, visibility 0s 1.8s; }
 .auth-shell.register-mode .auth-register { visibility: visible; opacity: 1; transition: opacity .3s 1.2s, visibility 0s 1.2s; }
 .auth-form-inner { width: min(100%, 350px); margin: auto; }
@@ -265,8 +265,8 @@ td strong { color: #373c35; font-weight: 600; }
 .auth-form-panel .field input { min-height: 43px; padding: 11px 13px; background: #fafbf8; border-color: #e6e9e2; font-size: 11px; }
 .auth-form-panel .full-button { min-height: 44px; margin-top: 4px; }
 .auth-security { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 26px 0 0; color: #92998f; font-size: 9px; }
-.auth-flow-panel { position: absolute; z-index: 4; top: 0; right: 0; display: flex; width: 50%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 28px; text-align: center; transition: transform .6s ease-in-out .6s; }
-.auth-shell.register-mode .auth-flow-panel { transform: translateX(-100%); }
+.auth-flow-panel { position: absolute; z-index: 4; top: 0; left: 0; display: flex; width: 50%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 28px; text-align: center; transition: transform .6s ease-in-out .6s; }
+.auth-shell.register-mode .auth-flow-panel { transform: translateX(100%); }
 .auth-flow-logo { display: block; width: clamp(155px, 21vw, 235px); aspect-ratio: 1; object-fit: contain; border-radius: 17%; }
 .auth-flow-caption { margin: 19px 0 0; color: #655323; font-size: 11px; font-weight: 600; letter-spacing: .3px; }
 .auth-flow-prompt { margin-top: 30px; color: #695b31; }
