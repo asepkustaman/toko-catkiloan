@@ -287,7 +287,6 @@ function AuthScreen({ setupError = '', signedInEmail = '', onSignOut, transition
       <div className={`auth-shell ${transitioning ? 'auth-success' : ''}`}>
         <section className="auth-form-panel auth-login" aria-hidden={transitioning} inert={transitioning}>
           <div className="auth-form-inner">
-            <Brand />
             <div className="auth-heading"><p className="eyebrow">MANAJEMEN TOKO YANG LEBIH MUDAH</p><h1>Selamat datang</h1><p>Masuk untuk melanjutkan ke ruang kerja toko.</p></div>
             {setupError && <div className="auth-message error-message">{setupError}</div>}
             {error && <div className="auth-message error-message" role="alert">{error}</div>}
@@ -302,9 +301,9 @@ function AuthScreen({ setupError = '', signedInEmail = '', onSignOut, transition
 
         <div className="auth-flow-panel" aria-live="polite">
           <img className="auth-flow-logo" src={`${import.meta.env.BASE_URL}paint-store-logo.png`} alt="Logo Paint Store" />
-          <p className="auth-flow-caption">{transitioning ? 'Login berhasil' : 'Kasir & manajemen stok'}</p>
+          <p className="auth-flow-caption">{transitioning ? 'Akses terverifikasi' : 'Sistem kasir & inventaris'}</p>
           <div className="auth-flow-prompt">
-            <p>{transitioning ? 'Membuka dashboard...' : 'Akses toko Anda dengan aman.'}</p>
+            <p>{transitioning ? 'Menyiapkan dashboard Anda.' : 'Penjualan dan stok tercatat rapi dalam satu ruang kerja.'}</p>
           </div>
         </div>
       </div>

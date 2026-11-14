@@ -250,24 +250,22 @@ td strong { color: #373c35; font-weight: 600; }
 .auth-form-panel { position: absolute; z-index: 1; top: 0; bottom: 0; display: flex; width: 50%; align-items: center; justify-content: center; overflow-y: auto; padding: clamp(26px, 5vw, 58px); background: #fff; }
 .auth-login { right: 0; visibility: visible; opacity: 1; transition: opacity .24s 1.2s, visibility 0s; }
 .auth-shell.auth-success .auth-login { visibility: hidden; opacity: 0; transition: opacity .2s, visibility 0s .2s; }
-.auth-form-inner { width: min(100%, 350px); margin: auto; }
-.auth-brand { padding: 0; }
-.auth-brand .brand-logo { width: min(100%, 260px); max-height: 130px; }
-.auth-heading { margin: 36px 0 24px; }
-.auth-heading .eyebrow { margin-bottom: 10px; }
-.auth-heading h1 { font-size: 30px; text-wrap: balance; }
-.auth-heading > p:last-child { max-width: 39ch; margin: 9px 0 0; color: #90968c; font-size: 11px; line-height: 1.65; }
-.auth-form-panel .form-stack { gap: 15px; }
-.auth-form-panel .field { gap: 7px; color: #4f564d; font-size: 10px; }
-.auth-form-panel .field input { min-height: 43px; padding: 11px 13px; background: #fafbf8; border-color: #e6e9e2; font-size: 11px; }
-.auth-form-panel .full-button { min-height: 44px; margin-top: 4px; }
-.auth-security { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 26px 0 0; color: #92998f; font-size: 9px; }
+.auth-form-inner { width: min(100%, 500px); margin: auto; }
+.auth-heading { margin: 0 0 34px; }
+.auth-heading .eyebrow { margin-bottom: 12px; }
+.auth-heading h1 { font-size: clamp(32px, 3.2vw, 42px); text-wrap: balance; }
+.auth-heading > p:last-child { max-width: 43ch; margin: 12px 0 0; color: #81877d; font-size: 15px; line-height: 1.65; }
+.auth-form-panel .form-stack { gap: 22px; }
+.auth-form-panel .field { gap: 9px; color: #4f564d; font-size: 14px; }
+.auth-form-panel .field input { min-height: 58px; padding: 15px 17px; background: #fafbf8; border-color: #e6e9e2; font-size: 15px; }
+.auth-form-panel .full-button { min-height: 58px; margin-top: 5px; font-size: 15px; }
+.auth-security { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 30px 0 0; color: #858c81; font-size: 12px; }
 .auth-flow-panel { position: absolute; z-index: 4; top: 0; left: 0; display: flex; width: 50%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 28px; text-align: center; transition: transform .6s ease-in-out .6s; }
 .auth-shell.auth-success .auth-flow-panel { transform: translateX(100%); transition: transform .6s ease-in-out; }
 .auth-flow-logo { display: block; width: clamp(240px, 38vw, 440px); height: auto; object-fit: contain; }
-.auth-flow-caption { margin: 19px 0 0; color: #655323; font-size: 11px; font-weight: 600; letter-spacing: .3px; }
-.auth-flow-prompt { margin-top: 30px; color: #695b31; }
-.auth-flow-prompt p { margin: 0; font-size: 11px; }
+.auth-flow-caption { margin: 25px 0 0; color: #55420f; font-size: 18px; font-weight: 700; letter-spacing: -.3px; }
+.auth-flow-prompt { max-width: 36ch; margin-top: 9px; color: #695b31; }
+.auth-flow-prompt p { margin: 0; font-size: 14px; line-height: 1.65; }
 .auth-standalone { display: grid; width: min(430px, 100%); gap: 18px; padding: 36px; background: white; border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 20px 60px #3b42271c; }
 .auth-message { margin-bottom: 15px; padding: 11px; border-radius: 7px; font-size: 10px; line-height: 1.5; overflow-wrap: anywhere; }
 .error-message { color: #a3443e; background: #fff0ef; }
@@ -337,30 +335,33 @@ td strong { color: #373c35; font-weight: 600; }
   .auth-form-panel { top: 0; bottom: auto; width: 100%; height: 70%; padding: 22px clamp(23px, 8vw, 42px); transition: top .6s ease-in-out .6s; }
   .auth-login { transition: top .6s ease-in-out .6s, opacity .24s 1.2s, visibility 0s; }
   .auth-shell.auth-success .auth-login { top: 0; transition: top .6s ease-in-out, opacity .2s, visibility 0s .2s; }
-  .auth-form-inner { max-width: 390px; }
-  .auth-heading { margin: 22px 0 18px; }
-  .auth-heading h1 { font-size: 26px; }
-  .auth-form-panel .form-stack { gap: 11px; }
-  .auth-form-panel .field input { min-height: 39px; }
-  .auth-security { margin-top: 16px; font-size: 8px; }
+  .auth-form-inner { max-width: 480px; }
+  .auth-heading { margin-bottom: 24px; }
+  .auth-heading h1 { font-size: 30px; }
+  .auth-heading > p:last-child { margin-top: 8px; font-size: 13px; }
+  .auth-form-panel .form-stack { gap: 16px; }
+  .auth-form-panel .field { font-size: 12px; }
+  .auth-form-panel .field input { min-height: 52px; padding: 13px 15px; font-size: 14px; }
+  .auth-form-panel .full-button { min-height: 54px; }
+  .auth-security { margin-top: 18px; font-size: 10px; }
   .auth-flow-panel { top: auto; right: auto; bottom: 0; left: 0; display: grid; width: 100%; height: 30%; grid-template-columns: minmax(90px, 31%) 1fr; align-content: center; justify-items: center; gap: 0 15px; padding: 9px 20px; transition: transform .6s ease-in-out .6s; }
   .auth-shell.auth-success .auth-flow-panel { transform: translateY(-233.333%); transition: transform .6s ease-in-out; }
   .auth-flow-logo { grid-row: span 2; width: min(100%, 200px); }
-  .auth-flow-caption { align-self: end; margin: 0 0 8px; font-size: 10px; }
+  .auth-flow-caption { align-self: end; margin: 0 0 7px; font-size: 12px; }
   .auth-flow-prompt { align-self: start; margin: 0; }
-  .auth-flow-prompt p { margin-bottom: 6px; font-size: 9px; }
+  .auth-flow-prompt p { margin-bottom: 6px; font-size: 10px; line-height: 1.45; }
 }
 @media (max-width: 390px) {
   .auth-page { padding: 0; }
   .auth-shell { height: 100dvh; min-height: 100dvh; }
-  .auth-form-panel { height: 72%; padding: 18px 22px; }
+  .auth-form-panel { height: 72%; padding: 15px 22px; }
   .auth-form-panel { height: 72%; }
   .auth-shell::before { top: 72%; }
   .auth-flow-panel { height: 28%; grid-template-columns: 82px 1fr; gap: 0 10px; padding: 8px 14px; }
   .auth-shell.auth-success .auth-flow-panel { transform: translateY(-257.143%); }
   .auth-flow-logo { width: min(100%, 160px); }
-  .auth-flow-caption { font-size: 9px; }
-  .auth-flow-prompt p { font-size: 8px; }
+  .auth-flow-caption { font-size: 11px; }
+  .auth-flow-prompt p { font-size: 9px; }
 }
 @media (prefers-reduced-motion: reduce) {
   /* Keep the auth transition visible while shortening it for reduced-motion users. */
