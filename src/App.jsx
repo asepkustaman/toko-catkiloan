@@ -287,7 +287,7 @@ function AuthScreen({ setupError = '', signedInEmail = '', onSignOut, transition
       <div className={`auth-shell ${transitioning ? 'auth-success' : ''}`}>
         <section className="auth-form-panel auth-login" aria-hidden={transitioning} inert={transitioning}>
           <div className="auth-form-inner">
-            <div className="auth-heading"><p className="eyebrow">MANAJEMEN TOKO YANG LEBIH MUDAH</p><h1>Selamat datang</h1><p>Masuk untuk melanjutkan ke ruang kerja toko.</p></div>
+            <div className="auth-heading"><p className="eyebrow">RUANG KERJA PAINT STORE</p><h1>Selamat datang kembali</h1><p>Masuk untuk mengelola penjualan dan stok toko Anda.</p></div>
             {setupError && <div className="auth-message error-message">{setupError}</div>}
             {error && <div className="auth-message error-message" role="alert">{error}</div>}
             <form className="form-stack" onSubmit={submit}>
