@@ -267,7 +267,7 @@ td strong { color: #373c35; font-weight: 600; }
 .auth-security { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 26px 0 0; color: #92998f; font-size: 9px; }
 .auth-flow-panel { position: absolute; z-index: 4; top: 0; right: 0; display: flex; width: 50%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 28px; text-align: center; transition: transform .6s ease-in-out .6s; }
 .auth-shell.register-mode .auth-flow-panel { transform: translateX(-100%); }
-.auth-flow-logo { display: block; width: clamp(155px, 21vw, 235px); aspect-ratio: 1; object-fit: contain; border-radius: 17%; box-shadow: 0 17px 38px #80601725; }
+.auth-flow-logo { display: block; width: clamp(155px, 21vw, 235px); aspect-ratio: 1; object-fit: contain; border-radius: 17%; }
 .auth-flow-caption { margin: 19px 0 0; color: #655323; font-size: 11px; font-weight: 600; letter-spacing: .3px; }
 .auth-flow-prompt { margin-top: 30px; color: #695b31; }
 .auth-flow-prompt p { margin: 0 0 10px; font-size: 11px; }
