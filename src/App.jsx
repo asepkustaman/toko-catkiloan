@@ -226,7 +226,7 @@ function App() {
           {page === 'dashboard' && <Dashboard store={store} products={products} sales={sales} stockEntries={stockEntries} settings={settings} setPage={navigate} />}
           {page === 'pos' && <PointOfSale products={products} storeId={store.id} run={run} />}
           {page === 'sales' && <SalesPage sales={sales} />}
-          {page === 'stock' && <StockPage products={products} vendors={vendors} storeId={store.id} run={run} />}
+          {page === 'stock' && <StockPage products={products} vendors={vendors} stockEntries={stockEntries} storeId={store.id} run={run} />}
           {page === 'products' && <ProductsPage products={products} categories={categories} vendors={vendors} storeId={store.id} run={run} threshold={settings?.low_stock_threshold ?? 5} />}
           {page === 'vendors' && <VendorsPage vendors={vendors} storeId={store.id} run={run} />}
           {page === 'reports' && <ReportsPage sales={sales} stockEntries={stockEntries} />}
@@ -521,7 +521,7 @@ function VendorsPage({ vendors, storeId, run }) {
   </>;
 }
 
-function StockPage({ products, vendors, storeId, run }) {
+function StockPage({ products, vendors, stockEntries, storeId, run }) {
   const [productId, setProductId] = useState('');
   const [vendorId, setVendorId] = useState('');
   const [amount, setAmount] = useState('');
