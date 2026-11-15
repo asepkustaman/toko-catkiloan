@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowDownToLine, ArrowRight, BarChart3, Boxes, BriefcaseBusiness, Check,
   CircleDollarSign, ClipboardList, CreditCard, LayoutDashboard,
-  LogOut, Menu, Package, PanelLeftClose, PanelLeftOpen, Pencil, Plus, Search, Settings, ShieldCheck,
+  LogOut, Menu, Package, Pencil, Plus, Search, Settings, ShieldCheck,
   ShoppingCart, Trash2, TrendingUp, Truck, X,
 } from 'lucide-react';
 import { supabase, supabaseSetupError } from './lib/supabase.js';
@@ -44,7 +44,7 @@ function App() {
   const [store, setStore] = useState(null);
   const [page, setPage] = useState('dashboard');
   const [mobileMenu, setMobileMenu] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [notice, setNotice] = useState(null);
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
@@ -218,19 +218,26 @@ function App() {
 
   const activeNav = navItems.find((item) => item.id === page);
   return (
-    <div className={`app-shell ${page === 'pos' ? 'app-pos-shell' : ''} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+    <div className={`app-shell ${page === 'pos' ? 'app-pos-shell' : ''} ${sidebarExpanded ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
       {mobileMenu && <button className="mobile-scrim" onClick={() => setMobileMenu(false)} aria-label="Tutup menu" />}
-      <aside className={`sidebar ${mobileMenu ? 'sidebar-open' : ''}`}>
-        <div className="sidebar-header">
-          <Brand />
-          <button className="sidebar-toggle" onClick={() => setSidebarCollapsed((collapsed) => !collapsed)} aria-label={sidebarCollapsed ? 'Tampilkan label menu' : 'Sembunyikan label menu'} title={sidebarCollapsed ? 'Tampilkan label menu' : 'Sembunyikan label menu'}>
-            {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
-          </button>
-        </div>
+      <aside
+        className={`sidebar ${mobileMenu ? 'sidebar-open' : ''}`}
+        onPointerEnter={(event) => {
+          if (event.pointerType === 'mouse') setSidebarExpanded(true);
+        }}
+        onPointerLeave={(event) => {
+          if (event.pointerType === 'mouse') setSidebarExpanded(false);
+        }}
+        onFocusCapture={() => setSidebarExpanded(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) setSidebarExpanded(false);
+        }}
+      >
+        <div className="sidebar-header"><Brand /></div>
         <p className="nav-caption">MENU UTAMA</p>
         <nav className="nav-list">
           {permittedNavItems.map(({ id, label, icon: Icon }) => (
-            <button key={id} className={`nav-item ${page === id ? 'nav-active' : ''}`} aria-label={label} title={label} onClick={() => { navigate(id); setMobileMenu(false); }}>
+            <button key={id} className={`nav-item ${page === id ? 'nav-active' : ''}`} aria-label={label} title={label} onClick={() => { navigate(id); setMobileMenu(false); setSidebarExpanded(false); }}>
               <Icon size={18} strokeWidth={1.8} /><span>{label}</span>
               {id === 'products' && products.some((product) => Number(product.stock) <= Number(settings?.low_stock_threshold ?? 5)) && <i className="nav-dot" />}
             </button>
