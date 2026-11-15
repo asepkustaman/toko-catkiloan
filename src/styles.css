@@ -1092,7 +1092,6 @@ body {
   border-radius: 18px 38px 14px 38px;
 }
 
-.stats-grid > .stat-card:nth-child(even),
 .vendor-card:nth-child(even),
 .quick-action:nth-child(even),
 .pos-product:nth-child(even) {
