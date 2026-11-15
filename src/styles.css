@@ -1412,6 +1412,12 @@ body {
   background: transparent;
 }
 
+.product-art.product-art-color {
+  background: var(--product-color);
+  border-color: rgba(42, 26, 0, .28);
+  border-radius: 8px;
+}
+
 .table-wrap th,
 .table-wrap td {
   text-align: center;
