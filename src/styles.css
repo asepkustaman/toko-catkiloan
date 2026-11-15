@@ -157,8 +157,13 @@ td strong { color: #373c35; font-weight: 600; }
 .sales-toolbar .sales-search-field { width: min(340px, 100%); border-radius: 9px 16px 8px 16px; }
 .sales-date-filters { display: flex; flex: 0 1 auto; min-width: 0; align-items: center; gap: 8px; }
 .sales-date-filters .field { width: 150px; }
-.sales-date-filters .field > span { display: none; }
-.sales-date-filters .field input { min-height: 34px; padding: 6px 8px; border-radius: 8px 14px 7px 14px; cursor: pointer; }
+.sales-date-filters .field > span:not(.sales-date-input) { display: none; }
+.sales-date-filters .field > .sales-date-input { position: relative; display: block; width: 100%; }
+.sales-date-filters .sales-date-input .sales-date-native { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+.sales-date-input .sales-date-picker { position: relative; display: flex; width: 100%; min-height: 34px; align-items: center; justify-content: space-between; gap: 5px; padding: 6px 8px; color: #59451a; background: white; border: 1px solid #e5e8e2; border-radius: 8px 14px 7px 14px; cursor: pointer; font-size: 10px; text-align: left; }
+.sales-date-input .sales-date-picker span { overflow: hidden; color: #74796f; text-overflow: ellipsis; white-space: nowrap; }
+.sales-date-input .sales-date-picker:hover { background: #fffdf6; border-color: #dfc36e; }
+.sales-date-input .sales-date-picker:focus-visible { outline: 2px solid #b38409; outline-offset: 2px; }
 .sales-date-separator { flex: 0 0 auto; color: #4a3a18; font-size: 13px; font-weight: 700; }
 .sales-date-reset { display: inline-flex; min-height: 34px; align-items: center; gap: 4px; padding: 0 8px; }
 .search-field { display: flex; align-items: center; gap: 9px; min-width: 250px; height: 38px; padding: 0 11px; color: #969c92; background: #fff; border: 1px solid #e8ebe5; border-radius: 8px; }
@@ -393,12 +398,14 @@ td strong { color: #373c35; font-weight: 600; }
   .panel-toolbar { padding: 12px; }
   .panel-toolbar-title { font-size: 10px; }
   .compact-search { min-width: 0; }
-  .sales-toolbar { min-width: 0; }
+  .sales-toolbar { min-width: 0; flex-wrap: wrap; row-gap: 8px; }
   .sales-search-controls { gap: 5px; }
+  .sales-search-controls { flex: 1 1 100%; }
   .sales-toolbar .sales-search-field { width: min(220px, 34%); min-width: 68px; flex: 1 1 100px; }
-  .sales-date-filters { flex: 0 1 auto; gap: 4px; }
-  .sales-date-filters .field { width: 78px; }
-  .sales-date-filters .field input { width: 100%; min-width: 0; padding: 6px 3px; font-size: 8px; }
+  .sales-date-filters { flex: 0 0 auto; gap: 4px; }
+  .sales-date-filters .field { width: 82px; flex: 0 0 82px; }
+  .sales-date-input .sales-date-picker { min-width: 0; padding: 6px 4px; font-size: 8px; }
+  .sales-date-input .sales-date-picker svg { flex: 0 0 auto; width: 13px; }
   .sales-date-reset { width: 28px; min-width: 28px; padding: 0; }
   .sales-date-reset span { display: none; }
   .cart-row { grid-template-columns: minmax(0, 1fr) auto auto; }

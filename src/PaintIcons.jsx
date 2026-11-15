@@ -32,6 +32,10 @@ export function BarChart3(props) {
   return <PaintIcon {...props}><path d="M4 19.5h16" /><path d="M6.5 16v-5m5 5V5m5 11V8" strokeWidth="3.2" /><path d="M5 8.5 10 5l4 2 5-4" strokeWidth="1.5" opacity=".68" /></PaintIcon>;
 }
 
+export function CalendarDays(props) {
+  return <PaintIcon {...props}><rect x="3.5" y="5" width="17" height="16" rx="2" /><path d="M7.5 3v4m9-4v4M3.5 9.5h17M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01" strokeWidth="2.2" /></PaintIcon>;
+}
+
 export function Boxes(props) {
   return <PaintIcon {...props}><path d="m12 3 8 4.2v9.2L12 21l-8-4.6V7.2L12 3Z" /><path d="m4.5 7.5 7.5 4 7.5-4M12 12v8.5" /><path d="m8 5.2 8 4.1" opacity=".55" /></PaintIcon>;
 }

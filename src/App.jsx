@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ArrowDownToLine, ArrowRight, BarChart3, Boxes, BriefcaseBusiness, Check,
+  ArrowDownToLine, ArrowRight, BarChart3, Boxes, BriefcaseBusiness, CalendarDays, Check,
   CircleDollarSign, ClipboardList, CreditCard, LayoutDashboard,
   LogOut, Menu, Package, Pencil, Plus, Search, Settings, ShieldCheck,
   ShoppingCart, Trash2, TrendingUp, Truck, X,
@@ -593,7 +593,15 @@ function SalesPage({ sales }) {
   const [search, setSearch] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
+  const fromDateRef = useRef(null);
+  const toDateRef = useRef(null);
   const [selected, setSelected] = useState(null);
+  const displayDate = (date) => date ? date.split('-').reverse().join('/') : 'dd/mm/yyyy';
+  const openDatePicker = (dateRef) => {
+    const input = dateRef.current;
+    if (typeof input?.showPicker === 'function') input.showPicker();
+    else input?.click();
+  };
   const filtered = sales.filter((sale) => {
     const date = sale.created_at ? localDate(sale.created_at) : '';
     return sale.code.toLowerCase().includes(search.toLowerCase())
@@ -611,9 +619,9 @@ function SalesPage({ sales }) {
         <div className="sales-search-controls">
           <div className="search-field compact-search sales-search-field"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari nomor transaksi..." /></div>
           <div className="sales-date-filters">
-            <Field label="Dari"><input type="date" aria-label="Dari tanggal" value={from} max={to || undefined} onChange={(event) => setFrom(event.target.value)} /></Field>
+            <Field label="Dari"><span className="sales-date-input"><input className="sales-date-native" ref={fromDateRef} type="date" tabIndex={-1} aria-hidden="true" value={from} max={to || undefined} onChange={(event) => setFrom(event.target.value)} /><button className="sales-date-picker" type="button" aria-label="Pilih tanggal awal" onClick={() => openDatePicker(fromDateRef)}><span>{displayDate(from)}</span><CalendarDays size={15} /></button></span></Field>
             <span className="sales-date-separator" aria-hidden="true">-</span>
-            <Field label="Sampai"><input type="date" aria-label="Sampai tanggal" value={to} min={from || undefined} onChange={(event) => setTo(event.target.value)} /></Field>
+            <Field label="Sampai"><span className="sales-date-input"><input className="sales-date-native" ref={toDateRef} type="date" tabIndex={-1} aria-hidden="true" value={to} min={from || undefined} onChange={(event) => setTo(event.target.value)} /><button className="sales-date-picker" type="button" aria-label="Pilih tanggal akhir" onClick={() => openDatePicker(toDateRef)}><span>{displayDate(to)}</span><CalendarDays size={15} /></button></span></Field>
             <button className="button button-quiet sales-date-reset" type="button" aria-label="Reset filter tanggal" disabled={!from && !to} onClick={() => { setFrom(''); setTo(''); }}><X size={14} /><span>Reset</span></button>
           </div>
         </div>
