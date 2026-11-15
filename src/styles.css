@@ -467,6 +467,7 @@ body {
   width: 76px;
   padding: 16px 12px;
   border-radius: 22px;
+  transition: width .2s cubic-bezier(.2, .75, .25, 1);
 }
 
 .sidebar-collapsed .sidebar {
@@ -478,6 +479,34 @@ body {
 .sidebar-expanded .sidebar {
   width: 232px;
   box-shadow: 0 10px 30px rgba(110, 70, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .25);
+}
+
+.sidebar-collapsed .nav-item > span,
+.sidebar-collapsed .nav-caption,
+.sidebar-collapsed .secure-note > span,
+.sidebar-collapsed .profile-copy,
+.sidebar-collapsed .profile-avatar {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity .1s ease, visibility 0s linear .1s;
+}
+
+.sidebar-collapsed .nav-item > span {
+  display: block;
+}
+
+.sidebar-expanded .nav-item > span,
+.sidebar-expanded .nav-caption,
+.sidebar-expanded .secure-note > span,
+.sidebar-expanded .profile-copy,
+.sidebar-expanded .profile-avatar {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity .12s ease .1s, visibility 0s linear .1s;
+}
+
+.sidebar-expanded .nav-item > span {
+  display: block;
 }
 
 .sidebar-collapsed .main-area,
