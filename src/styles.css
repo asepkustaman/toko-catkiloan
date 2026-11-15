@@ -1030,7 +1030,7 @@ body {
 }
 
 .topbar {
-  border-radius: 5px 10px 5px 10px;
+  border-radius: 0;
 }
 
 .breadcrumb {
@@ -1055,7 +1055,7 @@ body {
 
 @media (max-width: 820px) {
   .topbar {
-    border-radius: 4px 9px 4px 9px;
+    border-radius: 0;
   }
 }
 
