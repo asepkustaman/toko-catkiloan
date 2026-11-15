@@ -25,10 +25,10 @@ button:disabled { cursor: not-allowed; opacity: .58; }
 button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid #f6b91a66; outline-offset: 2px; }
 
 .app-shell { min-height: 100vh; }
-.sidebar { position: fixed; z-index: 20; inset: 0 auto 0 0; display: flex; flex-direction: column; width: 254px; padding: 20px 17px 15px; background: #fff; border-right: 1px solid var(--line); transition: width .22s ease, padding .22s ease; }
+.sidebar { position: fixed; z-index: 20; inset: 0 auto 0 0; display: flex; flex-direction: column; width: 254px; padding: 20px 17px 15px; background: #fff; border-right: 1px solid var(--line); transition: width .16s cubic-bezier(.2, .75, .25, 1), padding .16s ease; }
 .sidebar-header { display: flex; flex: 0 0 86px; min-height: 86px; align-items: center; gap: 8px; }
 .brand { display: flex; align-items: center; justify-content: center; padding: 0; }
-.brand-logo { display: block; width: min(100%, 170px); max-height: 86px; object-fit: contain; object-position: center; transition: width .2s cubic-bezier(.2, .75, .25, 1); }
+.brand-logo { display: block; width: min(100%, 170px); max-height: 86px; object-fit: contain; object-position: center; transition: width .16s cubic-bezier(.2, .75, .25, 1); }
 .profile-avatar { display: grid; flex: 0 0 auto; place-items: center; width: 34px; height: 34px; color: #54400e; background: #f9dfa0; border-radius: 10px; font-weight: 700; }
 .profile-copy { display: grid; min-width: 0; flex: 1; gap: 3px; }
 .profile-copy strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
@@ -466,7 +466,9 @@ body {
   width: 76px;
   padding: 16px 12px;
   border-radius: 22px;
-  transition: width .2s cubic-bezier(.2, .75, .25, 1);
+  transition: width .16s cubic-bezier(.2, .75, .25, 1);
+  backdrop-filter: blur(12px) saturate(130%);
+  -webkit-backdrop-filter: blur(12px) saturate(130%);
 }
 
 .sidebar-collapsed .sidebar {
@@ -498,7 +500,7 @@ body {
 .sidebar-collapsed .profile-avatar {
   visibility: hidden;
   opacity: 0;
-  transition: opacity .1s ease, visibility 0s linear .1s;
+  transition: opacity .08s ease, visibility 0s linear .08s;
 }
 
 .sidebar-collapsed .nav-item > span {
@@ -512,7 +514,7 @@ body {
 .sidebar-expanded .profile-avatar {
   visibility: visible;
   opacity: 1;
-  transition: opacity .12s ease .1s, visibility 0s linear .1s;
+  transition: opacity .1s ease, visibility 0s;
 }
 
 .sidebar-expanded .nav-item > span {
@@ -1029,7 +1031,7 @@ body {
 }
 
 .topbar {
-  border-radius: 0;
+  border-radius: 4px 12px 4px 12px;
 }
 
 .breadcrumb {
@@ -1054,7 +1056,7 @@ body {
 
 @media (max-width: 820px) {
   .topbar {
-    border-radius: 0;
+    border-radius: 4px 12px 4px 12px;
   }
 }
 
