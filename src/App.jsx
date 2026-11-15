@@ -21,18 +21,18 @@ const navItems = [
 
 function SidebarIcon({ id }) {
   const iconContent = {
-    dashboard: <><rect x="3" y="3" width="8" height="8" rx="2.4" /><rect x="13" y="3" width="8" height="5" rx="2" /><rect x="13" y="10" width="8" height="11" rx="2.4" /><rect x="3" y="13" width="8" height="8" rx="2.4" /><path d="M5.5 8V6.5A1.5 1.5 0 0 1 7 5h1m7 1h3m-3 7h3M5.5 18v-2A1.5 1.5 0 0 1 7 14.5h1" strokeWidth="1.5" /></>,
-    pos: <><rect x="4" y="3" width="16" height="14" rx="3" /><path d="M7.5 6.5h9v4h-9z" fill="currentColor" opacity=".2" /><path d="M7.5 13h2m2 0h2m2 0h1M9 17v2.5h6V17" /><path d="M10 19.5h4" strokeWidth="2.4" /></>,
-    sales: <><path d="M6 3.5h9l4 4V18l-2 2.5H7L5 18V5a1.5 1.5 0 0 1 1-1.5Z" /><path d="M14.5 4v4H19M8.5 11h7m-7 3h7" /><path d="M8.5 17h2m2 0h3" strokeWidth="2.2" /><path d="M5.5 19.5 7 18l1.5 1.5L10 18l1.5 1.5L13 18l1.5 1.5L16 18l1.5 1.5" strokeWidth="1.4" /></>,
-    stock: <><path d="m3.5 8 8.5-4.5L20.5 8v9l-8.5 4.5L3.5 17V8Z" /><path d="m4 8.5 8 4.2 8-4.2M12 12.7v8" /><path d="M12 3.5v6m-2.5-2.5L12 9.5l2.5-2.5" strokeWidth="2.2" /><circle cx="12" cy="7" r="4.3" fill="currentColor" opacity=".12" /></>,
-    products: <><path d="M5.5 7.5h13l-1.2 12H6.7l-1.2-12Z" /><path d="M4.5 7.5h15M8 7.5l1-4h6l1 4M8 11h8" /><path d="m9 15 2 2 4-4" strokeWidth="2.1" /><path d="M8 5h8" strokeWidth="1.5" /></>,
-    vendors: <><path d="M2.5 7h11v10h-11z" /><path d="M13.5 10h4l4 4v3h-8" /><path d="M15.5 10.5v3.8h5" /><circle cx="7" cy="18" r="2" /><circle cx="17.5" cy="18" r="2" /><path d="M5 10h5m-5 3h3" /><path d="m7 4 1.5 1.5L10 4" strokeWidth="1.6" /></>,
-    reports: <><path d="M4 20h16" /><rect x="5.5" y="12" width="3" height="6" rx="1" /><rect x="10.5" y="8" width="3" height="10" rx="1" /><rect x="15.5" y="4" width="3" height="14" rx="1" /><path d="m5 9 4-3 3 1 6-4m-3 0h3v3" strokeWidth="1.7" /><circle cx="18" cy="4" r="1.5" fill="currentColor" /></>,
-    zakat: <><circle cx="12" cy="12" r="9" /><path d="M8.5 15.5c.8.8 1.9 1.2 3.2 1.2 1.8 0 3-.8 3-2s-1-1.8-2.8-2.3-2.8-1-2.8-2.3 1.2-2.2 3-2.2c1.1 0 2.1.4 2.8 1.1M12 6v12" strokeWidth="1.6" /><path d="m17.5 4.5 2-2m-1 4h3" strokeWidth="1.4" /></>,
-    settings: <><path d="M4 6h16M4 12h16M4 18h16" strokeWidth="2" /><circle cx="9" cy="6" r="2.4" fill="currentColor" /><circle cx="15.5" cy="12" r="2.4" fill="currentColor" /><circle cx="7" cy="18" r="2.4" fill="currentColor" /><path d="M9 5.3v1.4m6.5-.7v12m-8 0v.1" stroke="white" strokeWidth="1.1" /></>,
+    dashboard: <><rect x="6" y="6" width="5" height="5" rx="1" /><rect x="13" y="6" width="5" height="5" rx="1" /><rect x="6" y="13" width="5" height="5" rx="1" /><rect x="13" y="13" width="5" height="5" rx="1" /></>,
+    pos: <><rect x="6" y="6" width="12" height="9" rx="2" /><path d="M8.5 9h7m-7 2.5h4M9 15v2.5h6V15m-4.5 2.5h3" /><circle cx="15.5" cy="12" r=".55" fill="currentColor" stroke="none" /></>,
+    sales: <><path d="M8 6.5h6l3 3V17a1.5 1.5 0 0 1-1.5 1.5h-6A1.5 1.5 0 0 1 8 17V6.5Z" /><path d="M14 6.8v3h3M10 12h5m-5 2.5h5m-5 2.5h3" /></>,
+    stock: <><path d="m12 6 6 3.2v6.2L12 18.5l-6-3.1V9.2L12 6Z" /><path d="m6.5 9.5 5.5 3 5.5-3M12 12.5v5.6" /></>,
+    products: <><path d="M7 9h10l-.8 9H7.8L7 9Z" /><path d="M9.5 9V7.5a2.5 2.5 0 0 1 5 0V9m-4.5 4h4m-4 2.5h3" /></>,
+    vendors: <><path d="M5.5 9h8v6.5h-8z" /><path d="M13.5 11h3l2 2v2.5h-5" /><circle cx="8.5" cy="16.5" r="1.4" /><circle cx="16.5" cy="16.5" r="1.4" /><path d="M7.5 11h4m-4 2h2" /></>,
+    reports: <><path d="M6.5 17.5h11" /><rect x="7.5" y="13" width="2.5" height="4.5" rx=".7" /><rect x="11" y="10" width="2.5" height="7.5" rx=".7" /><rect x="14.5" y="7" width="2.5" height="10.5" rx=".7" /><path d="m8 11 3-2 2 1 4-3m-2 0h2v2" /></>,
+    zakat: <><circle cx="12" cy="12" r="5.5" /><path d="M13.8 9.8a2.4 2.4 0 0 0-1.8-.7c-1.1 0-1.8.5-1.8 1.3s.7 1.1 1.8 1.4 1.8.6 1.8 1.4-.7 1.4-1.9 1.4a2.8 2.8 0 0 1-2-.8M12 8.2v7.6" /></>,
+    settings: <><path d="M6 8h12m-12 4h12m-12 4h12" /><circle cx="10" cy="8" r="1.5" fill="currentColor" /><circle cx="14.5" cy="12" r="1.5" fill="currentColor" /><circle cx="9" cy="16" r="1.5" fill="currentColor" /></>,
   }[id];
 
-  return <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{iconContent}</svg>;
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><rect className="nav-icon-frame" x="2.5" y="2.5" width="19" height="19" rx="4" />{iconContent}</svg>;
 }
 
 const currency = new Intl.NumberFormat('id-ID', {

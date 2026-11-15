@@ -37,11 +37,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .nav-list { display: grid; gap: 4px; }
 .nav-item { position: relative; display: flex; height: 42px; min-height: 42px; align-items: center; gap: 12px; width: 100%; padding: 0 12px 0 42px; color: #72786f; background: transparent; border: 0; border-radius: 9px; text-align: left; font-size: 12px; font-weight: 600; transition: .18s ease; }
 .nav-item > span { min-width: 0; overflow: hidden; white-space: nowrap; }
-.nav-item > svg { position: absolute; top: 50%; left: 10px; width: 21px; height: 21px; flex: 0 0 21px; transform: translateY(-50%); }
+.nav-item > svg { position: absolute; top: 50%; left: 9px; width: 23px; height: 23px; flex: 0 0 23px; transform: translateY(-50%); transition: color .18s ease, transform .18s ease; }
+.nav-icon-frame { fill: currentColor; fill-opacity: .07; stroke: currentColor; stroke-width: 1.15; }
 .nav-item:hover { color: var(--ink); background: #f7f7f3; }
+.nav-item:hover > svg { transform: translateY(-50%) scale(1.05); }
 .nav-item.nav-active { color: #292820; background: #fff6db; }
 .nav-active::before { position: absolute; inset: 8px auto 8px 0; width: 3px; background: var(--gold); border-radius: 0 4px 4px 0; content: ''; }
 .nav-active > svg { color: #b38409; }
+.nav-active .nav-icon-frame { fill-opacity: .14; }
 .nav-dot { width: 7px; height: 7px; margin-left: auto; background: #d35e52; border-radius: 50%; }
 .sidebar-bottom { margin-top: auto; }
 .secure-note { display: grid; height: 54px; grid-template-columns: 16px minmax(0, 1fr); align-items: center; gap: 9px; margin: 0 4px 13px; padding: 0 10px; color: #668470; background: #f3f8f4; border-radius: 9px; font-size: 10px; line-height: 1.5; }
