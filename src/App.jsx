@@ -209,7 +209,7 @@ function App() {
 
   const activeNav = navItems.find((item) => item.id === page);
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${page === 'pos' ? 'app-pos-shell' : ''}`}>
       {mobileMenu && <button className="mobile-scrim" onClick={() => setMobileMenu(false)} aria-label="Tutup menu" />}
       <aside className={`sidebar ${mobileMenu ? 'sidebar-open' : ''}`}>
         <Brand />
@@ -413,7 +413,6 @@ function PointOfSale({ products, storeId, run }) {
     }
   };
   return <>
-    <PageHeading eyebrow="TRANSAKSI" title="Kasir" description="Pilih produk untuk ditambahkan ke transaksi." action={<span className="date-chip"><ShoppingCart size={15} /> POS</span>} />
     <div className="pos-layout">
       <section className="panel product-picker"><div className="search-field"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari nama atau barcode produk..." /><kbd>⌘ K</kbd></div>
         <div className="product-grid">{filtered.map((product) => <button className="pos-product" key={product.id} disabled={Number(product.stock) <= 0} onClick={() => add(product)}><span className="product-art"><Package size={23} /></span><span className="pos-product-name">{product.name}</span><span className="pos-product-bottom"><strong>{money(product.sell_price)}</strong><small>{quantity(product.stock)} {product.unit} tersedia</small></span></button>)}</div>
