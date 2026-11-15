@@ -152,8 +152,12 @@ td strong { color: #373c35; font-weight: 600; }
 .sales-panel-heading h2 { margin: 0; font-family: Manrope, sans-serif; font-size: 14px; font-weight: 700; }
 .panel-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 15px 18px; border-bottom: 1px solid var(--line); }
 .panel-toolbar-title { font-size: 11px; }
-.vendor-add-button { min-height: 34px; padding: 0 12px; border-radius: 9px 17px 8px 17px; font-size: 10px; white-space: nowrap; }
+.button.vendor-add-button { min-height: 36px; gap: 8px; padding: 0 13px; border-radius: 8px; font-size: 10px; white-space: nowrap; }
 .vendor-add-button svg { flex: 0 0 auto; }
+.vendor-add-icon { position: relative; display: grid; width: 23px; height: 23px; flex: 0 0 auto; place-items: center; color: #ffe6a0; background: rgba(255, 255, 255, .13); border: 1px solid rgba(255, 230, 160, .42); border-radius: 6px; }
+.vendor-add-icon > svg:first-child { width: 14px; height: 14px; }
+.vendor-add-icon > svg:last-child { position: absolute; right: -4px; bottom: -3px; width: 11px; height: 11px; padding: 1px; color: #3e2900; background: #ffe6a0; border-radius: 4px; }
+.vendor-add-button:hover:not(:disabled) .vendor-add-icon { color: #fff1c8; background: rgba(255, 255, 255, .2); }
 .sales-toolbar { display: flex; align-items: center; }
 .sales-search-controls { display: flex; min-width: 0; flex: 1; align-items: center; gap: 8px; }
 .sales-toolbar .sales-search-field { width: min(340px, 100%); border-radius: 9px 16px 8px 16px; }
