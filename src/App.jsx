@@ -410,6 +410,83 @@ function Field({ label, children, hint }) {
   return <label className="field"><span>{label}</span>{children}{hint && <small>{hint}</small>}</label>;
 }
 
+function DatePickerField({ label, value, onChange, min, max }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [visibleMonth, setVisibleMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+  const containerRef = useRef(null);
+  const triggerRef = useRef(null);
+  const selectedDate = value ? new Date(`${value}T12:00:00`) : null;
+  const displayDate = selectedDate ? value.split('-').reverse().join('/') : 'dd/mm/yyyy';
+  const todayDate = new Date();
+  const todayIso = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`;
+  const monthLabel = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(visibleMonth);
+  const firstDay = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1);
+  const gridStart = new Date(firstDay);
+  gridStart.setDate(firstDay.getDate() - ((firstDay.getDay() + 6) % 7));
+  const days = Array.from({ length: 42 }, (_, index) => {
+    const date = new Date(gridStart);
+    date.setDate(gridStart.getDate() + index);
+    return date;
+  });
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const closeOnOutsideClick = (event) => {
+      if (!containerRef.current?.contains(event.target)) setIsOpen(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [isOpen]);
+
+  const toggleCalendar = () => {
+    if (!isOpen) {
+      const initialDate = selectedDate ?? todayDate;
+      setVisibleMonth(new Date(initialDate.getFullYear(), initialDate.getMonth(), 1));
+    }
+    setIsOpen((open) => !open);
+  };
+  const changeMonth = (amount) => {
+    setVisibleMonth((month) => new Date(month.getFullYear(), month.getMonth() + amount, 1));
+  };
+  const selectDate = (date) => {
+    const isoDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    onChange(isoDate);
+    setIsOpen(false);
+    triggerRef.current?.focus();
+  };
+  const isWithinRange = (date) => {
+    const isoDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    return (!min || isoDate >= min) && (!max || isoDate <= max);
+  };
+
+  return <div className="field"><span className="date-field-label">{label}</span><span className="sales-date-input" ref={containerRef}>
+    <button className={`sales-date-picker${isOpen ? ' is-open' : ''}`} ref={triggerRef} type="button" aria-label={`Pilih ${label.toLowerCase()}`} aria-expanded={isOpen} aria-haspopup="dialog" onClick={toggleCalendar}><CalendarDays size={15} /><span>{displayDate}</span><span className="date-picker-caret" aria-hidden="true" /></button>
+    {isOpen && <span className="date-calendar" role="dialog" aria-label={`Kalender ${label.toLowerCase()}`}>
+      <span className="date-calendar-header"><button type="button" aria-label="Bulan sebelumnya" onClick={() => changeMonth(-1)}>‹</button><strong>{monthLabel}</strong><button type="button" aria-label="Bulan berikutnya" onClick={() => changeMonth(1)}>›</button></span>
+      <span className="date-calendar-grid">
+        {['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map((day) => <span className="date-calendar-weekday" key={day}>{day}</span>)}
+        {days.map((date) => {
+          const isoDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+          const isSelected = isoDate === value;
+          const isToday = isoDate === todayIso;
+          return <button className={`date-calendar-day${date.getMonth() !== visibleMonth.getMonth() ? ' is-outside-month' : ''}${isSelected ? ' is-selected' : ''}${isToday ? ' is-today' : ''}`} type="button" key={isoDate} disabled={!isWithinRange(date)} aria-label={new Intl.DateTimeFormat('id-ID', { dateStyle: 'full' }).format(date)} aria-pressed={isSelected} onClick={() => selectDate(date)}>{date.getDate()}</button>;
+        })}
+      </span>
+      <span className="date-calendar-footer"><button type="button" onClick={() => { onChange(''); setIsOpen(false); triggerRef.current?.focus(); }}>Hapus tanggal</button><button type="button" disabled={!isWithinRange(todayDate)} onClick={() => selectDate(todayDate)}>Hari ini</button></span>
+    </span>}
+  </span></div>;
+}
+
 function CurrencyInput({ value, onChange, ...inputProps }) {
   const inputRef = useRef(null);
   const rawValue = value === '' || value == null ? '' : String(value);
@@ -628,15 +705,7 @@ function SalesPage({ sales }) {
   const [search, setSearch] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
-  const fromDateRef = useRef(null);
-  const toDateRef = useRef(null);
   const [selected, setSelected] = useState(null);
-  const displayDate = (date) => date ? date.split('-').reverse().join('/') : 'dd/mm/yyyy';
-  const openDatePicker = (dateRef) => {
-    const input = dateRef.current;
-    if (typeof input?.showPicker === 'function') input.showPicker();
-    else input?.click();
-  };
   const filtered = sales.filter((sale) => {
     const date = sale.created_at ? localDate(sale.created_at) : '';
     return sale.code.toLowerCase().includes(search.toLowerCase())
@@ -654,9 +723,9 @@ function SalesPage({ sales }) {
         <div className="sales-search-controls">
           <div className="search-field compact-search sales-search-field"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari nomor transaksi..." /></div>
           <div className="sales-date-filters">
-            <Field label="Dari"><span className="sales-date-input"><input className="sales-date-native" ref={fromDateRef} type="date" tabIndex={-1} aria-hidden="true" value={from} max={to || undefined} onChange={(event) => setFrom(event.target.value)} /><button className="sales-date-picker" type="button" aria-label="Pilih tanggal awal" onClick={() => openDatePicker(fromDateRef)}><span>{displayDate(from)}</span><CalendarDays size={15} /></button></span></Field>
+            <DatePickerField label="Dari" value={from} max={to || undefined} onChange={setFrom} />
             <span className="sales-date-separator" aria-hidden="true">-</span>
-            <Field label="Sampai"><span className="sales-date-input"><input className="sales-date-native" ref={toDateRef} type="date" tabIndex={-1} aria-hidden="true" value={to} min={from || undefined} onChange={(event) => setTo(event.target.value)} /><button className="sales-date-picker" type="button" aria-label="Pilih tanggal akhir" onClick={() => openDatePicker(toDateRef)}><span>{displayDate(to)}</span><CalendarDays size={15} /></button></span></Field>
+            <DatePickerField label="Sampai" value={to} min={from || undefined} onChange={setTo} />
             <button className="button button-quiet sales-date-reset" type="button" aria-label="Reset filter tanggal" disabled={!from && !to} onClick={() => { setFrom(''); setTo(''); }}><X size={14} /><span>Reset</span></button>
           </div>
         </div>
@@ -680,9 +749,9 @@ function ReportsPage({ sales, stockEntries }) {
   const expense = stockEntries.filter((entry) => (!from || entry.occurred_on >= from) && (!to || entry.occurred_on <= to)).reduce((sum, entry) => sum + Number(entry.quantity) * Number(entry.unit_cost), 0);
   const exportCsv = () => downloadCsv(['Tanggal,Transaksi,Omzet (Rp),Harga Pokok (Rp),Laba Kotor (Rp)', ...filtered.map((sale) => [sale.created_at?.slice(0, 10), sale.code, sale.total, sale.cost_total, Number(sale.total) - Number(sale.cost_total)].join(','))].join('\n'), 'laporan-laba-rugi.csv');
   return <>
-    <section className="panel filter-panel"><span className="filter-label">Periode laporan</span><Field label="Dari tanggal"><input type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></Field><span className="filter-separator">sampai</span><Field label="Sampai tanggal"><input type="date" value={to} onChange={(event) => setTo(event.target.value)} /></Field><button className="button button-quiet" onClick={() => { setFrom(''); setTo(''); }}>Reset</button><button className="button button-secondary" onClick={exportCsv}><ArrowDownToLine size={16} /> Ekspor CSV</button></section>
+    <section className="panel filter-panel"><span className="filter-label">Periode laporan</span><div className="sales-date-filters report-date-filters"><DatePickerField label="Dari" value={from} max={to || undefined} onChange={setFrom} /><span className="sales-date-separator" aria-hidden="true">-</span><DatePickerField label="Sampai" value={to} min={from || undefined} onChange={setTo} /><button className="button button-quiet sales-date-reset" type="button" aria-label="Reset filter tanggal" disabled={!from && !to} onClick={() => { setFrom(''); setTo(''); }}><X size={14} /><span>Reset</span></button></div><button className="button button-secondary" onClick={exportCsv}><ArrowDownToLine size={16} /> Ekspor CSV</button></section>
     <div className="stats-grid report-stats"><StatCard label="Omzet bersih" value={money(revenue)} note={`${filtered.length} transaksi`} icon={CircleDollarSign} tone="gold" /><StatCard label="Harga pokok terjual" value={money(cost)} note="Dihitung dari harga beli saat transaksi" icon={Boxes} tone="blue" /><StatCard label="Laba kotor" value={money(profit)} note="Omzet dikurangi harga pokok" icon={TrendingUp} tone="green" /><StatCard label="Pembelian stok" value={money(expense)} note="Nilai stok masuk pada periode ini" icon={ArrowDownToLine} tone="purple" /></div>
-    <section className="panel data-panel"><div className="panel-heading"><div><h2>Rincian laba per transaksi</h2><p>Harga pokok disimpan sebagai snapshot saat penjualan.</p></div></div><div className="table-wrap"><table><thead><tr><th>TANGGAL</th><th>NO. TRANSAKSI</th><th>OMZET</th><th>HARGA POKOK</th><th className="align-right">LABA KOTOR</th></tr></thead><tbody>{filtered.map((sale) => <tr key={sale.id}><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}</tbody></table>{!filtered.length && <EmptyState icon={BarChart3} title="Belum ada data laporan" text="Transaksi pada periode ini akan muncul di sini." />}</div></section>
+    <section className="panel data-panel"><div className="panel-heading"><div><h2>Rincian laba per transaksi</h2></div></div><div className="table-wrap"><table><thead><tr><th>TANGGAL</th><th>NO. TRANSAKSI</th><th>OMZET</th><th>HARGA POKOK</th><th className="align-right">LABA KOTOR</th></tr></thead><tbody>{filtered.map((sale) => <tr key={sale.id}><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}</tbody></table>{!filtered.length && <EmptyState icon={BarChart3} title="Belum ada data laporan" text="Transaksi pada periode ini akan muncul di sini." />}</div></section>
   </>;
 }
 
