@@ -181,7 +181,7 @@ td strong { color: #373c35; font-weight: 600; }
 .pos-product-bottom { display: flex; align-items: flex-end; justify-content: space-between; gap: 4px; width: 100%; margin-top: auto; padding-top: 10px; }
 .pos-product-bottom strong { color: #8a680d; font-size: 10px; }
 .pos-product-bottom small { color: #969d93; font-size: 8px; }
-.cart-panel { position: sticky; top: 77px; display: flex; min-height: min(680px, calc(100dvh - 112px)); flex-direction: column; padding: 17px; }
+.cart-panel { position: sticky; top: 77px; display: flex; min-height: calc(100dvh - 50px); flex-direction: column; padding: 17px; }
 .cart-heading { display: flex; align-items: center; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
 .cart-icon { display: grid; width: 34px; height: 34px; place-items: center; color: #96700c; background: #fff2cd; border-radius: 9px; }
 .cart-heading > div { flex: 1; }
