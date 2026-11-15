@@ -206,6 +206,9 @@ function App() {
       setNotice({ type: 'error', text: 'Akses ini hanya tersedia untuk pemilik atau pengelola toko.' });
       return;
     }
+    if (nextPage !== page) {
+      setNotice((current) => current?.type === 'success' ? null : current);
+    }
     setPage(nextPage);
   };
   if (!authReady) return <LoadingScreen />;
