@@ -523,7 +523,9 @@ function Dashboard({ store, products, sales, stockEntries, settings, setPage }) 
   const todaySales = sales.filter((sale) => sale.created_at && localDate(sale.created_at) === start);
   const revenue = todaySales.reduce((sum, sale) => sum + Number(sale.total), 0);
   const lowStock = products.filter((product) => Number(product.stock) <= Number(settings?.low_stock_threshold ?? 5));
-  const recent = sales.slice(0, 5);
+  const recent = [...sales]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 5);
   const week = Array.from({ length: 7 }, (_, index) => {
     const date = new Date();
     date.setDate(date.getDate() - (6 - index));
@@ -548,7 +550,7 @@ function Dashboard({ store, products, sales, stockEntries, settings, setPage }) 
         {lowStock.length ? <div className="compact-list">{lowStock.slice(0, 5).map((product) => <div className="compact-row" key={product.id}><ProductMarker product={product} /><span className="compact-copy"><strong>{product.name}</strong><small>{product.category?.name || 'Tanpa kategori'}</small></span><span className="stock-warning">{quantity(product.stock)} {product.unit}</span></div>)}</div> : <EmptyState icon={Check} title="Stok aman" text="Tidak ada produk yang stoknya menipis." /> }
       </section>
       <section className="panel recent-panel"><div className="panel-heading"><div><h2>Transaksi terbaru</h2><p>Aktivitas penjualan terkini</p></div><button className="text-button" onClick={() => setPage('sales')}>Semua transaksi <ArrowRight size={15} /></button></div>
-        {recent.length ? <div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>No. transaksi</th><th>Tanggal</th><th>Item</th><th className="align-right">Total</th></tr></thead><tbody>{recent.map((sale, index) => <tr key={sale.id}><td className="row-number">{index + 1}</td><td><strong className="mono">{sale.code}</strong></td><td>{shortDate(sale.created_at)}</td><td>{sale.sale_items?.length ?? 0} produk</td><td className="align-right"><strong>{money(sale.total)}</strong></td></tr>)}</tbody></table></div> : <EmptyState icon={ClipboardList} title="Belum ada transaksi" text="Transaksi penjualan akan tampil di sini." /> }
+        {recent.length ? <div className="table-wrap"><table><thead><tr><th>No. transaksi</th><th>Tanggal</th><th>Item</th><th className="align-right">Total</th></tr></thead><tbody>{recent.map((sale) => <tr key={sale.id}><td><strong className="mono">{sale.code}</strong></td><td>{shortDate(sale.created_at)}</td><td>{sale.sale_items?.length ?? 0} produk</td><td className="align-right"><strong>{money(sale.total)}</strong></td></tr>)}</tbody></table></div> : <EmptyState icon={ClipboardList} title="Belum ada transaksi" text="Transaksi penjualan akan tampil di sini." /> }
       </section>
       <section className="panel quick-actions"><div className="panel-heading"><div><h2>Aktivitas cepat</h2><p>Akses pekerjaan yang sering dilakukan</p></div></div><div className="quick-action-grid"><QuickAction iconId="pos" label="Transaksi baru" tone="gold" onClick={() => setPage('pos')} /><QuickAction iconId="products" label="Tambah produk" tone="blue" onClick={() => setPage('products')} /><QuickAction iconId="stock" label="Catat stok masuk" tone="green" onClick={() => setPage('stock')} /><QuickAction iconId="reports" label="Lihat laporan" tone="purple" onClick={() => setPage('reports')} /></div></section>
     </div>
