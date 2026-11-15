@@ -36,6 +36,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .nav-caption { flex: 0 0 11px; height: 11px; margin: 42px 10px 10px; color: #a0a49d; font-size: 9px; font-weight: 700; letter-spacing: 1.4px; line-height: 11px; }
 .nav-list { display: grid; gap: 4px; }
 .nav-item { position: relative; display: flex; height: 42px; min-height: 42px; align-items: center; gap: 12px; width: 100%; padding: 0 12px 0 42px; color: #72786f; background: transparent; border: 0; border-radius: 9px; text-align: left; font-size: 12px; font-weight: 600; transition: .18s ease; }
+.nav-item > span { min-width: 0; overflow: hidden; white-space: nowrap; }
 .nav-item > svg { position: absolute; top: 50%; left: 12px; flex: 0 0 18px; transform: translateY(-50%); }
 .nav-item:hover { color: var(--ink); background: #f7f7f3; }
 .nav-item.nav-active { color: #292820; background: #fff6db; }
