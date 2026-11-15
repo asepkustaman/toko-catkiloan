@@ -849,7 +849,7 @@ function PointOfSale({ products, store, settings, storeId, run }) {
             {receipt.phone && <p>{receipt.phone}</p>}
           </header>
           <div className="receipt-rule" />
-          <div className="receipt-meta"><span>No. transaksi</span><strong>{receipt.code}</strong></div>
+          <div className="receipt-meta"><span>No</span><strong>{receipt.code}</strong></div>
           <div className="receipt-meta"><span>Waktu</span><strong>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(receipt.createdAt))}</strong></div>
           <div className="receipt-rule receipt-rule-dashed" />
           <div className="receipt-items">{receipt.items.map((item, index) => <div className="receipt-item" key={`${item.name}-${index}`}>
