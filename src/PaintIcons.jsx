@@ -1,6 +1,6 @@
 import React from 'react';
 
-function PaintIcon({ size = 18, strokeWidth = 1.9, children, ...props }) {
+function PaintIcon({ size = 18, strokeWidth = 1.35, children, ...props }) {
   return (
     <svg
       width={size}
@@ -8,6 +8,7 @@ function PaintIcon({ size = 18, strokeWidth = 1.9, children, ...props }) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
+      className="paint-icon"
       strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -21,19 +22,19 @@ function PaintIcon({ size = 18, strokeWidth = 1.9, children, ...props }) {
 }
 
 export function ArrowDownToLine(props) {
-  return <PaintIcon {...props}><path d="M12 3v11m0 0 4-4m-4 4-4-4" /><path d="M4 16v4h16v-4" /><path d="M7 20h10" strokeWidth="2.8" /></PaintIcon>;
+  return <PaintIcon {...props}><path d="M12 3v11m0 0 4-4m-4 4-4-4" /><path d="M4 16v4h16v-4" /><path d="M7 20h10" /></PaintIcon>;
 }
 
 export function ArrowRight(props) {
-  return <PaintIcon {...props}><path d="M4 12h14" /><path d="m13 6 6 6-6 6" strokeWidth="2.4" /><path d="M3 8v8" strokeWidth="2.6" opacity=".48" /></PaintIcon>;
+  return <PaintIcon {...props}><path d="M4 12h14m-5-6 6 6-6 6" /><path d="M3 8v8" opacity=".48" /></PaintIcon>;
 }
 
 export function BarChart3(props) {
-  return <PaintIcon {...props}><path d="M4 19.5h16" /><path d="M6.5 16v-5m5 5V5m5 11V8" strokeWidth="3.2" /><path d="M5 8.5 10 5l4 2 5-4" strokeWidth="1.5" opacity=".68" /></PaintIcon>;
+  return <PaintIcon {...props}><path d="M4 19.5h16" /><path d="M6.5 16v-5m5 5V5m5 11V8" /><path d="M5 8.5 10 5l4 2 5-4" opacity=".68" /></PaintIcon>;
 }
 
 export function CalendarDays(props) {
-  return <PaintIcon {...props}><rect x="3.5" y="5" width="17" height="16" rx="2" /><path d="M7.5 3v4m9-4v4M3.5 9.5h17M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01" strokeWidth="2.2" /></PaintIcon>;
+  return <PaintIcon {...props}><rect x="3.5" y="5" width="17" height="16" rx="2" /><path d="M7.5 3v4m9-4v4M3.5 9.5h17M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01" /></PaintIcon>;
 }
 
 export function Boxes(props) {
@@ -45,11 +46,11 @@ export function BriefcaseBusiness(props) {
 }
 
 export function Check(props) {
-  return <PaintIcon {...props}><path d="m5 12.5 4.2 4.1L19.5 6" strokeWidth="2.8" /><path d="M4 20h16" strokeWidth="1.2" opacity=".38" /></PaintIcon>;
+  return <PaintIcon {...props}><path d="m5 12.5 4.2 4.1L19.5 6" /><path d="M4 20h16" opacity=".38" /></PaintIcon>;
 }
 
 export function CircleDollarSign(props) {
-  return <PaintIcon {...props}><circle cx="12" cy="12" r="9" strokeWidth="1.7" /><circle cx="12" cy="12" r="6.2" opacity=".36" strokeWidth="1" /><path d="M15.5 8.8c-.7-.8-1.8-1.2-3-1.2-1.6 0-2.8.8-2.8 2s1 1.8 2.8 2.3 2.8 1.1 2.8 2.4-1.2 2.2-3 2.2c-1.3 0-2.5-.5-3.3-1.4M12.3 6v12" strokeWidth="1.6" /></PaintIcon>;
+  return <PaintIcon {...props}><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="6.2" opacity=".36" /><path d="M15.5 8.8c-.7-.8-1.8-1.2-3-1.2-1.6 0-2.8.8-2.8 2s1 1.8 2.8 2.3 2.8 1.1 2.8 2.4-1.2 2.2-3 2.2c-1.3 0-2.5-.5-3.3-1.4M12.3 6v12" /></PaintIcon>;
 }
 
 export function ClipboardList(props) {
@@ -57,7 +58,7 @@ export function ClipboardList(props) {
 }
 
 export function CreditCard(props) {
-  return <PaintIcon {...props}><rect x="2.5" y="5" width="19" height="14" rx="3" /><path d="M3 9h18" strokeWidth="2.5" /><path d="M6 15h5" strokeWidth="2.2" /><path d="M16 15h2" opacity=".5" /></PaintIcon>;
+  return <PaintIcon {...props}><rect x="2.5" y="5" width="19" height="14" rx="3" /><path d="M3 9h18M6 15h5M16 15h2" opacity=".8" /></PaintIcon>;
 }
 
 export function LayoutDashboard(props) {
@@ -65,11 +66,11 @@ export function LayoutDashboard(props) {
 }
 
 export function LogOut(props) {
-  return <PaintIcon {...props}><path d="M11 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H11" /><path d="M9 12h11m-4-4 4 4-4 4" strokeWidth="2.2" /><path d="M8 8v8" opacity=".42" /></PaintIcon>;
+  return <PaintIcon {...props}><path d="M11 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H11M9 12h11m-4-4 4 4-4 4" /><path d="M8 8v8" opacity=".42" /></PaintIcon>;
 }
 
 export function Menu(props) {
-  return <PaintIcon {...props}><path d="M4 6.5h16M4 12h10M4 17.5h16" strokeWidth="2.4" /><circle cx="17.5" cy="12" r="1" fill="currentColor" stroke="none" /></PaintIcon>;
+  return <PaintIcon {...props}><path d="M4 6.5h16M4 12h10M4 17.5h16" /><circle cx="17.5" cy="12" r="1" fill="currentColor" stroke="none" /></PaintIcon>;
 }
 
 export function Package(props) {
@@ -81,11 +82,11 @@ export function Pencil(props) {
 }
 
 export function Plus(props) {
-  return <PaintIcon {...props}><path d="M12 4v16M4 12h16" strokeWidth="2.5" /><path d="M12 2.5a9.5 9.5 0 1 0 9.5 9.5" strokeWidth="1.1" opacity=".38" /></PaintIcon>;
+  return <PaintIcon {...props}><path d="M12 4v16M4 12h16" /><path d="M12 2.5a9.5 9.5 0 1 0 9.5 9.5" opacity=".38" /></PaintIcon>;
 }
 
 export function Search(props) {
-  return <PaintIcon {...props}><circle cx="10.5" cy="10.5" r="6.8" /><path d="m15.5 15.5 5 5" strokeWidth="2.8" /><path d="M8.2 10.5h4.6" strokeWidth="1.2" opacity=".5" /></PaintIcon>;
+  return <PaintIcon {...props}><circle cx="10.5" cy="10.5" r="6.8" /><path d="m15.5 15.5 5 5" /><path d="M8.2 10.5h4.6" opacity=".5" /></PaintIcon>;
 }
 
 export function Settings(props) {
@@ -93,7 +94,7 @@ export function Settings(props) {
 }
 
 export function ShieldCheck(props) {
-  return <PaintIcon {...props}><path d="M12 2.8 20 6v5.3c0 4.6-3.2 8.1-8 9.9-4.8-1.8-8-5.3-8-9.9V6l8-3.2Z" /><path d="m8.2 11.8 2.5 2.5 5.2-5.5" strokeWidth="2.2" /><path d="M12 5.5v1" opacity=".4" /></PaintIcon>;
+  return <PaintIcon {...props}><path d="M12 2.8 20 6v5.3c0 4.6-3.2 8.1-8 9.9-4.8-1.8-8-5.3-8-9.9V6l8-3.2Z" /><path d="m8.2 11.8 2.5 2.5 5.2-5.5" /><path d="M12 5.5v1" opacity=".4" /></PaintIcon>;
 }
 
 export function ShoppingCart(props) {
@@ -101,11 +102,11 @@ export function ShoppingCart(props) {
 }
 
 export function Trash2(props) {
-  return <PaintIcon {...props}><path d="M4 7h16m-10-3h4l1 3H9l1-3Z" /><path d="m6 7 1 13h10l1-13" /><path d="M10 10v7m4-7v7" strokeWidth="1.5" /><path d="M3 7h18" strokeWidth="2.5" /></PaintIcon>;
+  return <PaintIcon {...props}><path d="M4 7h16m-10-3h4l1 3H9l1-3Z" /><path d="m6 7 1 13h10l1-13M10 10v7m4-7v7" /></PaintIcon>;
 }
 
 export function TrendingUp(props) {
-  return <PaintIcon {...props}><path d="M3 18.5h18" /><path d="m4.5 15.5 5-5 3.3 2.8 6.7-7" strokeWidth="2.2" /><path d="M14.8 6.3h4.7V11" strokeWidth="2.2" /><circle cx="9.5" cy="10.5" r="1" fill="currentColor" stroke="none" /></PaintIcon>;
+  return <PaintIcon {...props}><path d="M3 18.5h18m-16.5-3 5-5 3.3 2.8 6.7-7m-4.7.7h4.7v4.7" /><circle cx="9.5" cy="10.5" r="1" fill="currentColor" stroke="none" /></PaintIcon>;
 }
 
 export function Truck(props) {

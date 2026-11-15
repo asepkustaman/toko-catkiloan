@@ -290,7 +290,7 @@ function App() {
           <div className="topbar-right"><span className="live-dot" /> Data tersinkron <span className="topbar-date">{new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())}</span></div>
         </header>
         {notice && <div key={notice.id} className={`toast toast-${notice.type}`} style={{ '--toast-duration': `${NOTICE_DURATION}ms` }} role={notice.type === 'error' ? 'alert' : 'status'}>
-          <span className="toast-icon" aria-hidden="true">{notice.type === 'success' ? <Check size={17} strokeWidth={2.5} /> : <X size={17} strokeWidth={2.5} />}</span>
+          <span className="toast-icon" aria-hidden="true">{notice.type === 'success' ? <Check size={17} /> : <X size={17} />}</span>
           <span className="toast-copy"><strong>{notice.type === 'success' ? 'Berhasil' : 'Perlu perhatian'}</strong><span>{notice.text}</span></span>
           <button onClick={() => setNotice(null)} aria-label="Tutup notifikasi" title="Tutup"><X size={16} /></button>
           <span key={notice.id} className="toast-progress" aria-hidden="true" />
@@ -507,7 +507,7 @@ function Brand() {
 }
 
 function StatCard({ label, value, note, icon: Icon, tone = 'gold', artwork = false }) {
-  return <article className={`stat-card${artwork ? ' stat-card-art' : ''}`}><div className="stat-top"><span>{label}</span><span className={`stat-icon icon-${tone}${artwork ? ' stat-icon-art' : ''}`}><Icon size={artwork ? 76 : 19} strokeWidth={artwork ? 1.6 : 1.9} /></span></div><strong className="stat-value">{value}</strong><span className="stat-note">{note}</span></article>;
+  return <article className={`stat-card${artwork ? ' stat-card-art' : ''}`}><div className="stat-top"><span>{label}</span><span className={`stat-icon icon-${tone}${artwork ? ' stat-icon-art' : ''}`}><Icon size={artwork ? 76 : 19} /></span></div><strong className="stat-value">{value}</strong><span className="stat-note">{note}</span></article>;
 }
 
 function Dashboard({ store, products, sales, stockEntries, settings, setPage }) {
