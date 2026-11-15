@@ -542,13 +542,13 @@ function Dashboard({ store, products, sales, stockEntries, settings, setPage }) 
       <section className="panel recent-panel"><div className="panel-heading"><div><h2>Transaksi terbaru</h2><p>Aktivitas penjualan terkini</p></div><button className="text-button" onClick={() => setPage('sales')}>Semua transaksi <ArrowRight size={15} /></button></div>
         {recent.length ? <div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>No. transaksi</th><th>Tanggal</th><th>Item</th><th className="align-right">Total</th></tr></thead><tbody>{recent.map((sale, index) => <tr key={sale.id}><td className="row-number">{index + 1}</td><td><strong className="mono">{sale.code}</strong></td><td>{shortDate(sale.created_at)}</td><td>{sale.sale_items?.length ?? 0} produk</td><td className="align-right"><strong>{money(sale.total)}</strong></td></tr>)}</tbody></table></div> : <EmptyState icon={ClipboardList} title="Belum ada transaksi" text="Transaksi penjualan akan tampil di sini." /> }
       </section>
-      <section className="panel quick-actions"><div className="panel-heading"><div><h2>Aktivitas cepat</h2><p>Akses pekerjaan yang sering dilakukan</p></div></div><div className="quick-action-grid"><QuickAction icon={ShoppingCart} label="Transaksi baru" tone="gold" onClick={() => setPage('pos')} /><QuickAction icon={Plus} label="Tambah produk" tone="blue" onClick={() => setPage('products')} /><QuickAction icon={ArrowDownToLine} label="Catat stok masuk" tone="green" onClick={() => setPage('stock')} /><QuickAction icon={BarChart3} label="Lihat laporan" tone="purple" onClick={() => setPage('reports')} /></div></section>
+      <section className="panel quick-actions"><div className="panel-heading"><div><h2>Aktivitas cepat</h2><p>Akses pekerjaan yang sering dilakukan</p></div></div><div className="quick-action-grid"><QuickAction iconId="pos" label="Transaksi baru" tone="gold" onClick={() => setPage('pos')} /><QuickAction iconId="products" label="Tambah produk" tone="blue" onClick={() => setPage('products')} /><QuickAction iconId="stock" label="Catat stok masuk" tone="green" onClick={() => setPage('stock')} /><QuickAction iconId="reports" label="Lihat laporan" tone="purple" onClick={() => setPage('reports')} /></div></section>
     </div>
   </>;
 }
 
-function QuickAction({ icon: Icon, label, tone, onClick }) {
-  return <button className="quick-action" onClick={onClick}><span className={`stat-icon icon-${tone}`}><Icon size={19} /></span><span>{label}</span><ArrowRight size={15} /></button>;
+function QuickAction({ iconId, label, tone, onClick }) {
+  return <button className="quick-action" onClick={onClick}><span className={`stat-icon icon-${tone}`}><SidebarIcon id={iconId} /></span><span>{label}</span><ArrowRight size={15} /></button>;
 }
 
 function EmptyState({ icon: Icon, title, text }) {
