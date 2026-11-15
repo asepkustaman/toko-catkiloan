@@ -1160,7 +1160,7 @@ function SettingsPage({ store, settings, storeId, run, onStoreUpdated }) {
   </>;
 }
 
-function Modal({ title, children, onClose }) {
+function Modal({ title, children, onClose, className = '' }) {
   useEffect(() => {
     const closeOnEscape = (event) => { if (event.key === 'Escape') onClose(); };
     document.addEventListener('keydown', closeOnEscape);
