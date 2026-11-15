@@ -20,14 +20,14 @@ const navItems = [
 
 function SidebarIcon({ id }) {
   const iconContent = {
-    dashboard: <><rect x="3" y="3" width="8" height="8" rx="2.5" /><rect x="14" y="3" width="7" height="5" rx="2" /><rect x="14" y="10" width="7" height="11" rx="2.5" /><rect x="3" y="14" width="8" height="7" rx="2" /><path d="M6 6h2m9 0h3m-3 7h3M6 17h2" strokeWidth="1.4" opacity=".6" /></>,
-    pos: <><path d="M4 5h16l-1.6 9.2a2 2 0 0 1-2 1.7H9.2a2 2 0 0 1-2-1.7L5.5 5" /><path d="M3 3h2l.6 3M9 10h8m-7 3h5" /><circle cx="10" cy="19" r="1.5" /><circle cx="17" cy="19" r="1.5" /></>,
-    sales: <><path d="M7 3.5h8l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 20V5a1.5 1.5 0 0 1 1.5-1.5Z" /><path d="M14.5 3.8V8h4.2M8.5 12h7m-7 3.5h3m1.5 3 2-2 1.5 1.2 2.2-2.7" /></>,
-    stock: <><path d="m12 3 8 4.2v9.3L12 21l-8-4.5V7.2L12 3Z" /><path d="m4.5 7.5 7.5 4 7.5-4M12 11.5v5" /><path d="M9.5 14.5 12 17l2.5-2.5" strokeWidth="2.2" /></>,
-    products: <><path d="M5 7.5 12 4l7 3.5v9L12 20l-7-3.5v-9Z" /><path d="m5.5 8 6.5 3.3L18.5 8M12 11.3V20" /><path d="m8.2 5.9 6.7 3.5" opacity=".55" /><path d="M8.5 14.5h2.2" strokeWidth="2.2" /></>,
-    vendors: <><path d="M3 6h11v11H3z" /><path d="M14 10h3.5L21 14v3h-7" /><circle cx="7" cy="18" r="2" /><circle cx="17" cy="18" r="2" /><path d="M5.5 9.5h5m-5 3h3" /><path d="M16 10.5v3.8h4.2" /></>,
-    reports: <><path d="M4 20h16" /><path d="M6.5 17v-4.5m5 4.5V8m5 9v-6" strokeWidth="2.5" /><path d="m5 9 5-4 4 2.5L19 3.5" strokeWidth="1.7" /><path d="M15.5 3.5H19v3.8" strokeWidth="1.7" /></>,
-    settings: <><path d="m10 3 .6-1h2.8l.6 1 .4 2a7.8 7.8 0 0 1 1.5.9l1.9-.6 1.4 2.4-1.4 1.5a7.5 7.5 0 0 1 0 1.8l1.4 1.5-1.4 2.4-1.9-.6a7.8 7.8 0 0 1-1.5.9l-.4 2h-2.8l-.6-2a7.8 7.8 0 0 1-1.5-.9l-1.9.6-1.4-2.4 1.4-1.5a7.5 7.5 0 0 1 0-1.8L5.2 7.4l1.4-2.4 1.9.6A7.8 7.8 0 0 1 10 4.7L10 3Z" /><circle cx="12" cy="10.9" r="2.5" /><path d="M12 8.4v.8m0 3.4v.8" strokeWidth="1.2" opacity=".6" /></>,
+    dashboard: <><rect x="3" y="3" width="8" height="8" rx="2.4" /><rect x="13" y="3" width="8" height="5" rx="2" /><rect x="13" y="10" width="8" height="11" rx="2.4" /><rect x="3" y="13" width="8" height="8" rx="2.4" /><path d="M5.5 8V6.5A1.5 1.5 0 0 1 7 5h1m7 1h3m-3 7h3M5.5 18v-2A1.5 1.5 0 0 1 7 14.5h1" strokeWidth="1.5" /></>,
+    pos: <><rect x="4" y="3" width="16" height="14" rx="3" /><path d="M7.5 6.5h9v4h-9z" fill="currentColor" opacity=".2" /><path d="M7.5 13h2m2 0h2m2 0h1M9 17v2.5h6V17" /><path d="M10 19.5h4" strokeWidth="2.4" /></>,
+    sales: <><path d="M6 3.5h9l4 4V18l-2 2.5H7L5 18V5a1.5 1.5 0 0 1 1-1.5Z" /><path d="M14.5 4v4H19M8.5 11h7m-7 3h7" /><path d="M8.5 17h2m2 0h3" strokeWidth="2.2" /><path d="M5.5 19.5 7 18l1.5 1.5L10 18l1.5 1.5L13 18l1.5 1.5L16 18l1.5 1.5" strokeWidth="1.4" /></>,
+    stock: <><path d="m3.5 8 8.5-4.5L20.5 8v9l-8.5 4.5L3.5 17V8Z" /><path d="m4 8.5 8 4.2 8-4.2M12 12.7v8" /><path d="M12 3.5v6m-2.5-2.5L12 9.5l2.5-2.5" strokeWidth="2.2" /><circle cx="12" cy="7" r="4.3" fill="currentColor" opacity=".12" /></>,
+    products: <><path d="M5.5 7.5h13l-1.2 12H6.7l-1.2-12Z" /><path d="M4.5 7.5h15M8 7.5l1-4h6l1 4M8 11h8" /><path d="m9 15 2 2 4-4" strokeWidth="2.1" /><path d="M8 5h8" strokeWidth="1.5" /></>,
+    vendors: <><path d="M2.5 7h11v10h-11z" /><path d="M13.5 10h4l4 4v3h-8" /><path d="M15.5 10.5v3.8h5" /><circle cx="7" cy="18" r="2" /><circle cx="17.5" cy="18" r="2" /><path d="M5 10h5m-5 3h3" /><path d="m7 4 1.5 1.5L10 4" strokeWidth="1.6" /></>,
+    reports: <><path d="M4 20h16" /><rect x="5.5" y="12" width="3" height="6" rx="1" /><rect x="10.5" y="8" width="3" height="10" rx="1" /><rect x="15.5" y="4" width="3" height="14" rx="1" /><path d="m5 9 4-3 3 1 6-4m-3 0h3v3" strokeWidth="1.7" /><circle cx="18" cy="4" r="1.5" fill="currentColor" /></>,
+    settings: <><path d="M4 6h16M4 12h16M4 18h16" strokeWidth="2" /><circle cx="9" cy="6" r="2.4" fill="currentColor" /><circle cx="15.5" cy="12" r="2.4" fill="currentColor" /><circle cx="7" cy="18" r="2.4" fill="currentColor" /><path d="M9 5.3v1.4m6.5-.7v12m-8 0v.1" stroke="white" strokeWidth="1.1" /></>,
   }[id];
 
   return <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{iconContent}</svg>;
