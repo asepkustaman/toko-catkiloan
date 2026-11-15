@@ -4,7 +4,7 @@ import {
   CircleDollarSign, ClipboardList, CreditCard, LayoutDashboard,
   LogOut, Menu, Package, Pencil, Plus, Search, Settings, ShieldCheck,
   ShoppingCart, Trash2, TrendingUp, Truck, X,
-} from 'lucide-react';
+} from './PaintIcons.jsx';
 import { supabase, supabaseSetupError } from './lib/supabase.js';
 
 const navItems = [
