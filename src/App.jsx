@@ -712,6 +712,7 @@ function PointOfSale({ products, store, settings, storeId, run }) {
     focusProduct(firstAvailable.id);
   };
   const handleProductKeyDown = (event, product) => {
+    if (quantityEntryActive) return;
     if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
     const availableProducts = filtered.filter((item) => getAvailableQuantity(item) > 0);
     const index = availableProducts.findIndex((item) => item.id === product.id);
@@ -727,7 +728,7 @@ function PointOfSale({ products, store, settings, storeId, run }) {
     focusProduct(availableProducts[nextIndex].id);
   };
   const startQuantityEntry = (product) => {
-    if (getAvailableQuantity(product) <= 0) return;
+    if (quantityEntryActive || getAvailableQuantity(product) <= 0) return;
     setQuantityEntryProductId(product.id);
     setQuantityDraft('1');
     setQuantityError('');
@@ -824,8 +825,8 @@ function PointOfSale({ products, store, settings, storeId, run }) {
         <div className="product-grid">{filtered.map((product) => {
           const available = getAvailableQuantity(product);
           const isEnteringQuantity = quantityEntryProductId === product.id;
-          return <div className={`pos-product${isEnteringQuantity ? ' pos-product-entering' : ''}`} key={product.id}>
-            <button className="pos-product-main" type="button" ref={(element) => { if (element) productButtonRefs.current.set(product.id, element); else productButtonRefs.current.delete(product.id); }} disabled={available <= 0 || quantityEntryActive} onKeyDown={(event) => handleProductKeyDown(event, product)} onClick={() => startQuantityEntry(product)}>
+          return <div className={`pos-product${isEnteringQuantity ? ' pos-product-entering' : ''}${quantityEntryActive && !isEnteringQuantity ? ' pos-product-disabled' : ''}`} key={product.id}>
+            <button className="pos-product-main" type="button" ref={(element) => { if (element) productButtonRefs.current.set(product.id, element); else productButtonRefs.current.delete(product.id); }} disabled={available <= 0 || (quantityEntryActive && !isEnteringQuantity)} onKeyDown={(event) => handleProductKeyDown(event, product)} onClick={() => startQuantityEntry(product)}>
               <span className={`product-art${product.color ? ' product-art-color' : ''}`} style={product.color ? { '--product-color': product.color } : undefined}>{!product.color && <Package size={18} />}</span>
               <span className="pos-product-copy"><span className="pos-product-name">{product.name}</span><span className="pos-product-bottom"><strong>{money(product.sell_price)}</strong><small><strong className="pos-stock-available">{quantity(available)} {product.unit}</strong> tersedia</small></span></span>
             </button>
