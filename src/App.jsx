@@ -606,18 +606,18 @@ function SalesPage({ sales }) {
         <h2>Transaksi</h2>
         <button className="icon-button" onClick={exportCsv} aria-label="Ekspor CSV" title="Ekspor CSV"><ArrowDownToLine size={18} /></button>
       </div>
-      <div className="panel-toolbar sales-toolbar">
+      <div className={`panel-toolbar sales-toolbar${dateFilterOpen ? ' date-filter-open' : ''}`}>
         <div className="sales-search-controls">
           <div className="search-field compact-search sales-search-field"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari nomor transaksi..." /></div>
           <button className={`sales-filter-button${dateFilterOpen ? ' is-open' : ''}${from || to ? ' has-filter' : ''}`} type="button" aria-expanded={dateFilterOpen} aria-controls="sales-date-filters" onClick={() => setDateFilterOpen((open) => !open)}><CalendarDays size={16} /><span>Tanggal</span></button>
+          {dateFilterOpen && <div className="sales-date-filters" id="sales-date-filters">
+            <Field label="Dari tanggal"><input type="date" aria-label="Dari tanggal" value={from} max={to || undefined} onChange={(event) => setFrom(event.target.value)} /></Field>
+            <span className="filter-separator">sampai</span>
+            <Field label="Sampai tanggal"><input type="date" aria-label="Sampai tanggal" value={to} min={from || undefined} onChange={(event) => setTo(event.target.value)} /></Field>
+            <button className="button button-quiet sales-date-reset" type="button" aria-label="Reset filter tanggal" disabled={!from && !to} onClick={() => { setFrom(''); setTo(''); }}><X size={14} /><span>Reset</span></button>
+          </div>}
         </div>
         <span className="result-count">{filtered.length} transaksi</span>
-        {dateFilterOpen && <div className="sales-date-filters" id="sales-date-filters">
-          <Field label="Dari tanggal"><input type="date" value={from} max={to || undefined} onChange={(event) => setFrom(event.target.value)} /></Field>
-          <span className="filter-separator">sampai</span>
-          <Field label="Sampai tanggal"><input type="date" value={to} min={from || undefined} onChange={(event) => setTo(event.target.value)} /></Field>
-          <button className="button button-quiet sales-date-reset" type="button" disabled={!from && !to} onClick={() => { setFrom(''); setTo(''); }}>Reset</button>
-        </div>}
       </div>
       <div className="table-wrap"><table><thead><tr><th>NO. TRANSAKSI</th><th>TANGGAL</th><th>JUMLAH ITEM</th><th>SUBTOTAL</th><th>DISKON</th><th className="align-right">TOTAL</th></tr></thead><tbody>{filtered.map((sale) => <tr className="clickable-row" key={sale.id} onClick={() => setSelected(sale)}><td><strong className="mono">{sale.code}</strong></td><td>{shortDate(sale.created_at)}</td><td>{sale.sale_items?.length ?? 0} produk</td><td>{money(sale.subtotal)}</td><td>{money(sale.discount)}</td><td className="align-right"><strong>{money(sale.total)}</strong></td></tr>)}</tbody></table>{!filtered.length && <EmptyState icon={ClipboardList} title="Transaksi tidak ditemukan" text="Belum ada transaksi yang sesuai." />}</div></section>
     {selected && <Modal title="Detail transaksi" onClose={() => setSelected(null)}><div className="sale-detail"><div className="sale-detail-top"><span className="badge badge-success">Selesai</span><strong className="mono">{selected.code}</strong><span>{shortDate(selected.created_at)}</span></div><div className="sale-items">{selected.sale_items?.map((item) => <div className="sale-item" key={item.id}><span>{item.product_name}<small>{quantity(item.quantity)} × {money(item.unit_price)}</small></span><strong>{money(Number(item.quantity) * Number(item.unit_price))}</strong></div>)}</div><div className="summary-line"><span>Subtotal</span><strong>{money(selected.subtotal)}</strong></div><div className="summary-line"><span>Diskon</span><strong>{money(selected.discount)}</strong></div><div className="summary-total"><span>Total</span><strong>{money(selected.total)}</strong></div><div className="summary-line"><span>Dibayar</span><strong>{money(selected.amount_paid)}</strong></div><div className="summary-line"><span>Kembalian</span><strong>{money(selected.change_amount)}</strong></div></div></Modal>}
