@@ -1264,3 +1264,132 @@ body {
 .sales-toolbar .sales-search-field {
   border-radius: 18px 8px 8px 8px;
 }
+
+.zakat-summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(230px, .65fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.zakat-breakdown {
+  padding: 18px;
+}
+
+.zakat-breakdown .panel-heading {
+  margin-bottom: 10px;
+}
+
+.zakat-calculation {
+  display: grid;
+}
+
+.zakat-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  color: rgba(42, 26, 0, .78);
+  border-bottom: 1px solid rgba(42, 26, 0, .1);
+  font-size: 11px;
+}
+
+.zakat-line strong {
+  flex: 0 0 auto;
+  color: #382605;
+  font-variant-numeric: tabular-nums;
+}
+
+.zakat-line.zakat-deduction {
+  color: rgba(42, 26, 0, .6);
+}
+
+.zakat-line.zakat-deduction strong {
+  color: #795b27;
+  font-weight: 500;
+}
+
+.zakat-line.zakat-subtotal {
+  font-weight: 700;
+}
+
+.zakat-line.zakat-profit {
+  margin-top: 2px;
+  border-top: 1px dashed rgba(42, 26, 0, .25);
+  border-bottom: 0;
+  font-weight: 700;
+}
+
+.zakat-line.zakat-rate {
+  padding-top: 3px;
+  color: rgba(42, 26, 0, .62);
+  border: 0;
+}
+
+.zakat-method-note {
+  margin: 8px 0 0;
+  color: rgba(42, 26, 0, .58);
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.zakat-total-panel {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 22px;
+  color: #fff5d8;
+  background: #5a3a00;
+  border-color: rgba(255, 255, 255, .46);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12);
+}
+
+.zakat-total-label {
+  color: rgba(255, 245, 216, .78);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.zakat-total-value {
+  margin-top: 12px;
+  color: #fff5d8;
+  font-family: Manrope, sans-serif;
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 800;
+  letter-spacing: -1.3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.zakat-total-formula {
+  margin-top: 7px;
+  color: rgba(255, 245, 216, .68);
+  font-size: 10px;
+}
+
+.zakat-no-profit {
+  margin-top: 15px;
+  padding-top: 12px;
+  color: #fff1cd;
+  border-top: 1px solid rgba(255, 255, 255, .2);
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+@media (max-width: 620px) {
+  .zakat-summary-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .zakat-total-panel {
+    min-height: 150px;
+  }
+
+  .zakat-breakdown,
+  .zakat-total-panel {
+    padding: 15px;
+  }
+}

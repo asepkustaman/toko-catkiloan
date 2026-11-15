@@ -15,6 +15,7 @@ const navItems = [
   { id: 'products', label: 'Produk', icon: Package },
   { id: 'vendors', label: 'Vendor', icon: Truck },
   { id: 'reports', label: 'Laba rugi', icon: TrendingUp },
+  { id: 'zakat', label: 'Zakat', icon: CircleDollarSign },
   { id: 'settings', label: 'Pengaturan', icon: Settings },
 ];
 
@@ -27,6 +28,7 @@ function SidebarIcon({ id }) {
     products: <><path d="M5.5 7.5h13l-1.2 12H6.7l-1.2-12Z" /><path d="M4.5 7.5h15M8 7.5l1-4h6l1 4M8 11h8" /><path d="m9 15 2 2 4-4" strokeWidth="2.1" /><path d="M8 5h8" strokeWidth="1.5" /></>,
     vendors: <><path d="M2.5 7h11v10h-11z" /><path d="M13.5 10h4l4 4v3h-8" /><path d="M15.5 10.5v3.8h5" /><circle cx="7" cy="18" r="2" /><circle cx="17.5" cy="18" r="2" /><path d="M5 10h5m-5 3h3" /><path d="m7 4 1.5 1.5L10 4" strokeWidth="1.6" /></>,
     reports: <><path d="M4 20h16" /><rect x="5.5" y="12" width="3" height="6" rx="1" /><rect x="10.5" y="8" width="3" height="10" rx="1" /><rect x="15.5" y="4" width="3" height="14" rx="1" /><path d="m5 9 4-3 3 1 6-4m-3 0h3v3" strokeWidth="1.7" /><circle cx="18" cy="4" r="1.5" fill="currentColor" /></>,
+    zakat: <><circle cx="12" cy="12" r="9" /><path d="M8.5 15.5c.8.8 1.9 1.2 3.2 1.2 1.8 0 3-.8 3-2s-1-1.8-2.8-2.3-2.8-1-2.8-2.3 1.2-2.2 3-2.2c1.1 0 2.1.4 2.8 1.1M12 6v12" strokeWidth="1.6" /><path d="m17.5 4.5 2-2m-1 4h3" strokeWidth="1.4" /></>,
     settings: <><path d="M4 6h16M4 12h16M4 18h16" strokeWidth="2" /><circle cx="9" cy="6" r="2.4" fill="currentColor" /><circle cx="15.5" cy="12" r="2.4" fill="currentColor" /><circle cx="7" cy="18" r="2.4" fill="currentColor" /><path d="M9 5.3v1.4m6.5-.7v12m-8 0v.1" stroke="white" strokeWidth="1.1" /></>,
   }[id];
 
@@ -303,7 +305,8 @@ function App() {
           {page === 'vendors' && <VendorsPage vendors={vendors} storeId={store.id} run={run} />}
           {page === 'reports' && <ReportsPage sales={sales} stockEntries={stockEntries} />}
           {page === 'settings' && <SettingsPage store={store} settings={settings} storeId={store.id} run={run} onStoreUpdated={(updatedStore) => setStore((current) => ({ ...current, ...updatedStore }))} />}
-          {!canManage && ['stock', 'products', 'vendors', 'reports', 'settings'].includes(page) && <EmptyState icon={ShieldCheck} title="Akses terbatas" text="Halaman ini hanya tersedia untuk pemilik atau pengelola toko." />}
+          {page === 'zakat' && canManage && <ZakatPage sales={sales} />}
+          {!canManage && ['stock', 'products', 'vendors', 'reports', 'zakat', 'settings'].includes(page) && <EmptyState icon={ShieldCheck} title="Akses terbatas" text="Halaman ini hanya tersedia untuk pemilik atau pengelola toko." />}
         </div>
       </main>
     </div>
@@ -767,6 +770,74 @@ function ReportsPage({ sales, stockEntries }) {
     <section className="panel filter-panel"><span className="filter-label">Periode laporan</span><div className="sales-date-filters report-date-filters"><DatePickerField label="Dari" value={from} max={to || undefined} onChange={setFrom} /><span className="sales-date-separator" aria-hidden="true">-</span><DatePickerField label="Sampai" value={to} min={from || undefined} onChange={setTo} /><button className="button button-quiet sales-date-reset" type="button" aria-label="Reset filter tanggal" disabled={!from && !to} onClick={() => { setFrom(''); setTo(''); }}><X size={14} /><span>Reset</span></button></div><button className="button button-secondary" onClick={exportCsv}><ArrowDownToLine size={16} /> Ekspor CSV</button></section>
     <div className="stats-grid report-stats"><StatCard label="Omzet bersih" value={money(revenue)} note={`${filtered.length} transaksi`} icon={CircleDollarSign} tone="gold" /><StatCard label="Harga pokok terjual" value={money(cost)} note="Dihitung dari harga beli saat transaksi" icon={Boxes} tone="blue" /><StatCard label="Laba kotor" value={money(profit)} note="Omzet dikurangi harga pokok" icon={TrendingUp} tone="green" /><StatCard label="Pembelian stok" value={money(expense)} note="Nilai stok masuk pada periode ini" icon={ArrowDownToLine} tone="purple" /></div>
     <section className="panel data-panel"><div className="panel-heading"><div><h2>Rincian laba per transaksi</h2></div></div><div className="table-wrap"><table><thead><tr><th>TANGGAL</th><th>NO. TRANSAKSI</th><th>OMZET</th><th>HARGA POKOK</th><th className="align-right">LABA KOTOR</th></tr></thead><tbody>{filtered.map((sale) => <tr key={sale.id}><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}</tbody></table>{!filtered.length && <EmptyState icon={BarChart3} title="Belum ada data laporan" text="Transaksi pada periode ini akan muncul di sini." />}</div></section>
+  </>;
+}
+
+function ZakatPage({ sales }) {
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const filtered = useMemo(() => sales.filter((sale) => {
+    const date = sale.created_at ? localDate(sale.created_at) : '';
+    return (!from || date >= from) && (!to || date <= to);
+  }), [sales, from, to]);
+  const grossRevenue = filtered.reduce((sum, sale) => sum + Number(sale.subtotal), 0);
+  const discount = filtered.reduce((sum, sale) => sum + Number(sale.discount), 0);
+  const netRevenue = filtered.reduce((sum, sale) => sum + Number(sale.total), 0);
+  const cost = filtered.reduce((sum, sale) => sum + Number(sale.cost_total), 0);
+  const profit = netRevenue - cost;
+  const zakat = Math.round(Math.max(0, profit) * 0.025);
+  const exportCsv = () => downloadCsv([
+    'Tanggal,Nomor Transaksi,Omzet kotor (Rp),Diskon (Rp),Omzet bersih (Rp),HPP (Rp),Laba setelah HPP (Rp)',
+    ...filtered.map((sale) => [
+      sale.created_at?.slice(0, 10),
+      sale.code,
+      sale.subtotal,
+      sale.discount,
+      sale.total,
+      sale.cost_total,
+      Number(sale.total) - Number(sale.cost_total),
+    ].join(',')),
+  ].join('\n'), 'perhitungan-zakat.csv');
+
+  return <>
+    <section className="panel filter-panel">
+      <span className="filter-label">Periode perhitungan</span>
+      <div className="sales-date-filters report-date-filters">
+        <DatePickerField label="Dari" value={from} max={to || undefined} onChange={setFrom} />
+        <span className="sales-date-separator" aria-hidden="true">-</span>
+        <DatePickerField label="Sampai" value={to} min={from || undefined} onChange={setTo} />
+        <button className="button button-quiet sales-date-reset" type="button" aria-label="Reset filter tanggal" disabled={!from && !to} onClick={() => { setFrom(''); setTo(''); }}><X size={14} /><span>Reset</span></button>
+      </div>
+      <button className="button button-secondary" onClick={exportCsv}><ArrowDownToLine size={16} /> Ekspor CSV</button>
+    </section>
+
+    <div className="zakat-summary-grid">
+      <section className="panel zakat-breakdown">
+        <div className="panel-heading"><div><h2>Rincian perhitungan</h2><p>{filtered.length} transaksi dalam periode</p></div></div>
+        <div className="zakat-calculation">
+          <div className="zakat-line"><span>Omzet kotor</span><strong>{money(grossRevenue)}</strong></div>
+          <div className="zakat-line zakat-deduction"><span>Diskon penjualan</span><strong>− {money(discount)}</strong></div>
+          <div className="zakat-line zakat-subtotal"><span>Omzet bersih</span><strong>{money(netRevenue)}</strong></div>
+          <div className="zakat-line zakat-deduction"><span>Harga pokok penjualan (HPP)</span><strong>− {money(cost)}</strong></div>
+          <div className="zakat-line zakat-profit"><span>Laba setelah HPP</span><strong>{money(profit)}</strong></div>
+          <div className="zakat-line zakat-rate"><span>Tarif zakat</span><strong>2,5%</strong></div>
+        </div>
+        <p className="zakat-method-note">Perhitungan menggunakan omzet bersih dikurangi HPP, tanpa pengurangan biaya usaha.</p>
+      </section>
+      <section className="panel zakat-total-panel">
+        <span className="zakat-total-label">Zakat periode ini</span>
+        <strong className="zakat-total-value">{money(zakat)}</strong>
+        <span className="zakat-total-formula">Laba positif × 2,5%</span>
+        {profit <= 0 && <span className="zakat-no-profit">Tidak ada zakat yang dihitung karena laba periode ini tidak positif.</span>}
+      </section>
+    </div>
+
+    <section className="panel data-panel zakat-transactions">
+      <div className="panel-heading"><div><h2>Rincian transaksi</h2></div></div>
+      <div className="table-wrap"><table><thead><tr><th>TANGGAL</th><th>NO. TRANSAKSI</th><th>OMZET KOTOR</th><th>DISKON</th><th>OMZET BERSIH</th><th>HPP</th><th className="align-right">LABA SETELAH HPP</th></tr></thead><tbody>
+        {filtered.map((sale) => <tr key={sale.id}><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.subtotal)}</td><td>{money(sale.discount)}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}
+      </tbody></table>{!filtered.length && <EmptyState icon={CircleDollarSign} title="Belum ada transaksi pada periode ini" text="Pilih rentang tanggal lain untuk melihat rincian perhitungan zakat." />}</div>
+    </section>
   </>;
 }
 
