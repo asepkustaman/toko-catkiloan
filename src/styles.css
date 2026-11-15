@@ -481,6 +481,17 @@ body {
   box-shadow: 0 10px 30px rgba(110, 70, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .25);
 }
 
+.sidebar-expanded .sidebar-header,
+.sidebar-expanded .sidebar-header .brand {
+  justify-content: center;
+  width: 100%;
+}
+
+.sidebar-expanded .brand-logo {
+  width: min(100%, 170px);
+  margin-inline: auto;
+}
+
 .sidebar-collapsed .nav-item > span,
 .sidebar-collapsed .nav-caption,
 .sidebar-collapsed .secure-note > span,
