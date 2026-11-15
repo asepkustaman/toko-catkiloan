@@ -288,14 +288,14 @@ td strong { color: #373c35; font-weight: 600; }
 .cart-heading h2 { font-size: 13px; }
 .cart-items { flex: 1 1 auto; min-height: 245px; max-height: 400px; overflow-y: auto; }
 .cart-items .empty-state { min-height: 160px; }
-.cart-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto 24px; align-items: center; gap: 7px; padding: 12px 0; border-bottom: 1px solid #f0f1ee; }
+.cart-row { display: grid; grid-template-columns: minmax(0, 1fr) 92px 108px 24px; align-items: center; gap: 7px; padding: 12px 0; border-bottom: 1px solid #f0f1ee; }
 .cart-item-copy { display: grid; min-width: 0; gap: 4px; }
 .cart-item-copy strong { overflow: hidden; font-size: 11px; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
 .cart-item-copy small { color: #969c92; font-size: 8px; }
-.quantity-control { display: flex; align-items: center; gap: 7px; padding: 3px; border: 1px solid #e9ebe6; border-radius: 6px; }
+.quantity-control { display: flex; width: 92px; align-items: center; justify-content: space-between; gap: 4px; padding: 3px; border: 1px solid #e9ebe6; border-radius: 6px; }
 .quantity-control button { display: grid; width: 19px; height: 19px; place-items: center; color: #666d62; background: #f6f7f4; border: 0; border-radius: 4px; }
-.quantity-control span { min-width: 12px; text-align: center; font-size: 9px; }
-.cart-line-total { text-align: right; font-size: 11px; line-height: 1.15; white-space: nowrap; }
+.quantity-control span { min-width: 20px; text-align: center; font-size: 9px; font-variant-numeric: tabular-nums; }
+.cart-line-total { width: 108px; text-align: right; font-size: 11px; line-height: 1.15; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .remove-button { display: grid; width: 23px; height: 23px; place-items: center; color: #a2a79f; background: transparent; border: 0; border-radius: 5px; }
 .remove-button:hover { color: #b74d46; background: #fff1ef; }
 .cart-summary { display: grid; flex: 0 0 auto; gap: 12px; padding-top: 14px; }
@@ -472,7 +472,7 @@ td strong { color: #373c35; font-weight: 600; }
   .sales-date-input .sales-date-picker svg { flex: 0 0 auto; width: 13px; }
   .sales-date-reset { width: 28px; min-width: 28px; padding: 0; }
   .sales-date-reset span { display: none; }
-  .cart-row { grid-template-columns: minmax(0, 1fr) auto auto; }
+  .cart-row { grid-template-columns: minmax(0, 1fr) 92px 108px; }
   .remove-button { display: none; }
 }
 @media (max-width: 820px) {
