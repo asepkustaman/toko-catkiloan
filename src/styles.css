@@ -43,9 +43,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .nav-active > svg { color: #b38409; }
 .nav-dot { width: 7px; height: 7px; margin-left: auto; background: #d35e52; border-radius: 50%; }
 .sidebar-bottom { margin-top: auto; }
-.secure-note { display: flex; align-items: center; gap: 9px; margin: 0 4px 13px; padding: 12px 10px; color: #668470; background: #f3f8f4; border-radius: 9px; font-size: 10px; line-height: 1.5; }
-.profile-button { display: flex; align-items: center; gap: 9px; width: 100%; padding: 11px 6px 3px; background: transparent; border: 0; border-top: 1px solid var(--line); text-align: left; }
+.secure-note { display: grid; height: 54px; grid-template-columns: 16px minmax(0, 1fr); align-items: center; gap: 9px; margin: 0 4px 13px; padding: 0 10px; color: #668470; background: #f3f8f4; border-radius: 9px; font-size: 10px; line-height: 1.5; }
+.secure-note > span, .profile-copy { transition: opacity .16s ease; }
+.profile-button { position: relative; display: grid; min-height: 52px; grid-template-columns: 31px minmax(0, 1fr); align-items: center; gap: 9px; width: 100%; padding: 8px 6px 0; background: transparent; border: 0; border-top: 1px solid var(--line); text-align: left; }
 .profile-button > svg { color: #8c9288; }
+.profile-button > svg:last-child { position: absolute; top: calc(50% + 4px); right: 6px; transform: translateY(-50%); }
 .profile-avatar { width: 31px; height: 31px; background: #e8eee8; color: #497558; border-radius: 50%; }
 .profile-copy strong { max-width: 143px; font-size: 10px; }
 .profile-copy small { font-size: 9px; }
@@ -68,11 +70,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .sidebar-collapsed .nav-item { min-width: 0; }
   .sidebar-collapsed .nav-item > span { display: none; }
   .sidebar-collapsed .nav-dot { position: absolute; top: 8px; right: 12px; margin: 0; }
-  .sidebar-collapsed .secure-note { justify-content: center; margin-right: 0; margin-left: 0; padding: 12px 0; }
   .sidebar-collapsed .secure-note > span,
   .sidebar-collapsed .profile-copy,
-  .sidebar-collapsed .profile-avatar { display: none; }
-  .sidebar-collapsed .profile-button { justify-content: center; padding: 12px 0 3px; }
+  .sidebar-collapsed .profile-avatar { visibility: hidden; opacity: 0; }
+  .sidebar-collapsed .profile-button { grid-template-columns: 31px minmax(0, 1fr); gap: 9px; padding-right: 0; padding-left: 0; }
   .sidebar-expanded .sidebar { z-index: 25; width: 232px; box-shadow: 12px 0 28px #20241f12; }
   .sidebar-expanded .main-area { margin-left: 76px; }
 }
