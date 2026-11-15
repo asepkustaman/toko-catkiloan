@@ -32,7 +32,7 @@ function SidebarIcon({ id }) {
     settings: <><path d="M6 8h12m-12 4h12m-12 4h12" /><circle cx="10" cy="8" r="1.5" fill="currentColor" /><circle cx="14.5" cy="12" r="1.5" fill="currentColor" /><circle cx="9" cy="16" r="1.5" fill="currentColor" /></>,
   }[id];
 
-  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><rect className="nav-icon-frame" x="2.5" y="2.5" width="19" height="19" rx="4" />{iconContent}</svg>;
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><rect className="nav-icon-frame" x="2.5" y="2.5" width="19" height="19" rx="4" />{iconContent}</svg>;
 }
 
 const currency = new Intl.NumberFormat('id-ID', {

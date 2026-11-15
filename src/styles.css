@@ -38,7 +38,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .nav-item { position: relative; display: flex; height: 42px; min-height: 42px; align-items: center; gap: 12px; width: 100%; padding: 0 12px 0 42px; color: #72786f; background: transparent; border: 0; border-radius: 9px; text-align: left; font-size: 12px; font-weight: 600; transition: .18s ease; }
 .nav-item > span { min-width: 0; overflow: hidden; white-space: nowrap; }
 .nav-item > svg { position: absolute; top: 50%; left: 9px; width: 23px; height: 23px; flex: 0 0 23px; transform: translateY(-50%); transition: color .18s ease, transform .18s ease; }
-.nav-icon-frame { fill: currentColor; fill-opacity: .07; stroke: currentColor; stroke-width: 1.15; }
+.nav-icon-frame { fill: currentColor; fill-opacity: .07; stroke: currentColor; stroke-width: 1; }
 .nav-item:hover { color: var(--ink); background: #f7f7f3; }
 .nav-item:hover > svg { transform: translateY(-50%) scale(1.05); }
 .nav-item.nav-active { color: #292820; background: #fff6db; }
