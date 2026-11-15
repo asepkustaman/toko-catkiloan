@@ -62,6 +62,8 @@ create table if not exists public.products (
   foreign key (vendor_id, store_id) references public.vendors(id, store_id) on delete set null (vendor_id)
 );
 
+alter table public.products add column if not exists color text;
+
 create unique index if not exists products_store_barcode_unique
   on public.products (store_id, barcode)
   where barcode is not null and length(trim(barcode)) > 0;
