@@ -152,7 +152,7 @@ td strong { color: #373c35; font-weight: 600; }
 .sales-panel-heading h2 { margin: 0; font-family: Manrope, sans-serif; font-size: 14px; font-weight: 700; }
 .panel-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 15px 18px; border-bottom: 1px solid var(--line); }
 .panel-toolbar-title { font-size: 11px; }
-.product-toolbar .compact-search { width: min(340px, 100%); min-width: 0; flex: 0 1 340px; border-radius: 8px; }
+.product-toolbar .compact-search { width: min(340px, 100%); min-width: 0; flex: 0 1 340px; }
 .product-toolbar .result-count { flex: 0 0 auto; white-space: nowrap; }
 .button.header-action-button { min-height: 36px; gap: 8px; padding: 0 13px; border-radius: 8px 24px 8px 8px; font-size: 10px; white-space: nowrap; }
 .header-action-button svg { flex: 0 0 auto; }
@@ -164,7 +164,7 @@ td strong { color: #373c35; font-weight: 600; }
 .export-action-button .header-action-icon > svg:last-child { position: static; width: 15px; height: 15px; padding: 0; color: currentColor; background: transparent; border-radius: 0; }
 .sales-toolbar { display: flex; align-items: center; }
 .sales-search-controls { display: flex; min-width: 0; flex: 1; align-items: center; gap: 8px; }
-.sales-toolbar .sales-search-field { width: min(340px, 100%); border-radius: 9px 16px 8px 16px; }
+.sales-toolbar .sales-search-field { width: min(340px, 100%); }
 .sales-date-filters { display: flex; flex: 0 1 auto; min-width: 0; align-items: center; gap: 8px; }
 .sales-date-filters .field { width: 150px; }
 .sales-date-filters .field > span:not(.sales-date-input) { display: none; }
@@ -225,7 +225,7 @@ td strong { color: #373c35; font-weight: 600; }
 .clickable-row:hover { background: #fbfbf7; }
 .pos-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(320px, .8fr); align-items: stretch; gap: 16px; }
 .product-picker { padding: 17px; }
-.product-picker > .search-field { width: 100%; margin-bottom: 16px; }
+.product-picker > .search-field { width: 100%; max-width: 340px; margin-bottom: 16px; }
 .product-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px; }
 .pos-product { grid-column: span 3; }
 .pos-product:nth-child(4n + 2) { grid-column: span 2; }
@@ -1241,4 +1241,10 @@ body {
   .quick-action:nth-child(even) {
     border-radius: 20px 10px 20px 11px;
   }
+}
+
+.search-field,
+.product-toolbar .compact-search,
+.sales-toolbar .sales-search-field {
+  border-radius: 18px 8px 8px 8px;
 }
