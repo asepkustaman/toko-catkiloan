@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ArrowDownToLine, ArrowRight, BarChart3, Boxes, BriefcaseBusiness, CalendarDays, Check,
+  ArrowDownToLine, ArrowRight, BarChart3, Boxes, BriefcaseBusiness, Check,
   CircleDollarSign, ClipboardList, CreditCard, LayoutDashboard,
   LogOut, Menu, Package, Pencil, Plus, Search, Settings, ShieldCheck,
   ShoppingCart, Trash2, TrendingUp, Truck, X,
@@ -89,6 +89,8 @@ function App() {
       if (identityChanged) {
         setStore(null);
         setAuthError('');
+        setSidebarExpanded(false);
+        setMobileMenu(false);
       }
       if (event === 'SIGNED_IN' && nextUserId && identityChanged) {
         setPage('dashboard');
@@ -222,7 +224,7 @@ function App() {
       {mobileMenu && <button className="mobile-scrim" onClick={() => setMobileMenu(false)} aria-label="Tutup menu" />}
       <aside
         className={`sidebar ${mobileMenu ? 'sidebar-open' : ''}`}
-        onPointerMove={(event) => {
+        onPointerEnter={(event) => {
           if (event.pointerType === 'mouse') setSidebarExpanded(true);
         }}
         onPointerLeave={(event) => {
@@ -591,7 +593,6 @@ function SalesPage({ sales }) {
   const [search, setSearch] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
-  const [dateFilterOpen, setDateFilterOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const filtered = sales.filter((sale) => {
     const date = sale.created_at ? localDate(sale.created_at) : '';
@@ -606,16 +607,15 @@ function SalesPage({ sales }) {
         <h2>Transaksi</h2>
         <button className="icon-button" onClick={exportCsv} aria-label="Ekspor CSV" title="Ekspor CSV"><ArrowDownToLine size={18} /></button>
       </div>
-      <div className={`panel-toolbar sales-toolbar${dateFilterOpen ? ' date-filter-open' : ''}`}>
+      <div className="panel-toolbar sales-toolbar">
         <div className="sales-search-controls">
           <div className="search-field compact-search sales-search-field"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari nomor transaksi..." /></div>
-          <button className={`sales-filter-button${dateFilterOpen ? ' is-open' : ''}${from || to ? ' has-filter' : ''}`} type="button" aria-expanded={dateFilterOpen} aria-controls="sales-date-filters" onClick={() => setDateFilterOpen((open) => !open)}><CalendarDays size={16} /><span>Tanggal</span></button>
-          {dateFilterOpen && <div className="sales-date-filters" id="sales-date-filters">
-            <Field label="Dari tanggal"><input type="date" aria-label="Dari tanggal" value={from} max={to || undefined} onChange={(event) => setFrom(event.target.value)} /></Field>
-            <span className="filter-separator">sampai</span>
-            <Field label="Sampai tanggal"><input type="date" aria-label="Sampai tanggal" value={to} min={from || undefined} onChange={(event) => setTo(event.target.value)} /></Field>
+          <div className="sales-date-filters">
+            <Field label="Dari"><input type="date" aria-label="Dari tanggal" value={from} max={to || undefined} onChange={(event) => setFrom(event.target.value)} /></Field>
+            <span className="sales-date-separator" aria-hidden="true">-</span>
+            <Field label="Sampai"><input type="date" aria-label="Sampai tanggal" value={to} min={from || undefined} onChange={(event) => setTo(event.target.value)} /></Field>
             <button className="button button-quiet sales-date-reset" type="button" aria-label="Reset filter tanggal" disabled={!from && !to} onClick={() => { setFrom(''); setTo(''); }}><X size={14} /><span>Reset</span></button>
-          </div>}
+          </div>
         </div>
         <span className="result-count">{filtered.length} transaksi</span>
       </div>
