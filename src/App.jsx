@@ -709,7 +709,7 @@ function PointOfSale({ products, storeId, run }) {
   };
   return <>
     <div className="pos-layout">
-      <section className="panel product-picker"><div className="search-field"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari nama atau barcode produk..." /><kbd>⌘ K</kbd></div>
+      <section className="panel product-picker"><div className="search-field"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari nama atau barcode produk..." />{search && <button className="search-clear" type="button" onClick={() => setSearch('')} aria-label="Hapus pencarian"><X size={15} /></button>}</div>
         <div className="product-grid">{filtered.map((product) => <button className="pos-product" key={product.id} disabled={Number(product.stock) <= 0} onClick={() => add(product)}><span className={`product-art${product.color ? ' product-art-color' : ''}`} style={product.color ? { '--product-color': product.color } : undefined}>{!product.color && <Package size={18} />}</span><span className="pos-product-copy"><span className="pos-product-name">{product.name}</span><span className="pos-product-bottom"><strong>{money(product.sell_price)}</strong><small>{quantity(product.stock)} {product.unit} tersedia</small></span></span></button>)}</div>
         {!filtered.length && <EmptyState icon={Search} title="Produk tidak ditemukan" text="Coba kata kunci yang berbeda." />}
       </section>

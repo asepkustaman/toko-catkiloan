@@ -205,6 +205,9 @@ td strong { color: #373c35; font-weight: 600; }
 .search-field input { width: 100%; min-width: 0; color: #333830; background: none; border: 0; outline: 0; font-size: 10px; }
 .search-field input::placeholder { color: #a6aaa2; }
 .search-field kbd { padding: 3px 5px; color: #999f96; background: #f7f8f5; border: 1px solid #e9ebe6; border-radius: 4px; font-size: 8px; white-space: nowrap; }
+.search-clear { display: grid; width: 23px; height: 23px; flex: 0 0 23px; place-items: center; padding: 0; color: #777d73; background: transparent; border: 0; border-radius: 6px; }
+.search-clear:hover { color: #333830; background: rgba(42, 26, 0, .08); }
+.search-clear:focus-visible { outline: 2px solid #a27b17; outline-offset: 1px; }
 .compact-search { width: min(340px, 100%); min-width: 210px; height: 34px; }
 .result-count { color: #92988f; font-size: 10px; }
 .table-product { display: flex; align-items: center; gap: 9px; }
