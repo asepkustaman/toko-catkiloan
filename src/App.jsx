@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ArrowDownToLine, ArrowRight, BarChart3, Boxes, BriefcaseBusiness, Check,
+  ArrowDownToLine, ArrowRight, BarChart3, Boxes, BriefcaseBusiness, CalendarDays, Check,
   CircleDollarSign, ClipboardList, CreditCard, LayoutDashboard,
   LogOut, Menu, Package, Pencil, Plus, Search, Settings, ShieldCheck,
   ShoppingCart, Trash2, TrendingUp, Truck, X,
@@ -589,8 +589,16 @@ function StockPage({ products, vendors, stockEntries, storeId, run }) {
 
 function SalesPage({ sales }) {
   const [search, setSearch] = useState('');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [dateFilterOpen, setDateFilterOpen] = useState(false);
   const [selected, setSelected] = useState(null);
-  const filtered = sales.filter((sale) => sale.code.toLowerCase().includes(search.toLowerCase()));
+  const filtered = sales.filter((sale) => {
+    const date = sale.created_at ? localDate(sale.created_at) : '';
+    return sale.code.toLowerCase().includes(search.toLowerCase())
+      && (!from || date >= from)
+      && (!to || date <= to);
+  });
   const exportCsv = () => downloadCsv(['Nomor Transaksi,Tanggal,Subtotal,Diskon,Total,Dibayar,Kembalian', ...filtered.map((sale) => [sale.code, sale.created_at?.slice(0, 10), sale.subtotal, sale.discount, sale.total, sale.amount_paid, sale.change_amount].join(','))].join('\n'), 'laporan-penjualan.csv');
   return <>
     <section className="panel data-panel">
@@ -598,7 +606,20 @@ function SalesPage({ sales }) {
         <h2>Transaksi</h2>
         <button className="icon-button" onClick={exportCsv} aria-label="Ekspor CSV" title="Ekspor CSV"><ArrowDownToLine size={18} /></button>
       </div>
-      <div className="panel-toolbar"><div className="search-field compact-search"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari nomor transaksi..." /></div><span className="result-count">{filtered.length} transaksi</span></div><div className="table-wrap"><table><thead><tr><th>NO. TRANSAKSI</th><th>TANGGAL</th><th>JUMLAH ITEM</th><th>SUBTOTAL</th><th>DISKON</th><th className="align-right">TOTAL</th></tr></thead><tbody>{filtered.map((sale) => <tr className="clickable-row" key={sale.id} onClick={() => setSelected(sale)}><td><strong className="mono">{sale.code}</strong></td><td>{shortDate(sale.created_at)}</td><td>{sale.sale_items?.length ?? 0} produk</td><td>{money(sale.subtotal)}</td><td>{money(sale.discount)}</td><td className="align-right"><strong>{money(sale.total)}</strong></td></tr>)}</tbody></table>{!filtered.length && <EmptyState icon={ClipboardList} title="Transaksi tidak ditemukan" text="Belum ada transaksi yang sesuai." />}</div></section>
+      <div className="panel-toolbar sales-toolbar">
+        <div className="sales-search-controls">
+          <div className="search-field compact-search sales-search-field"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari nomor transaksi..." /></div>
+          <button className={`sales-filter-button${dateFilterOpen ? ' is-open' : ''}${from || to ? ' has-filter' : ''}`} type="button" aria-expanded={dateFilterOpen} aria-controls="sales-date-filters" onClick={() => setDateFilterOpen((open) => !open)}><CalendarDays size={16} /><span>Tanggal</span></button>
+        </div>
+        <span className="result-count">{filtered.length} transaksi</span>
+        {dateFilterOpen && <div className="sales-date-filters" id="sales-date-filters">
+          <Field label="Dari tanggal"><input type="date" value={from} max={to || undefined} onChange={(event) => setFrom(event.target.value)} /></Field>
+          <span className="filter-separator">sampai</span>
+          <Field label="Sampai tanggal"><input type="date" value={to} min={from || undefined} onChange={(event) => setTo(event.target.value)} /></Field>
+          <button className="button button-quiet sales-date-reset" type="button" disabled={!from && !to} onClick={() => { setFrom(''); setTo(''); }}>Reset</button>
+        </div>}
+      </div>
+      <div className="table-wrap"><table><thead><tr><th>NO. TRANSAKSI</th><th>TANGGAL</th><th>JUMLAH ITEM</th><th>SUBTOTAL</th><th>DISKON</th><th className="align-right">TOTAL</th></tr></thead><tbody>{filtered.map((sale) => <tr className="clickable-row" key={sale.id} onClick={() => setSelected(sale)}><td><strong className="mono">{sale.code}</strong></td><td>{shortDate(sale.created_at)}</td><td>{sale.sale_items?.length ?? 0} produk</td><td>{money(sale.subtotal)}</td><td>{money(sale.discount)}</td><td className="align-right"><strong>{money(sale.total)}</strong></td></tr>)}</tbody></table>{!filtered.length && <EmptyState icon={ClipboardList} title="Transaksi tidak ditemukan" text="Belum ada transaksi yang sesuai." />}</div></section>
     {selected && <Modal title="Detail transaksi" onClose={() => setSelected(null)}><div className="sale-detail"><div className="sale-detail-top"><span className="badge badge-success">Selesai</span><strong className="mono">{selected.code}</strong><span>{shortDate(selected.created_at)}</span></div><div className="sale-items">{selected.sale_items?.map((item) => <div className="sale-item" key={item.id}><span>{item.product_name}<small>{quantity(item.quantity)} × {money(item.unit_price)}</small></span><strong>{money(Number(item.quantity) * Number(item.unit_price))}</strong></div>)}</div><div className="summary-line"><span>Subtotal</span><strong>{money(selected.subtotal)}</strong></div><div className="summary-line"><span>Diskon</span><strong>{money(selected.discount)}</strong></div><div className="summary-total"><span>Total</span><strong>{money(selected.total)}</strong></div><div className="summary-line"><span>Dibayar</span><strong>{money(selected.amount_paid)}</strong></div><div className="summary-line"><span>Kembalian</span><strong>{money(selected.change_amount)}</strong></div></div></Modal>}
   </>;
 }
