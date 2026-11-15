@@ -975,7 +975,7 @@ body {
   position: absolute;
   z-index: 0;
   top: 50%;
-  right: clamp(12px, 2vw, 24px);
+  right: -16px;
   width: clamp(104px, 9vw, 140px);
   height: clamp(104px, 9vw, 140px);
   color: rgba(255, 255, 255, .42);
@@ -1003,7 +1003,7 @@ body {
 
 @media (max-width: 620px) {
   .stat-icon-art {
-    right: 7px;
+    right: -12px;
     width: 84px;
     height: 84px;
   }
