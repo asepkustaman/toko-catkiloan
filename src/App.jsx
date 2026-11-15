@@ -23,6 +23,7 @@ const currency = new Intl.NumberFormat('id-ID', {
   currency: 'IDR',
   maximumFractionDigits: 0,
 });
+const NOTICE_DURATION = 3500;
 const numberFormat = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 });
 const today = () => new Date().toLocaleDateString('en-CA');
 const money = (value) => currency.format(Number(value) || 0);
@@ -53,6 +54,12 @@ function App() {
   const [sales, setSales] = useState([]);
   const [stockEntries, setStockEntries] = useState([]);
   const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    if (!notice) return undefined;
+    const timeout = window.setTimeout(() => setNotice(null), NOTICE_DURATION);
+    return () => window.clearTimeout(timeout);
+  }, [notice]);
 
   useEffect(() => {
     if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
@@ -206,9 +213,7 @@ function App() {
       setNotice({ type: 'error', text: 'Akses ini hanya tersedia untuk pemilik atau pengelola toko.' });
       return;
     }
-    if (nextPage !== page) {
-      setNotice((current) => current?.type === 'success' ? null : current);
-    }
+    if (nextPage !== page) setNotice(null);
     setPage(nextPage);
   };
   if (!authReady) return <LoadingScreen />;
