@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowDownToLine, ArrowRight, BarChart3, Boxes, BriefcaseBusiness, Check,
-  ChevronDown, CircleDollarSign, ClipboardList, CreditCard, LayoutDashboard,
+  CircleDollarSign, ClipboardList, CreditCard, LayoutDashboard,
   LogOut, Menu, Package, Pencil, Plus, Search, Settings, ShieldCheck,
   ShoppingCart, Trash2, TrendingUp, Truck, X,
 } from 'lucide-react';
@@ -37,6 +37,7 @@ const errorMessage = (error) => error?.message || 'Terjadi kesalahan yang tidak 
 
 function App() {
   const [session, setSession] = useState(null);
+  const sessionUserId = useRef(null);
   const [authReady, setAuthReady] = useState(false);
   const [authTransitioning, setAuthTransitioning] = useState(false);
   const [authError, setAuthError] = useState('');
@@ -69,7 +70,9 @@ function App() {
     supabase.auth.getSession().then(({ data, error }) => {
       if (!active) return;
       if (error) setAuthError(error.message);
-      setSession(data?.session ?? null);
+      const currentSession = data?.session ?? null;
+      sessionUserId.current = currentSession?.user?.id ?? null;
+      setSession(currentSession);
       setAuthReady(true);
     }).catch((error) => {
       if (!active) return;
@@ -78,10 +81,15 @@ function App() {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      const nextUserId = nextSession?.user?.id ?? null;
+      const identityChanged = sessionUserId.current !== nextUserId;
+      sessionUserId.current = nextUserId;
       setSession(nextSession);
-      setStore(null);
-      setAuthError('');
-      if (event === 'SIGNED_IN') {
+      if (identityChanged) {
+        setStore(null);
+        setAuthError('');
+      }
+      if (event === 'SIGNED_IN' && nextUserId && identityChanged) {
         setPage('dashboard');
         setMobileMenu(false);
         setAuthTransitioning(true);
@@ -213,7 +221,6 @@ function App() {
       {mobileMenu && <button className="mobile-scrim" onClick={() => setMobileMenu(false)} aria-label="Tutup menu" />}
       <aside className={`sidebar ${mobileMenu ? 'sidebar-open' : ''}`}>
         <Brand />
-        <div className="store-switch"><span className="store-avatar">{store.name?.slice(0, 1) || 'T'}</span><span className="store-label"><strong>{store.name}</strong><small>Ruang kerja toko</small></span><ChevronDown size={16} /></div>
         <p className="nav-caption">MENU UTAMA</p>
         <nav className="nav-list">
           {permittedNavItems.map(({ id, label, icon: Icon }) => (
