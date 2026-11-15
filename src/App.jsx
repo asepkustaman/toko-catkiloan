@@ -47,6 +47,7 @@ function App() {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [notice, setNotice] = useState(null);
+  const noticeSequence = useRef(0);
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -54,6 +55,8 @@ function App() {
   const [sales, setSales] = useState([]);
   const [stockEntries, setStockEntries] = useState([]);
   const [settings, setSettings] = useState(null);
+
+  const notify = (type, text) => setNotice({ id: ++noticeSequence.current, type, text });
 
   useEffect(() => {
     if (!notice) return undefined;
@@ -181,16 +184,16 @@ function App() {
 
   useEffect(() => {
     if (!store) return;
-    loadData(false).catch((error) => setNotice({ type: 'error', text: `Gagal memuat data: ${errorMessage(error)}` }));
+    loadData(false).catch((error) => notify('error', `Gagal memuat data: ${errorMessage(error)}`));
   }, [store, loadData]);
 
   const run = async (action, successText) => {
     try {
       await action();
-      if (successText) setNotice({ type: 'success', text: successText });
+      if (successText) notify('success', successText);
       await loadData();
     } catch (error) {
-      setNotice({ type: 'error', text: errorMessage(error) });
+      notify('error', errorMessage(error));
       throw error;
     }
   };
@@ -200,7 +203,7 @@ function App() {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
     } catch (error) {
-      setNotice({ type: 'error', text: `Gagal keluar: ${errorMessage(error)}` });
+      notify('error', `Gagal keluar: ${errorMessage(error)}`);
     }
   };
 
@@ -210,7 +213,7 @@ function App() {
     : navItems.filter((item) => ['dashboard', 'pos', 'sales'].includes(item.id));
   const navigate = (nextPage) => {
     if (!canManage && !['dashboard', 'pos', 'sales'].includes(nextPage)) {
-      setNotice({ type: 'error', text: 'Akses ini hanya tersedia untuk pemilik atau pengelola toko.' });
+      notify('error', 'Akses ini hanya tersedia untuk pemilik atau pengelola toko.');
       return;
     }
     if (nextPage !== page) setNotice(null);
@@ -268,7 +271,12 @@ function App() {
           <div className="breadcrumb">Toko / <strong>{activeNav?.label}</strong></div>
           <div className="topbar-right"><span className="live-dot" /> Data tersinkron <span className="topbar-date">{new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())}</span></div>
         </header>
-        {notice && <div className={`toast toast-${notice.type}`} role="status">{notice.type === 'success' ? <Check size={17} /> : <X size={17} />}{notice.text}<button onClick={() => setNotice(null)} aria-label="Tutup"><X size={15} /></button></div>}
+        {notice && <div key={notice.id} className={`toast toast-${notice.type}`} style={{ '--toast-duration': `${NOTICE_DURATION}ms` }} role={notice.type === 'error' ? 'alert' : 'status'}>
+          <span className="toast-icon" aria-hidden="true">{notice.type === 'success' ? <Check size={17} strokeWidth={2.5} /> : <X size={17} strokeWidth={2.5} />}</span>
+          <span className="toast-copy"><strong>{notice.type === 'success' ? 'Berhasil' : 'Perlu perhatian'}</strong><span>{notice.text}</span></span>
+          <button onClick={() => setNotice(null)} aria-label="Tutup notifikasi" title="Tutup"><X size={16} /></button>
+          <span key={notice.id} className="toast-progress" aria-hidden="true" />
+        </div>}
         <div className={`content ${page === 'dashboard' ? 'dashboard-content' : ''}`}>
           {loading && <div className="sync-indicator">Memperbarui data...</div>}
           {page === 'dashboard' && <Dashboard store={store} products={products} sales={sales} stockEntries={stockEntries} settings={settings} setPage={navigate} />}
