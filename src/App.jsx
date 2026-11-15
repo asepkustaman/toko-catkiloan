@@ -138,9 +138,9 @@ function App() {
     return () => { active = false; };
   }, [session]);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (showIndicator = true) => {
     if (!store?.id) return;
-    setLoading(true);
+    if (showIndicator) setLoading(true);
     let results;
     try {
       results = await Promise.all([
@@ -158,7 +158,7 @@ function App() {
         supabase.from('store_settings').select('*').eq('store_id', store.id).single(),
       ]);
     } finally {
-      setLoading(false);
+      if (showIndicator) setLoading(false);
     }
     const failed = results.find((result) => result.error);
     if (failed) throw failed.error;
@@ -172,7 +172,7 @@ function App() {
 
   useEffect(() => {
     if (!store) return;
-    loadData().catch((error) => setNotice({ type: 'error', text: `Gagal memuat data: ${errorMessage(error)}` }));
+    loadData(false).catch((error) => setNotice({ type: 'error', text: `Gagal memuat data: ${errorMessage(error)}` }));
   }, [store, loadData]);
 
   const run = async (action, successText) => {
@@ -206,14 +206,14 @@ function App() {
     }
     setPage(nextPage);
   };
-  if (!authReady) return <LoadingScreen label="Menyiapkan aplikasi..." />;
+  if (!authReady) return <LoadingScreen />;
   if (!session || authTransitioning) {
     return <AuthScreen setupError={supabase ? '' : authError} transitioning={authTransitioning} />;
   }
   if (!store) {
     return authError
       ? <AuthScreen setupError={authError} signedInEmail={session.user.email} onSignOut={signOut} />
-      : <LoadingScreen label="Menghubungkan akun ke toko..." />;
+      : <LoadingScreen />;
   }
 
   const activeNav = navItems.find((item) => item.id === page);
@@ -273,8 +273,8 @@ function App() {
   );
 }
 
-function LoadingScreen({ label }) {
-  return <div className="full-screen"><span className="spinner" /><p>{label}</p></div>;
+function LoadingScreen() {
+  return <div className="full-screen" role="status" aria-label="Memuat aplikasi"><span className="spinner" /></div>;
 }
 
 function AuthScreen({ setupError = '', signedInEmail = '', onSignOut, transitioning = false }) {
