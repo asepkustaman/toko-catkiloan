@@ -222,7 +222,7 @@ function App() {
       {mobileMenu && <button className="mobile-scrim" onClick={() => setMobileMenu(false)} aria-label="Tutup menu" />}
       <aside
         className={`sidebar ${mobileMenu ? 'sidebar-open' : ''}`}
-        onPointerEnter={(event) => {
+        onPointerMove={(event) => {
           if (event.pointerType === 'mouse') setSidebarExpanded(true);
         }}
         onPointerLeave={(event) => {
