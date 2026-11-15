@@ -239,6 +239,9 @@ declare
   v_total numeric(14, 2);
   v_discount numeric(14, 2) := coalesce(p_discount, 0);
   v_amount_paid numeric(14, 2) := coalesce(p_amount_paid, 0);
+  v_sale_date date := (now() at time zone 'Asia/Jakarta')::date;
+  v_sale_prefix text;
+  v_sale_number bigint;
 begin
   if not public.is_store_member(p_store_id) then
     raise exception 'Anda tidak memiliki akses ke toko ini';
@@ -285,13 +288,22 @@ begin
     raise exception 'Pembayaran kurang dari total transaksi';
   end if;
 
+  v_sale_prefix := 'S-' || to_char(v_sale_date, 'YYMMDD') || '-';
+  perform pg_advisory_xact_lock(hashtext(p_store_id::text), hashtext(v_sale_date::text));
+  select coalesce(max(substring(code from length(v_sale_prefix) + 1)::bigint), 0) + 1
+    into v_sale_number
+    from public.sales
+    where store_id = p_store_id
+      and left(code, length(v_sale_prefix)) = v_sale_prefix
+      and substring(code from length(v_sale_prefix) + 1) ~ '^[0-9]+$';
+
   insert into public.sales (
     id, store_id, code, subtotal, discount, total, cost_total,
     amount_paid, change_amount, created_by
   )
   values (
     v_sale_id, p_store_id,
-    'SALE-' || to_char(now(), 'YYYYMMDD') || '-' || upper(substr(replace(v_sale_id::text, '-', ''), 1, 8)),
+    v_sale_prefix || lpad(v_sale_number::text, 3, '0'),
     v_subtotal, v_discount, v_total, v_cost_total, v_amount_paid, v_amount_paid - v_total, (select auth.uid())
   );
 

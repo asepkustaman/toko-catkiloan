@@ -788,9 +788,11 @@ function PointOfSale({ products, store, settings, storeId, run }) {
         .eq('id', saleId)
         .eq('store_id', storeId)
         .maybeSingle();
-      if (saleLookupError) notify('error', `Transaksi tersimpan, tetapi nomor struk gagal dimuat: ${errorMessage(saleLookupError)}`);
+      if (saleLookupError || !savedSale) {
+        notify('error', `Transaksi tersimpan, tetapi nomor struk gagal dimuat: ${saleLookupError ? errorMessage(saleLookupError) : 'Data transaksi tidak ditemukan.'}`);
+      }
       setReceipt({
-        code: savedSale?.code ?? `SALE-${String(saleId).replaceAll('-', '').slice(0, 8).toUpperCase()}`,
+        code: savedSale?.code ?? 'Tidak tersedia',
         createdAt: savedSale?.created_at ?? new Date().toISOString(),
         items: purchasedItems,
         total,

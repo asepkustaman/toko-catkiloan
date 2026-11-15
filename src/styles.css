@@ -346,7 +346,7 @@ td strong { color: #373c35; font-weight: 600; }
 .receipt-preview-wrap { display: grid; justify-items: center; gap: 14px; }
 .receipt-paper { width: 58mm; max-width: 100%; padding: 5mm 4mm; color: #171717; background: #fff; border: 1px solid #e8e5de; box-shadow: 0 8px 24px rgba(32, 24, 10, .1); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9px; line-height: 1.45; }
 .receipt-header { display: grid; justify-items: center; text-align: center; }
-.receipt-header img { width: 31mm; height: 15mm; object-fit: contain; }
+.receipt-header img { width: 31mm; height: 15mm; object-fit: contain; filter: grayscale(1) contrast(1.8); }
 .receipt-header h3 { margin: 2mm 0 1mm; font-family: Arial, sans-serif; font-size: 13px; font-weight: 800; line-height: 1.2; text-transform: uppercase; }
 .receipt-header p { margin: 0; font-size: 8px; overflow-wrap: anywhere; }
 .receipt-rule { height: 1px; margin: 3mm 0; background: #333; }
