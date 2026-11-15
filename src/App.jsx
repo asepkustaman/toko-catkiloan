@@ -259,7 +259,7 @@ function App() {
           <div className="topbar-right"><span className="live-dot" /> Data tersinkron <span className="topbar-date">{new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())}</span></div>
         </header>
         {notice && <div className={`toast toast-${notice.type}`} role="status">{notice.type === 'success' ? <Check size={17} /> : <X size={17} />}{notice.text}<button onClick={() => setNotice(null)} aria-label="Tutup"><X size={15} /></button></div>}
-        <div className="content">
+        <div className={`content ${page === 'dashboard' ? 'dashboard-content' : ''}`}>
           {loading && <div className="sync-indicator">Memperbarui data...</div>}
           {page === 'dashboard' && <Dashboard store={store} products={products} sales={sales} stockEntries={stockEntries} settings={settings} setPage={navigate} />}
           {page === 'pos' && <PointOfSale products={products} storeId={store.id} run={run} />}
