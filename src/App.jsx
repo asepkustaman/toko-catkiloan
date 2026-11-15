@@ -674,15 +674,59 @@ function PointOfSale({ products, storeId, run }) {
   const [discount, setDiscount] = useState('');
   const [paid, setPaid] = useState('');
   const [busy, setBusy] = useState(false);
+  const [quantityEntryProductId, setQuantityEntryProductId] = useState(null);
+  const [quantityDraft, setQuantityDraft] = useState('1');
+  const [quantityError, setQuantityError] = useState('');
+  const quantityInputRef = useRef(null);
   const filtered = products.filter((product) => `${product.name} ${product.barcode ?? ''} ${product.category?.name ?? ''}`.toLowerCase().includes(search.toLowerCase()));
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
   const total = Math.max(0, subtotal - (Number(discount) || 0));
   const change = Math.max(0, (Number(paid) || 0) - total);
-  const add = (product) => setCart((items) => {
+  useEffect(() => {
+    if (!quantityEntryProductId) return;
+    quantityInputRef.current?.focus();
+    quantityInputRef.current?.select();
+  }, [quantityEntryProductId]);
+  const getAvailableQuantity = (product) => Number(product.stock) - (cart.find((item) => item.product.id === product.id)?.qty ?? 0);
+  const startQuantityEntry = (product) => {
+    if (getAvailableQuantity(product) <= 0) return;
+    setQuantityEntryProductId(product.id);
+    setQuantityDraft('1');
+    setQuantityError('');
+  };
+  const add = (product, amount) => setCart((items) => {
     const existing = items.find((item) => item.product.id === product.id);
-    if (existing) return items.map((item) => item.product.id === product.id ? { ...item, qty: Math.min(item.qty + 1, Number(product.stock)) } : item);
-    return [...items, { product, qty: 1, price: Number(product.sell_price) }];
+    if (existing) return items.map((item) => item.product.id === product.id ? { ...item, qty: item.qty + amount } : item);
+    return [...items, { product, qty: amount, price: Number(product.sell_price) }];
   });
+  const confirmQuantity = (event, product) => {
+    event.preventDefault();
+    const amount = Number(quantityDraft);
+    const available = getAvailableQuantity(product);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setQuantityError('Masukkan jumlah lebih dari 0.');
+      return;
+    }
+    if (product.unit === 'pcs' && !Number.isInteger(amount)) {
+      setQuantityError('Jumlah produk satuan harus bilangan bulat.');
+      return;
+    }
+    if (product.unit !== 'pcs' && Math.abs(amount * 1000 - Math.round(amount * 1000)) > 1e-8) {
+      setQuantityError('Jumlah maksimal 3 angka di belakang koma.');
+      return;
+    }
+    if (amount > available) {
+      setQuantityError(`Stok yang tersedia hanya ${quantity(available)} ${product.unit}.`);
+      return;
+    }
+    add(product, amount);
+    setQuantityEntryProductId(null);
+    setQuantityError('');
+  };
+  const cancelQuantityEntry = () => {
+    setQuantityEntryProductId(null);
+    setQuantityError('');
+  };
   const updateQty = (productId, delta) => setCart((items) => items.map((item) => item.product.id === productId ? { ...item, qty: Math.min(Math.max(item.qty + delta, 1), Number(item.product.stock)) } : item));
   const remove = (productId) => setCart((items) => items.filter((item) => item.product.id !== productId));
   const checkout = async () => {
@@ -709,8 +753,23 @@ function PointOfSale({ products, storeId, run }) {
   };
   return <>
     <div className="pos-layout">
-      <section className="panel product-picker"><div className="search-field"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari nama atau barcode produk..." />{search && <button className="search-clear" type="button" onClick={() => setSearch('')} aria-label="Hapus pencarian"><X size={15} /></button>}</div>
-        <div className="product-grid">{filtered.map((product) => <button className="pos-product" key={product.id} disabled={Number(product.stock) <= 0} onClick={() => add(product)}><span className={`product-art${product.color ? ' product-art-color' : ''}`} style={product.color ? { '--product-color': product.color } : undefined}>{!product.color && <Package size={18} />}</span><span className="pos-product-copy"><span className="pos-product-name">{product.name}</span><span className="pos-product-bottom"><strong>{money(product.sell_price)}</strong><small>{quantity(product.stock)} {product.unit} tersedia</small></span></span></button>)}</div>
+      <section className="panel product-picker"><div className="search-field"><Search size={18} /><input value={search} onChange={(event) => { setSearch(event.target.value); cancelQuantityEntry(); }} placeholder="Cari nama atau barcode produk..." />{search && <button className="search-clear" type="button" onClick={() => { setSearch(''); cancelQuantityEntry(); }} aria-label="Hapus pencarian"><X size={15} /></button>}</div>
+        <div className="product-grid">{filtered.map((product) => {
+          const available = getAvailableQuantity(product);
+          const isEnteringQuantity = quantityEntryProductId === product.id;
+          return <div className={`pos-product${isEnteringQuantity ? ' pos-product-entering' : ''}`} key={product.id}>
+            <button className="pos-product-main" type="button" disabled={available <= 0} onClick={() => startQuantityEntry(product)}>
+              <span className={`product-art${product.color ? ' product-art-color' : ''}`} style={product.color ? { '--product-color': product.color } : undefined}>{!product.color && <Package size={18} />}</span>
+              <span className="pos-product-copy"><span className="pos-product-name">{product.name}</span><span className="pos-product-bottom"><strong>{money(product.sell_price)}</strong><small>{quantity(available)} {product.unit} tersedia</small></span></span>
+            </button>
+            {isEnteringQuantity && <form className="pos-quantity-entry" noValidate onSubmit={(event) => confirmQuantity(event, product)}>
+              <input ref={quantityInputRef} id={`quantity-${product.id}`} type="number" inputMode={product.unit === 'pcs' ? 'numeric' : 'decimal'} min="0.001" max={available} step={product.unit === 'pcs' ? '1' : '0.001'} value={quantityDraft} aria-label={`Jumlah ${product.name}`} aria-invalid={Boolean(quantityError)} aria-describedby={quantityError ? `quantity-error-${product.id}` : undefined} onChange={(event) => { setQuantityDraft(event.target.value); setQuantityError(''); }} onKeyDown={(event) => { if (event.key === 'Escape') cancelQuantityEntry(); }} />
+              <button className="quantity-entry-confirm" type="submit" aria-label={`Tambahkan ${product.name} ke keranjang`}><Check size={15} /></button>
+              <button className="quantity-entry-cancel" type="button" onClick={cancelQuantityEntry} aria-label="Batal"><X size={15} /></button>
+              {quantityError && <small className="pos-quantity-error" id={`quantity-error-${product.id}`} role="alert">{quantityError}</small>}
+            </form>}
+          </div>;
+        })}</div>
         {!filtered.length && <EmptyState icon={Search} title="Produk tidak ditemukan" text="Coba kata kunci yang berbeda." />}
       </section>
       <section className="panel cart-panel"><div className="cart-heading"><span className="cart-icon"><ShoppingCart size={18} /></span><div><h2>Keranjang</h2><p>{cart.length} jenis produk</p></div><button className="icon-button" disabled={!cart.length} onClick={() => setCart([])} title="Kosongkan keranjang"><Trash2 size={17} /></button></div>
