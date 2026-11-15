@@ -1422,8 +1422,14 @@ body {
   background: transparent;
 }
 
-.table-wrap th {
+.table-wrap th,
+.table-wrap td {
   text-align: center;
+}
+
+.table-wrap .table-product,
+.table-wrap .row-actions {
+  justify-content: center;
 }
 
 .table-wrap .row-number {
