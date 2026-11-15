@@ -806,15 +806,11 @@ body {
 
 .auth-page,
 .auth-shell {
-  background:
-    radial-gradient(900px 600px at 85% 95%, #ffd04a 0, transparent 60%),
-    radial-gradient(800px 600px at 10% 0, #ffc72c 0, transparent 60%),
-    linear-gradient(135deg, #f5b503, #eea500 55%, #f7bb12);
-  background-attachment: fixed;
+  background: transparent;
 }
 
 .auth-flow-panel {
-  background: linear-gradient(145deg, rgba(255, 208, 74, .28), rgba(238, 165, 0, .08));
+  background: transparent;
 }
 
 .auth-standalone {
