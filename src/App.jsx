@@ -226,7 +226,10 @@ function App() {
           if (event.pointerType === 'mouse') setSidebarExpanded(true);
         }}
         onPointerLeave={(event) => {
-          if (event.pointerType === 'mouse') setSidebarExpanded(false);
+          if (event.pointerType === 'mouse') {
+            setSidebarExpanded(false);
+            setMobileMenu(false);
+          }
         }}
         onFocusCapture={() => setSidebarExpanded(true)}
         onBlurCapture={(event) => {
@@ -237,7 +240,7 @@ function App() {
         <p className="nav-caption">MENU UTAMA</p>
         <nav className="nav-list">
           {permittedNavItems.map(({ id, label, icon: Icon }) => (
-            <button key={id} className={`nav-item ${page === id ? 'nav-active' : ''}`} aria-label={label} title={label} onClick={() => { navigate(id); setMobileMenu(false); setSidebarExpanded(false); }}>
+            <button key={id} className={`nav-item ${page === id ? 'nav-active' : ''}`} aria-label={label} title={label} onClick={() => navigate(id)}>
               <Icon size={18} strokeWidth={1.8} /><span>{label}</span>
               {id === 'products' && products.some((product) => Number(product.stock) <= Number(settings?.low_stock_threshold ?? 5)) && <i className="nav-dot" />}
             </button>
