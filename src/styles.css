@@ -354,6 +354,18 @@ td strong { color: #373c35; font-weight: 600; }
 .auth-form-panel .full-button { min-height: 58px; margin-top: 5px; border-radius: 11px; box-shadow: 0 8px 20px rgba(90, 58, 0, .18); font-size: 15px; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
 .auth-form-panel .full-button:hover:not(:disabled) { box-shadow: 0 10px 24px rgba(90, 58, 0, .25); transform: translateY(-2px); }
 .auth-form-panel .full-button:active:not(:disabled) { transform: translateY(0) scale(.99); }
+.auth-form-panel .button.auth-submit { position: relative; overflow: hidden; gap: 0; padding: 0; color: #fff0c0; background: #1f1400; border-radius: 22px 34px 18px 22px; box-shadow: 0 16px 28px -12px rgba(110, 60, 0, .55); font-size: 15px; font-weight: 800; letter-spacing: -.01em; -webkit-tap-highlight-color: transparent; }
+.auth-form-panel .button.auth-submit[aria-busy="true"] { opacity: 1; cursor: default; }
+.auth-form-panel .auth-submit:hover:not(:disabled) { color: #fff0c0; background: #2c1d04; box-shadow: 0 20px 34px -12px rgba(110, 60, 0, .6); }
+.auth-form-panel .auth-submit:active:not(:disabled) { transform: scale(.985); }
+.auth-submit-label { position: relative; z-index: 2; display: flex; flex: 0 0 auto; overflow: hidden; margin-right: 14px; white-space: pre; }
+.auth-submit-letter { display: inline-block; flex: none; will-change: transform, opacity; }
+.auth-submit-icon { position: relative; z-index: 2; display: block; width: 26px; height: 26px; flex: none; }
+.auth-submit-icon svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.auth-submit-icon path { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.auth-submit-check { opacity: 0; stroke-dasharray: 24; stroke-dashoffset: 24; }
+.auth-submit-ring { position: absolute; z-index: 1; inset: 0; display: block; width: 100%; height: 100%; margin: auto; opacity: 0; pointer-events: none; }
+.auth-submit-ring circle { fill: none; stroke: #fff0c0; stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 118 52; }
 .auth-security { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 24px 0 0; padding-top: 18px; color: rgba(42, 26, 0, .62); border-top: 1px solid rgba(42, 26, 0, .16); font-size: 11px; }
 .auth-flow-panel { position: absolute; z-index: 4; top: 0; left: 0; display: flex; width: 50%; height: 100%; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; padding: 28px; text-align: center; transition: transform .6s ease-in-out .6s; }
 .auth-flow-panel::before, .auth-flow-panel::after { position: absolute; z-index: 0; width: min(42vw, 520px); aspect-ratio: 1; border: 1px solid rgba(255, 255, 255, .32); border-radius: 50%; content: ''; pointer-events: none; }
@@ -489,6 +501,8 @@ td strong { color: #373c35; font-weight: 600; }
 @media (prefers-reduced-motion: reduce) {
   /* Keep the auth transition visible while shortening it for reduced-motion users. */
   .auth-shell::before, .auth-flow-panel, .auth-form-panel, .auth-login { transition-duration: .65s !important; transition-delay: 0s !important; }
+  .auth-submit[aria-busy="true"] .auth-submit-label { display: none; }
+  .auth-submit[aria-busy="true"]::before { content: 'Memproses...'; }
 }
 @media print {
   .sidebar, .topbar, .toast { display: none !important; }

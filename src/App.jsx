@@ -353,7 +353,7 @@ function AuthScreen({ setupError = '', signedInEmail = '', onSignOut, transition
             <form className="form-stack" onSubmit={submit}>
               <Field label="Email"><input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nama@email.com" required /></Field>
               <Field label="Kata sandi"><input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} minLength={6} placeholder="Minimal 6 karakter" required /></Field>
-              <button className="button button-primary full-button" disabled={busy || Boolean(setupError)}>{busy ? 'Memproses...' : 'Masuk ke aplikasi'}<ArrowRight size={17} /></button>
+              <AnimatedLoginButton busy={busy} success={transitioning} disabled={Boolean(setupError)} />
             </form>
             <p className="auth-security"><ShieldCheck size={15} /> Akses data dilindungi autentikasi dan kebijakan RLS.</p>
           </div>
@@ -368,6 +368,137 @@ function AuthScreen({ setupError = '', signedInEmail = '', onSignOut, transition
         </div>
       </div>
     </div>
+  );
+}
+
+function AnimatedLoginButton({ busy, success, disabled }) {
+  const buttonRef = useRef(null);
+  const labelRef = useRef(null);
+  const arrowRef = useRef(null);
+  const checkRef = useRef(null);
+  const ringRef = useRef(null);
+  const ringCircleRef = useRef(null);
+
+  useEffect(() => {
+    const button = buttonRef.current;
+    const label = labelRef.current;
+    const arrow = arrowRef.current;
+    const check = checkRef.current;
+    const ring = ringRef.current;
+    const ringCircle = ringCircleRef.current;
+    if (!button || !label || !arrow || !check || !ring || !ringCircle || (!busy && !success)) return undefined;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+
+    const letters = Array.from(label.children);
+    const animations = [];
+    let cancelled = false;
+    const animate = (element, frames, options) => {
+      const animation = element.animate(frames, options);
+      animations.push(animation);
+      return animation;
+    };
+    const wait = (duration) => new Promise((resolve) => window.setTimeout(resolve, duration));
+
+    const cleanup = () => {
+      cancelled = true;
+      animations.forEach((animation) => animation.cancel());
+      [button, label, arrow, check, ring, ringCircle, ...letters].forEach((element) => {
+        element.style.removeProperty('width');
+        element.style.removeProperty('margin-right');
+        element.style.removeProperty('opacity');
+      });
+    };
+
+    if (success) {
+      const bounds = button.getBoundingClientRect();
+      const height = bounds.height;
+      const radius = getComputedStyle(button).borderRadius;
+      label.style.width = '0px';
+      label.style.marginRight = '0px';
+      letters.forEach((letter) => { letter.style.opacity = '0'; });
+      animate(button, [
+        { width: `${bounds.width}px`, borderRadius: radius },
+        { width: `${height}px`, borderRadius: `${height / 2}px` },
+      ], { duration: 320, fill: 'forwards', easing: 'cubic-bezier(.65,0,.35,1)' });
+      animate(ring, [{ opacity: 0 }, { opacity: 1 }, { opacity: 0 }], { duration: 480, fill: 'forwards' });
+      animate(arrow, [{ opacity: 1 }, { opacity: 0 }], { duration: 140, fill: 'forwards' });
+      animate(ringCircle, [{ strokeDasharray: '118 52' }, { strokeDasharray: '170 0' }], { duration: 280, delay: 100, fill: 'forwards', easing: 'ease-out' });
+      animate(check, [{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], { duration: 320, delay: 130, fill: 'forwards', easing: 'ease-out' });
+      return cleanup;
+    }
+
+    const bounds = button.getBoundingClientRect();
+    const iconBounds = arrow.getBoundingClientRect();
+    const centerX = iconBounds.left + iconBounds.width / 2;
+    const centerY = iconBounds.top + iconBounds.height / 2;
+    const offsets = letters.map((letter) => {
+      const rect = letter.getBoundingClientRect();
+      return { x: centerX - (rect.left + rect.width / 2), y: centerY - (rect.top + rect.height / 2) };
+    });
+    const count = letters.length;
+
+    letters.forEach((letter, index) => {
+      const delay = (count - 1 - index) * 32;
+      animate(letter, [
+        { transform: 'translate(0,0) scale(1) rotate(0deg)', opacity: 1 },
+        { transform: `translate(${offsets[index].x * 0.2}px,-8px) scale(1.12) rotate(-8deg)`, opacity: 1, offset: 0.3 },
+        { transform: `translate(${offsets[index].x}px,${offsets[index].y}px) scale(.15) rotate(30deg)`, opacity: 0 },
+      ], { duration: 360, delay, fill: 'forwards', easing: 'cubic-bezier(.55,.05,.85,.45)' });
+    });
+
+    (async () => {
+      await wait((count - 1) * 32 + 390);
+      if (cancelled) return;
+      const labelWidth = label.getBoundingClientRect().width;
+      const marginRight = parseFloat(getComputedStyle(label).marginRight) || 0;
+      const radius = getComputedStyle(button).borderRadius;
+      animate(button, [
+        { width: `${bounds.width}px`, borderRadius: radius },
+        { width: `${bounds.height}px`, borderRadius: `${bounds.height / 2}px` },
+      ], { duration: 420, fill: 'forwards', easing: 'cubic-bezier(.65,0,.35,1)' });
+      animate(label, [
+        { width: `${labelWidth}px`, marginRight: `${marginRight}px` },
+        { width: '0px', marginRight: '0px' },
+      ], { duration: 420, fill: 'forwards', easing: 'cubic-bezier(.65,0,.35,1)' });
+      await wait(440);
+      if (cancelled) return;
+      animate(ring, [{ opacity: 0 }, { opacity: 1 }], { duration: 180, fill: 'forwards' });
+      animate(ring, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }], { duration: 800, iterations: Infinity, easing: 'linear' });
+      animate(arrow, [
+        { transform: 'translateX(-7px)', opacity: 0 },
+        { transform: 'translateX(0)', opacity: 1, offset: 0.4 },
+        { transform: 'translateX(0)', opacity: 1, offset: 0.6 },
+        { transform: 'translateX(7px)', opacity: 0 },
+      ], { duration: 800, iterations: Infinity, easing: 'ease-in-out' });
+    })();
+
+    return cleanup;
+  }, [busy, success]);
+
+  const characters = 'Masuk ke aplikasi'.split('');
+  return (
+    <button
+      ref={buttonRef}
+      className={`button button-primary full-button auth-submit${busy ? ' is-busy' : ''}${success ? ' is-success' : ''}`}
+      type="submit"
+      disabled={disabled || busy || success}
+      aria-label="Masuk ke aplikasi"
+      aria-busy={busy && !success}
+    >
+      <span className="auth-submit-label" ref={labelRef} aria-hidden="true">
+        {characters.map((character, index) => <span className="auth-submit-letter" key={`${character}-${index}`}>{character === ' ' ? '\u00a0' : character}</span>)}
+      </span>
+      <span className="auth-submit-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 5v14" />
+          <g ref={arrowRef}><path d="M4 12h16M14 6l6 6-6 6" /></g>
+          <path ref={checkRef} className="auth-submit-check" d="m5 13 5 5 10-11" />
+        </svg>
+      </span>
+      <svg ref={ringRef} className="auth-submit-ring" viewBox="0 0 64 64" aria-hidden="true">
+        <circle ref={ringCircleRef} cx="32" cy="32" r="27" transform="rotate(-90 32 32)" />
+      </svg>
+    </button>
   );
 }
 
