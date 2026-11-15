@@ -339,8 +339,8 @@ function PageHeading({ eyebrow, title, description, action }) {
   return <div className="page-heading"><div><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p className="page-description">{description}</p></div>{action}</div>;
 }
 
-function StatCard({ label, value, note, icon: Icon, tone = 'gold' }) {
-  return <article className="stat-card"><div className="stat-top"><span>{label}</span><span className={`stat-icon icon-${tone}`}><Icon size={19} /></span></div><strong className="stat-value">{value}</strong><span className="stat-note">{note}</span></article>;
+function StatCard({ label, value, note, icon: Icon, tone = 'gold', artwork = false }) {
+  return <article className={`stat-card${artwork ? ' stat-card-art' : ''}`}><div className="stat-top"><span>{label}</span><span className={`stat-icon icon-${tone}${artwork ? ' stat-icon-art' : ''}`}><Icon size={artwork ? 76 : 19} strokeWidth={artwork ? 1.6 : 1.9} /></span></div><strong className="stat-value">{value}</strong><span className="stat-note">{note}</span></article>;
 }
 
 function Dashboard({ store, products, sales, stockEntries, settings, setPage }) {
@@ -359,10 +359,10 @@ function Dashboard({ store, products, sales, stockEntries, settings, setPage }) 
   const average = todaySales.length ? revenue / todaySales.length : 0;
   return <>
     <div className="stats-grid">
-      <StatCard label="Penjualan hari ini" value={money(revenue)} note={`${todaySales.length} transaksi tercatat`} icon={CircleDollarSign} tone="gold" />
-      <StatCard label="Rata-rata transaksi" value={money(average)} note="Nilai rata-rata hari ini" icon={CreditCard} tone="blue" />
-      <StatCard label="Jumlah produk" value={numberFormat.format(products.length)} note={`${products.reduce((sum, product) => sum + Number(product.stock), 0).toLocaleString('id-ID')} unit tersedia`} icon={Boxes} tone="green" />
-      <StatCard label="Stok menipis" value={numberFormat.format(lowStock.length)} note="Perlu segera diperiksa" icon={Package} tone="red" />
+      <StatCard label="Penjualan hari ini" value={money(revenue)} note={`${todaySales.length} transaksi tercatat`} icon={CircleDollarSign} tone="gold" artwork />
+      <StatCard label="Rata-rata transaksi" value={money(average)} note="Nilai rata-rata hari ini" icon={CreditCard} tone="blue" artwork />
+      <StatCard label="Jumlah produk" value={numberFormat.format(products.length)} note={`${products.reduce((sum, product) => sum + Number(product.stock), 0).toLocaleString('id-ID')} unit tersedia`} icon={Boxes} tone="green" artwork />
+      <StatCard label="Stok menipis" value={numberFormat.format(lowStock.length)} note="Perlu segera diperiksa" icon={Package} tone="red" artwork />
     </div>
     <div className="dashboard-grid">
       <section className="panel chart-panel"><div className="panel-heading"><div><h2>Tren penjualan</h2><p>Omzet 7 hari terakhir</p></div><span className="chart-period"><span className="live-dot" /> Minggu ini</span></div>

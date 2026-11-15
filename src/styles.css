@@ -878,3 +878,253 @@ body {
 .dashboard-grid > .low-stock-panel .stock-warning {
   color: #ffb6a8;
 }
+
+.stat-card-art {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.stat-card-art .stat-top {
+  position: static;
+  justify-content: flex-start;
+}
+
+.stat-icon-art {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  right: clamp(12px, 2vw, 24px);
+  width: clamp(68px, 6vw, 100px);
+  height: clamp(68px, 6vw, 100px);
+  color: rgba(255, 255, 255, .52);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  opacity: .8;
+  pointer-events: none;
+  transform: translateY(-50%) rotate(8deg);
+}
+
+.stat-icon-art::before {
+  position: absolute;
+  inset: 8%;
+  border: 2px solid currentColor;
+  border-radius: 25%;
+  content: "";
+}
+
+.stat-icon-art::after {
+  position: absolute;
+  top: -25%;
+  right: -25%;
+  width: 92%;
+  aspect-ratio: 1;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  content: "";
+  opacity: .55;
+}
+
+.stat-icon-art svg {
+  position: relative;
+  z-index: 1;
+  width: 74%;
+  height: 74%;
+}
+
+.stat-card-art .stat-top > span:first-child,
+.stat-card-art .stat-value,
+.stat-card-art .stat-note {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 620px) {
+  .stat-icon-art {
+    right: 7px;
+    width: 62px;
+    height: 62px;
+  }
+}
+
+:root {
+  --muted: #1a1205;
+}
+
+.nav-caption,
+.nav-item,
+.profile-copy small,
+.breadcrumb,
+.topbar-right,
+.page-description,
+.date-chip,
+.chart-period,
+.stat-top,
+.stat-note,
+.panel-heading p,
+.cart-heading p,
+.chart-summary span,
+.bar-column,
+.compact-copy small,
+.quick-action,
+.table-wrap th,
+.table-wrap td,
+.table-wrap td strong,
+.mono,
+.empty-state strong,
+.empty-state p,
+.button-secondary,
+.button-quiet,
+.search-field,
+.search-field kbd,
+.result-count,
+.vendor-detail span,
+.vendor-detail strong,
+.vendor-card-foot,
+.field,
+.field > small,
+.field input,
+.field select,
+.field textarea,
+.pos-product-name,
+.pos-product-bottom small,
+.stock-total,
+.cart-item-copy strong,
+.cart-item-copy small,
+.quantity-control,
+.quantity-control button,
+.cart-line-total,
+.summary-line,
+.summary-line strong,
+.summary-total,
+.filter-label,
+.filter-separator,
+.toast > button,
+.sync-indicator,
+.sale-detail-top > span:last-child,
+.sale-item small,
+.full-screen,
+.auth-heading > p:last-child,
+.auth-security {
+  color: #1a1205 !important;
+}
+
+.field input::placeholder,
+.field textarea::placeholder,
+.search-field input::placeholder {
+  color: #1a1205 !important;
+  opacity: 1;
+}
+
+.stats-grid > .stat-card:first-child .stat-top,
+.stats-grid > .stat-card:first-child .stat-value,
+.stats-grid > .stat-card:first-child .stat-note,
+.dashboard-grid > .low-stock-panel .panel-heading h2,
+.dashboard-grid > .low-stock-panel .panel-heading p,
+.dashboard-grid > .low-stock-panel .compact-copy strong,
+.dashboard-grid > .low-stock-panel .compact-copy small,
+.dashboard-grid > .low-stock-panel .empty-state strong,
+.dashboard-grid > .low-stock-panel .empty-state p {
+  color: #fff8df !important;
+}
+
+.stats-grid > .stat-card:first-child .stat-note,
+.dashboard-grid > .low-stock-panel .panel-heading p,
+.dashboard-grid > .low-stock-panel .compact-copy small,
+.dashboard-grid > .low-stock-panel .empty-state p {
+  color: rgba(255, 248, 223, .8) !important;
+}
+
+.dashboard-grid > .low-stock-panel .stock-warning {
+  color: #ffb6a8 !important;
+}
+
+.table-wrap td strong.positive-value,
+.change-line strong {
+  color: #34774d !important;
+}
+
+.table-wrap td strong.negative-value {
+  color: #c34f48 !important;
+}
+
+.sidebar,
+.topbar,
+.panel,
+.stat-card,
+.vendor-card,
+.quick-action,
+.pos-product,
+.product-picker,
+.cart-panel,
+.form-panel,
+.stock-history,
+.filter-panel,
+.settings-panel,
+.modal,
+.toast,
+.date-chip,
+.chart-period,
+.search-field,
+.auth-form-inner,
+.auth-standalone {
+  border-radius: 18px 38px 14px 38px;
+}
+
+.stats-grid > .stat-card:nth-child(even),
+.vendor-card:nth-child(even),
+.quick-action:nth-child(even),
+.pos-product:nth-child(even) {
+  border-radius: 38px 16px 38px 14px;
+}
+
+.field input,
+.field select,
+.field textarea,
+.auth-form-panel .field input,
+.button,
+.icon-button,
+.empty-state > span,
+.stat-icon,
+.vendor-art,
+.form-heading-icon,
+.product-art,
+.search-field kbd,
+.stock-total {
+  border-radius: 10px 20px 8px 20px;
+}
+
+.auth-form-panel .full-button,
+.button-primary {
+  border-radius: 14px 26px 12px 26px;
+}
+
+.stat-icon-art {
+  border-radius: 0;
+}
+
+@media (max-width: 620px) {
+  .sidebar,
+  .topbar,
+  .panel,
+  .stat-card,
+  .vendor-card,
+  .quick-action,
+  .pos-product,
+  .product-picker,
+  .cart-panel,
+  .form-panel,
+  .stock-history,
+  .filter-panel,
+  .settings-panel,
+  .modal,
+  .toast,
+  .date-chip,
+  .chart-period,
+  .search-field,
+  .auth-form-inner,
+  .auth-standalone {
+    border-radius: 15px 28px 12px 28px;
+  }
+}
