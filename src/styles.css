@@ -834,7 +834,45 @@ body {
 
 .stats-grid > .stat-card:first-child,
 .dashboard-grid > .low-stock-panel {
-  background: #ffd04a;
-  border-color: rgba(255, 255, 255, .68);
-  box-shadow: 0 10px 30px rgba(110, 70, 0, .14), inset 0 1px 0 rgba(255, 255, 255, .35);
+  color: #fff8df;
+  background: #17130d;
+  border-color: rgba(255, 255, 255, .12);
+  box-shadow: 0 12px 30px rgba(42, 26, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+
+.stats-grid > .stat-card:first-child .stat-top,
+.stats-grid > .stat-card:first-child .stat-value,
+.stats-grid > .stat-card:first-child .stat-note,
+.dashboard-grid > .low-stock-panel .panel-heading h2,
+.dashboard-grid > .low-stock-panel .panel-heading p,
+.dashboard-grid > .low-stock-panel .compact-copy strong,
+.dashboard-grid > .low-stock-panel .compact-copy small,
+.dashboard-grid > .low-stock-panel .empty-state strong,
+.dashboard-grid > .low-stock-panel .empty-state p {
+  color: #fff8df;
+}
+
+.stats-grid > .stat-card:first-child .stat-note,
+.dashboard-grid > .low-stock-panel .panel-heading p,
+.dashboard-grid > .low-stock-panel .compact-copy small,
+.dashboard-grid > .low-stock-panel .empty-state p {
+  color: rgba(255, 248, 223, .68);
+}
+
+.dashboard-grid > .low-stock-panel .text-button {
+  color: #ffd66b;
+}
+
+.dashboard-grid > .low-stock-panel .compact-row {
+  border-color: rgba(255, 248, 223, .16);
+}
+
+.dashboard-grid > .low-stock-panel .product-initial,
+.dashboard-grid > .low-stock-panel .empty-state > span {
+  color: #ffd66b;
+  background: rgba(255, 255, 255, .1);
+}
+
+.dashboard-grid > .low-stock-panel .stock-warning {
+  color: #ffb6a8;
 }
