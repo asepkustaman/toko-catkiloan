@@ -33,9 +33,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .profile-copy { display: grid; min-width: 0; flex: 1; gap: 3px; }
 .profile-copy strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .profile-copy small { color: var(--muted); font-size: 10px; }
-.nav-caption { margin: 42px 10px 10px; color: #a0a49d; font-size: 9px; font-weight: 700; letter-spacing: 1.4px; }
+.nav-caption { flex: 0 0 11px; height: 11px; margin: 42px 10px 10px; color: #a0a49d; font-size: 9px; font-weight: 700; letter-spacing: 1.4px; line-height: 11px; }
 .nav-list { display: grid; gap: 4px; }
-.nav-item { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 12px; color: #72786f; background: transparent; border: 0; border-radius: 9px; text-align: left; font-size: 12px; font-weight: 600; transition: .18s ease; }
+.nav-item { position: relative; display: flex; height: 42px; min-height: 42px; align-items: center; gap: 12px; width: 100%; padding: 0 12px 0 42px; color: #72786f; background: transparent; border: 0; border-radius: 9px; text-align: left; font-size: 12px; font-weight: 600; transition: .18s ease; }
+.nav-item > svg { position: absolute; top: 50%; left: 12px; flex: 0 0 18px; transform: translateY(-50%); }
 .nav-item:hover { color: var(--ink); background: #f7f7f3; }
 .nav-item.nav-active { color: #292820; background: #fff6db; }
 .nav-active::before { position: absolute; inset: 8px auto 8px 0; width: 3px; background: var(--gold); border-radius: 0 4px 4px 0; content: ''; }
@@ -64,6 +65,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .sidebar-collapsed .brand-logo { width: 42px; }
   .sidebar-collapsed .main-area { margin-left: 76px; }
   .sidebar-collapsed .nav-caption { visibility: hidden; }
+  .sidebar-collapsed .nav-item { min-width: 0; }
   .sidebar-collapsed .nav-item > span { display: none; }
   .sidebar-collapsed .nav-dot { position: absolute; top: 8px; right: 12px; margin: 0; }
   .sidebar-collapsed .secure-note { justify-content: center; margin-right: 0; margin-left: 0; padding: 12px 0; }
