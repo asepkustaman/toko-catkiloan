@@ -18,6 +18,21 @@ const navItems = [
   { id: 'settings', label: 'Pengaturan', icon: Settings },
 ];
 
+function SidebarIcon({ id }) {
+  const iconContent = {
+    dashboard: <><rect x="3" y="3" width="8" height="8" rx="2.5" /><rect x="14" y="3" width="7" height="5" rx="2" /><rect x="14" y="10" width="7" height="11" rx="2.5" /><rect x="3" y="14" width="8" height="7" rx="2" /><path d="M6 6h2m9 0h3m-3 7h3M6 17h2" strokeWidth="1.4" opacity=".6" /></>,
+    pos: <><path d="M4 5h16l-1.6 9.2a2 2 0 0 1-2 1.7H9.2a2 2 0 0 1-2-1.7L5.5 5" /><path d="M3 3h2l.6 3M9 10h8m-7 3h5" /><circle cx="10" cy="19" r="1.5" /><circle cx="17" cy="19" r="1.5" /></>,
+    sales: <><path d="M7 3.5h8l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 20V5a1.5 1.5 0 0 1 1.5-1.5Z" /><path d="M14.5 3.8V8h4.2M8.5 12h7m-7 3.5h3m1.5 3 2-2 1.5 1.2 2.2-2.7" /></>,
+    stock: <><path d="m12 3 8 4.2v9.3L12 21l-8-4.5V7.2L12 3Z" /><path d="m4.5 7.5 7.5 4 7.5-4M12 11.5v5" /><path d="M9.5 14.5 12 17l2.5-2.5" strokeWidth="2.2" /></>,
+    products: <><path d="M5 7.5 12 4l7 3.5v9L12 20l-7-3.5v-9Z" /><path d="m5.5 8 6.5 3.3L18.5 8M12 11.3V20" /><path d="m8.2 5.9 6.7 3.5" opacity=".55" /><path d="M8.5 14.5h2.2" strokeWidth="2.2" /></>,
+    vendors: <><path d="M3 6h11v11H3z" /><path d="M14 10h3.5L21 14v3h-7" /><circle cx="7" cy="18" r="2" /><circle cx="17" cy="18" r="2" /><path d="M5.5 9.5h5m-5 3h3" /><path d="M16 10.5v3.8h4.2" /></>,
+    reports: <><path d="M4 20h16" /><path d="M6.5 17v-4.5m5 4.5V8m5 9v-6" strokeWidth="2.5" /><path d="m5 9 5-4 4 2.5L19 3.5" strokeWidth="1.7" /><path d="M15.5 3.5H19v3.8" strokeWidth="1.7" /></>,
+    settings: <><path d="m10 3 .6-1h2.8l.6 1 .4 2a7.8 7.8 0 0 1 1.5.9l1.9-.6 1.4 2.4-1.4 1.5a7.5 7.5 0 0 1 0 1.8l1.4 1.5-1.4 2.4-1.9-.6a7.8 7.8 0 0 1-1.5.9l-.4 2h-2.8l-.6-2a7.8 7.8 0 0 1-1.5-.9l-1.9.6-1.4-2.4 1.4-1.5a7.5 7.5 0 0 1 0-1.8L5.2 7.4l1.4-2.4 1.9.6A7.8 7.8 0 0 1 10 4.7L10 3Z" /><circle cx="12" cy="10.9" r="2.5" /><path d="M12 8.4v.8m0 3.4v.8" strokeWidth="1.2" opacity=".6" /></>,
+  }[id];
+
+  return <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{iconContent}</svg>;
+}
+
 const currency = new Intl.NumberFormat('id-ID', {
   style: 'currency',
   currency: 'IDR',
@@ -253,9 +268,9 @@ function App() {
         <div className="sidebar-header"><Brand /></div>
         <p className="nav-caption">MENU UTAMA</p>
         <nav className="nav-list">
-          {permittedNavItems.map(({ id, label, icon: Icon }) => (
+          {permittedNavItems.map(({ id, label }) => (
             <button key={id} className={`nav-item ${page === id ? 'nav-active' : ''}`} aria-label={label} onClick={() => navigate(id)}>
-              <Icon size={18} strokeWidth={1.8} /><span>{label}</span>
+             <SidebarIcon id={id} /><span>{label}</span>
               {id === 'products' && products.some((product) => Number(product.stock) <= Number(settings?.low_stock_threshold ?? 5)) && <i className="nav-dot" />}
             </button>
           ))}
