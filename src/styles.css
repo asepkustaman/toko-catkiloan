@@ -290,19 +290,19 @@ td strong { color: #373c35; font-weight: 600; }
 .cart-items .empty-state { min-height: 160px; }
 .cart-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto 24px; align-items: center; gap: 7px; padding: 12px 0; border-bottom: 1px solid #f0f1ee; }
 .cart-item-copy { display: grid; min-width: 0; gap: 4px; }
-.cart-item-copy strong { overflow: hidden; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.cart-item-copy strong { overflow: hidden; font-size: 11px; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
 .cart-item-copy small { color: #969c92; font-size: 8px; }
 .quantity-control { display: flex; align-items: center; gap: 7px; padding: 3px; border: 1px solid #e9ebe6; border-radius: 6px; }
 .quantity-control button { display: grid; width: 19px; height: 19px; place-items: center; color: #666d62; background: #f6f7f4; border: 0; border-radius: 4px; }
 .quantity-control span { min-width: 12px; text-align: center; font-size: 9px; }
-.cart-line-total { text-align: right; font-size: 9px; white-space: nowrap; }
+.cart-line-total { text-align: right; font-size: 11px; line-height: 1.15; white-space: nowrap; }
 .remove-button { display: grid; width: 23px; height: 23px; place-items: center; color: #a2a79f; background: transparent; border: 0; border-radius: 5px; }
 .remove-button:hover { color: #b74d46; background: #fff1ef; }
 .cart-summary { display: grid; flex: 0 0 auto; gap: 12px; padding-top: 14px; }
 .summary-line, .summary-total { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: #7d837a; font-size: 10px; }
 .summary-line strong { color: #41473e; font-weight: 600; }
-.summary-total { padding: 11px 0; color: #3f453c; border-top: 1px dashed #e6e9e2; font-weight: 700; }
-.summary-total strong { color: #262b24; font-family: Manrope, sans-serif; font-size: 18px; }
+.summary-total { padding: 13px 0; color: #3f453c; border-top: 1px dashed #e6e9e2; font-size: 12px; font-weight: 700; }
+.summary-total strong { color: #262b24; font-family: Manrope, sans-serif; font-size: 23px; font-variant-numeric: tabular-nums; }
 .cart-summary .field { gap: 5px; }
 .cart-summary .field input { min-height: 34px; }
 .change-line { padding-top: 4px; }
