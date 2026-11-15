@@ -358,7 +358,6 @@ function Dashboard({ store, products, sales, stockEntries, settings, setPage }) 
   const max = Math.max(...week.map((day) => day.total), 1);
   const average = todaySales.length ? revenue / todaySales.length : 0;
   return <>
-    <PageHeading eyebrow="RINGKASAN TOKO" title={`Selamat datang, ${store.name}`} description="Pantau kondisi toko dan aktivitas terbaru hari ini." action={<span className="date-chip">{new Intl.DateTimeFormat('id-ID', { dateStyle: 'full' }).format(new Date())}</span>} />
     <div className="stats-grid">
       <StatCard label="Penjualan hari ini" value={money(revenue)} note={`${todaySales.length} transaksi tercatat`} icon={CircleDollarSign} tone="gold" />
       <StatCard label="Rata-rata transaksi" value={money(average)} note="Nilai rata-rata hari ini" icon={CreditCard} tone="blue" />
