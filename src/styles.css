@@ -895,15 +895,15 @@ body {
   z-index: 0;
   top: 50%;
   right: clamp(12px, 2vw, 24px);
-  width: clamp(88px, 8vw, 124px);
-  height: clamp(88px, 8vw, 124px);
-  color: rgba(255, 255, 255, .52);
+  width: clamp(104px, 9vw, 140px);
+  height: clamp(104px, 9vw, 140px);
+  color: rgba(255, 255, 255, .42);
   background: transparent;
   border: 0;
   border-radius: 0;
-  opacity: .8;
+  opacity: .72;
   pointer-events: none;
-  transform: translateY(-50%);
+  transform: translateY(-50%) rotate(7deg);
 }
 
 .stat-icon-art svg {
@@ -923,8 +923,8 @@ body {
 @media (max-width: 620px) {
   .stat-icon-art {
     right: 7px;
-    width: 76px;
-    height: 76px;
+    width: 84px;
+    height: 84px;
   }
 }
 
