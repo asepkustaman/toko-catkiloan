@@ -682,6 +682,7 @@ function PointOfSale({ products, store, settings, storeId, run }) {
   const quantityInputRef = useRef(null);
   const productButtonRefs = useRef(new Map());
   const filtered = products.filter((product) => `${product.name} ${product.barcode ?? ''} ${product.category?.name ?? ''}`.toLowerCase().includes(search.toLowerCase()));
+  const quantityEntryActive = quantityEntryProductId !== null;
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
   const total = subtotal;
   const change = Math.max(0, (Number(paid) || 0) - total);
@@ -690,6 +691,12 @@ function PointOfSale({ products, store, settings, storeId, run }) {
     quantityInputRef.current?.focus();
     quantityInputRef.current?.select();
   }, [quantityEntryProductId]);
+  useEffect(() => {
+    if (!receipt) return undefined;
+    const closeReceiptAfterPrint = () => setReceipt(null);
+    window.addEventListener('afterprint', closeReceiptAfterPrint);
+    return () => window.removeEventListener('afterprint', closeReceiptAfterPrint);
+  }, [receipt]);
   const getAvailableQuantity = (product) => Number(product.stock) - (cart.find((item) => item.product.id === product.id)?.qty ?? 0);
   const focusProduct = (productId) => {
     const button = productButtonRefs.current.get(productId);
@@ -813,12 +820,12 @@ function PointOfSale({ products, store, settings, storeId, run }) {
   };
   return <>
     <div className="pos-layout">
-      <section className="panel product-picker"><div className="search-field"><Search size={18} /><input ref={searchInputRef} value={search} onChange={(event) => { setSearch(event.target.value); cancelQuantityEntry(); }} onKeyDown={handleSearchKeyDown} placeholder="Cari nama atau barcode produk..." />{search && <button className="search-clear" type="button" onClick={() => { setSearch(''); cancelQuantityEntry(); }} aria-label="Hapus pencarian"><X size={15} /></button>}</div>
+      <section className="panel product-picker"><div className="search-field"><Search size={18} /><input ref={searchInputRef} value={search} disabled={quantityEntryActive} onChange={(event) => { setSearch(event.target.value); cancelQuantityEntry(); }} onKeyDown={handleSearchKeyDown} placeholder="Cari nama atau barcode produk..." />{search && <button className="search-clear" type="button" disabled={quantityEntryActive} onClick={() => { setSearch(''); cancelQuantityEntry(); }} aria-label="Hapus pencarian"><X size={15} /></button>}</div>
         <div className="product-grid">{filtered.map((product) => {
           const available = getAvailableQuantity(product);
           const isEnteringQuantity = quantityEntryProductId === product.id;
           return <div className={`pos-product${isEnteringQuantity ? ' pos-product-entering' : ''}`} key={product.id}>
-            <button className="pos-product-main" type="button" ref={(element) => { if (element) productButtonRefs.current.set(product.id, element); else productButtonRefs.current.delete(product.id); }} disabled={available <= 0} onKeyDown={(event) => handleProductKeyDown(event, product)} onClick={() => startQuantityEntry(product)}>
+            <button className="pos-product-main" type="button" ref={(element) => { if (element) productButtonRefs.current.set(product.id, element); else productButtonRefs.current.delete(product.id); }} disabled={available <= 0 || quantityEntryActive} onKeyDown={(event) => handleProductKeyDown(event, product)} onClick={() => startQuantityEntry(product)}>
               <span className={`product-art${product.color ? ' product-art-color' : ''}`} style={product.color ? { '--product-color': product.color } : undefined}>{!product.color && <Package size={18} />}</span>
               <span className="pos-product-copy"><span className="pos-product-name">{product.name}</span><span className="pos-product-bottom"><strong>{money(product.sell_price)}</strong><small><strong className="pos-stock-available">{quantity(available)} {product.unit}</strong> tersedia</small></span></span>
             </button>
