@@ -271,6 +271,7 @@ td strong { color: #373c35; font-weight: 600; }
 .pos-product-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; }
 .pos-product-bottom strong { color: #8a680d; font-size: 10px; }
 .pos-product-bottom small { color: #969d93; font-size: 8px; }
+.pos-product-bottom small .pos-stock-available { color: #5a3a00; font-size: 10px; font-weight: 700; }
 .pos-quantity-entry { position: relative; display: flex; flex: 0 0 auto; align-items: center; gap: 4px; padding: 0 7px 0 0; }
 .pos-quantity-entry input { width: 56px; min-width: 0; height: 30px; padding: 4px 5px; color: #2a1a00; background: rgba(255, 255, 255, .78); border: 1px solid rgba(90, 58, 0, .22); border-radius: 7px; font-size: 11px; font-variant-numeric: tabular-nums; text-align: center; }
 .pos-quantity-entry input:focus { border-color: #a27b17; outline: 2px solid rgba(162, 123, 23, .22); }
@@ -341,6 +342,29 @@ td strong { color: #373c35; font-weight: 600; }
 .sync-indicator { margin: -20px 0 15px; color: #92998e; font-size: 9px; }
 .modal-backdrop { position: fixed; z-index: 60; inset: 0; display: grid; align-items: center; justify-items: center; overflow-y: auto; padding: 20px; background: #20241f66; backdrop-filter: blur(3px); }
 .modal { width: min(490px, 100%); max-height: min(90vh, 780px); overflow-y: auto; padding: 20px; background: white; border: 1px solid #eaebe6; border-radius: 13px; box-shadow: 0 25px 90px #171c1426; }
+.receipt-print-dialog { width: min(420px, 100%); }
+.receipt-preview-wrap { display: grid; justify-items: center; gap: 14px; }
+.receipt-paper { width: 58mm; max-width: 100%; padding: 5mm 4mm; color: #171717; background: #fff; border: 1px solid #e8e5de; box-shadow: 0 8px 24px rgba(32, 24, 10, .1); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9px; line-height: 1.45; }
+.receipt-header { display: grid; justify-items: center; text-align: center; }
+.receipt-header img { width: 31mm; height: 15mm; object-fit: contain; }
+.receipt-header h3 { margin: 2mm 0 1mm; font-family: Arial, sans-serif; font-size: 13px; font-weight: 800; line-height: 1.2; text-transform: uppercase; }
+.receipt-header p { margin: 0; font-size: 8px; overflow-wrap: anywhere; }
+.receipt-rule { height: 1px; margin: 3mm 0; background: #333; }
+.receipt-rule-dashed { height: 0; background: transparent; border-top: 1px dashed #555; }
+.receipt-meta,
+.receipt-item > div,
+.receipt-total { display: flex; justify-content: space-between; gap: 8px; }
+.receipt-meta { margin: 1mm 0; }
+.receipt-meta strong { text-align: right; overflow-wrap: anywhere; }
+.receipt-items { display: grid; gap: 2.5mm; }
+.receipt-item > strong { display: block; margin-bottom: .6mm; overflow-wrap: anywhere; }
+.receipt-item > div { align-items: flex-start; }
+.receipt-item > div > span { flex: 1; }
+.receipt-item > div > strong { text-align: right; white-space: nowrap; }
+.receipt-total { align-items: baseline; margin: 2mm 0; font-family: Arial, sans-serif; font-weight: 800; }
+.receipt-total strong { font-size: 13px; white-space: nowrap; }
+.receipt-footer { margin-top: 4mm; padding-top: 2.5mm; border-top: 1px dashed #555; text-align: center; overflow-wrap: anywhere; }
+.receipt-print-note { margin: 0; color: #858980; font-size: 10px; text-align: center; }
 .modal-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
 .modal-heading h2 { font-size: 16px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 3px; }
@@ -519,10 +543,19 @@ td strong { color: #373c35; font-weight: 600; }
   .auth-submit[aria-busy="true"]::before { content: 'Memproses...'; }
 }
 @media print {
-  .sidebar, .topbar, .toast { display: none !important; }
-  .main-area { margin: 0; }
-  .content { padding: 0; }
-  .panel { border: 0; }
+  @page { size: 58mm auto; margin: 0; }
+  body,
+  body * { visibility: hidden !important; }
+  .receipt-print,
+  .receipt-print * { visibility: visible !important; }
+  .receipt-print { position: fixed !important; inset: 0 !important; display: block !important; overflow: visible !important; padding: 0 !important; background: #fff !important; backdrop-filter: none !important; }
+  .receipt-print-dialog { position: absolute !important; top: 0 !important; left: 0 !important; width: 58mm !important; max-width: 58mm !important; max-height: none !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; background: #fff !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+  .receipt-print-dialog .modal-heading,
+  .receipt-actions,
+  .receipt-print-note { display: none !important; }
+  .receipt-preview-wrap { display: block !important; }
+  .receipt-paper { width: 58mm !important; min-height: 0 !important; margin: 0 !important; padding: 3mm !important; color: #000 !important; background: #fff !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; font-family: Arial, sans-serif !important; font-size: 9pt !important; }
+  .receipt-paper * { color: #000 !important; }
 }
 
 .app-shell {

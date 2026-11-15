@@ -85,6 +85,10 @@ export function Plus(props) {
   return <PaintIcon {...props}><path d="M12 4v16M4 12h16" /><path d="M12 2.5a9.5 9.5 0 1 0 9.5 9.5" opacity=".38" /></PaintIcon>;
 }
 
+export function Printer(props) {
+  return <PaintIcon {...props}><path d="M7 8V3.5h10V8M6 17H4.5A1.5 1.5 0 0 1 3 15.5v-6A1.5 1.5 0 0 1 4.5 8h15A1.5 1.5 0 0 1 21 9.5v6a1.5 1.5 0 0 1-1.5 1.5H18" /><path d="M7 14h10v6.5H7zM17.5 11h.01" /></PaintIcon>;
+}
+
 export function Search(props) {
   return <PaintIcon {...props}><circle cx="10.5" cy="10.5" r="6.8" /><path d="m15.5 15.5 5 5" /><path d="M8.2 10.5h4.6" opacity=".5" /></PaintIcon>;
 }

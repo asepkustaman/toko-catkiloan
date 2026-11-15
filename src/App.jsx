@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowDownToLine, ArrowRight, BarChart3, Boxes, BriefcaseBusiness, CalendarDays, Check,
   CircleDollarSign, ClipboardList, CreditCard, LayoutDashboard,
-  LogOut, Menu, Package, Pencil, Plus, Search, Settings, ShieldCheck,
+  LogOut, Menu, Package, Pencil, Plus, Printer, Search, Settings, ShieldCheck,
   ShoppingCart, Trash2, TrendingUp, Truck, X,
 } from './PaintIcons.jsx';
 import { supabase, supabaseSetupError } from './lib/supabase.js';
@@ -214,9 +214,10 @@ function App() {
 
   const run = async (action, successText) => {
     try {
-      await action();
+      const result = await action();
       if (successText) notify('success', successText);
       await loadData();
+      return result;
     } catch (error) {
       notify('error', errorMessage(error));
       throw error;
@@ -305,7 +306,7 @@ function App() {
         <div className={`content ${page === 'dashboard' ? 'dashboard-content' : ''}`}>
           {loading && <div className="sync-indicator">Memperbarui data...</div>}
           {page === 'dashboard' && <Dashboard store={store} products={products} sales={sales} stockEntries={stockEntries} settings={settings} setPage={navigate} />}
-          {page === 'pos' && <PointOfSale products={products} storeId={store.id} run={run} />}
+          {page === 'pos' && <PointOfSale products={products} store={store} settings={settings} storeId={store.id} run={run} />}
           {page === 'sales' && <SalesPage sales={sales} />}
           {page === 'stock' && <StockPage products={products} vendors={vendors} stockEntries={stockEntries} storeId={store.id} run={run} />}
           {page === 'products' && <ProductsPage products={products} categories={categories} vendors={vendors} storeId={store.id} run={run} threshold={settings?.low_stock_threshold ?? 5} />}
@@ -668,15 +669,18 @@ function CurrencyInput({ value, onChange, ...inputProps }) {
   return <span className="currency-input"><span aria-hidden="true">Rp</span><input {...inputProps} ref={inputRef} type="text" inputMode="numeric" value={formattedValue} onChange={handleChange} /></span>;
 }
 
-function PointOfSale({ products, storeId, run }) {
+function PointOfSale({ products, store, settings, storeId, run }) {
   const [search, setSearch] = useState('');
   const [cart, setCart] = useState([]);
   const [paid, setPaid] = useState('');
+  const [receipt, setReceipt] = useState(null);
   const [busy, setBusy] = useState(false);
   const [quantityEntryProductId, setQuantityEntryProductId] = useState(null);
   const [quantityDraft, setQuantityDraft] = useState('1');
   const [quantityError, setQuantityError] = useState('');
+  const searchInputRef = useRef(null);
   const quantityInputRef = useRef(null);
+  const productButtonRefs = useRef(new Map());
   const filtered = products.filter((product) => `${product.name} ${product.barcode ?? ''} ${product.category?.name ?? ''}`.toLowerCase().includes(search.toLowerCase()));
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
   const total = subtotal;
@@ -687,6 +691,34 @@ function PointOfSale({ products, storeId, run }) {
     quantityInputRef.current?.select();
   }, [quantityEntryProductId]);
   const getAvailableQuantity = (product) => Number(product.stock) - (cart.find((item) => item.product.id === product.id)?.qty ?? 0);
+  const focusProduct = (productId) => {
+    const button = productButtonRefs.current.get(productId);
+    if (!button) return;
+    button.focus();
+    button.scrollIntoView({ block: 'nearest' });
+  };
+  const handleSearchKeyDown = (event) => {
+    if (event.key !== 'ArrowDown' || event.nativeEvent.isComposing) return;
+    const firstAvailable = filtered.find((product) => getAvailableQuantity(product) > 0);
+    if (!firstAvailable) return;
+    event.preventDefault();
+    focusProduct(firstAvailable.id);
+  };
+  const handleProductKeyDown = (event, product) => {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+    const availableProducts = filtered.filter((item) => getAvailableQuantity(item) > 0);
+    const index = availableProducts.findIndex((item) => item.id === product.id);
+    if (index < 0) return;
+    if (event.key === 'ArrowUp' && index === 0) {
+      event.preventDefault();
+      searchInputRef.current?.focus();
+      return;
+    }
+    const nextIndex = index + (event.key === 'ArrowDown' ? 1 : -1);
+    if (nextIndex < 0 || nextIndex >= availableProducts.length) return;
+    event.preventDefault();
+    focusProduct(availableProducts[nextIndex].id);
+  };
   const startQuantityEntry = (product) => {
     if (getAvailableQuantity(product) <= 0) return;
     setQuantityEntryProductId(product.id);
@@ -732,15 +764,43 @@ function PointOfSale({ products, storeId, run }) {
     if (!cart.length) return;
     setBusy(true);
     try {
-      await run(async () => {
-        const { error } = await supabase.rpc('checkout_sale', {
+      const purchasedItems = cart.map((item) => ({
+        name: item.product.name,
+        quantity: item.qty,
+        unit: item.product.unit,
+        unitPrice: item.price,
+        lineTotal: item.price * item.qty,
+      }));
+      const amountPaid = Number(paid) || 0;
+      const saleId = await run(async () => {
+        const { data, error } = await supabase.rpc('checkout_sale', {
           p_store_id: storeId,
           p_items: cart.map((item) => ({ product_id: item.product.id, quantity: item.qty })),
           p_discount: 0,
-          p_amount_paid: Number(paid) || 0,
+          p_amount_paid: amountPaid,
         });
         if (error) throw error;
+        return data;
       }, 'Transaksi berhasil disimpan.');
+      const { data: savedSale, error: saleLookupError } = await supabase
+        .from('sales')
+        .select('code, created_at')
+        .eq('id', saleId)
+        .eq('store_id', storeId)
+        .maybeSingle();
+      if (saleLookupError) notify('error', `Transaksi tersimpan, tetapi nomor struk gagal dimuat: ${errorMessage(saleLookupError)}`);
+      setReceipt({
+        code: savedSale?.code ?? `SALE-${String(saleId).replaceAll('-', '').slice(0, 8).toUpperCase()}`,
+        createdAt: savedSale?.created_at ?? new Date().toISOString(),
+        items: purchasedItems,
+        total,
+        amountPaid,
+        change: Math.max(0, amountPaid - total),
+        storeName: store.name,
+        address: settings?.address,
+        phone: settings?.phone,
+        footer: settings?.receipt_footer,
+      });
       setCart([]);
       setPaid('');
     } catch {
@@ -751,14 +811,14 @@ function PointOfSale({ products, storeId, run }) {
   };
   return <>
     <div className="pos-layout">
-      <section className="panel product-picker"><div className="search-field"><Search size={18} /><input value={search} onChange={(event) => { setSearch(event.target.value); cancelQuantityEntry(); }} placeholder="Cari nama atau barcode produk..." />{search && <button className="search-clear" type="button" onClick={() => { setSearch(''); cancelQuantityEntry(); }} aria-label="Hapus pencarian"><X size={15} /></button>}</div>
+      <section className="panel product-picker"><div className="search-field"><Search size={18} /><input ref={searchInputRef} value={search} onChange={(event) => { setSearch(event.target.value); cancelQuantityEntry(); }} onKeyDown={handleSearchKeyDown} placeholder="Cari nama atau barcode produk..." />{search && <button className="search-clear" type="button" onClick={() => { setSearch(''); cancelQuantityEntry(); }} aria-label="Hapus pencarian"><X size={15} /></button>}</div>
         <div className="product-grid">{filtered.map((product) => {
           const available = getAvailableQuantity(product);
           const isEnteringQuantity = quantityEntryProductId === product.id;
           return <div className={`pos-product${isEnteringQuantity ? ' pos-product-entering' : ''}`} key={product.id}>
-            <button className="pos-product-main" type="button" disabled={available <= 0} onClick={() => startQuantityEntry(product)}>
+            <button className="pos-product-main" type="button" ref={(element) => { if (element) productButtonRefs.current.set(product.id, element); else productButtonRefs.current.delete(product.id); }} disabled={available <= 0} onKeyDown={(event) => handleProductKeyDown(event, product)} onClick={() => startQuantityEntry(product)}>
               <span className={`product-art${product.color ? ' product-art-color' : ''}`} style={product.color ? { '--product-color': product.color } : undefined}>{!product.color && <Package size={18} />}</span>
-              <span className="pos-product-copy"><span className="pos-product-name">{product.name}</span><span className="pos-product-bottom"><strong>{money(product.sell_price)}</strong><small>{quantity(available)} {product.unit} tersedia</small></span></span>
+              <span className="pos-product-copy"><span className="pos-product-name">{product.name}</span><span className="pos-product-bottom"><strong>{money(product.sell_price)}</strong><small><strong className="pos-stock-available">{quantity(available)} {product.unit}</strong> tersedia</small></span></span>
             </button>
             {isEnteringQuantity && <form className="pos-quantity-entry" noValidate onSubmit={(event) => confirmQuantity(event, product)}>
               <input ref={quantityInputRef} id={`quantity-${product.id}`} type="number" inputMode={product.unit === 'pcs' ? 'numeric' : 'decimal'} min="0.001" max={available} step={product.unit === 'pcs' ? '1' : '0.001'} value={quantityDraft} aria-label={`Jumlah ${product.name}`} aria-invalid={Boolean(quantityError)} aria-describedby={quantityError ? `quantity-error-${product.id}` : undefined} onChange={(event) => { setQuantityDraft(event.target.value); setQuantityError(''); }} onKeyDown={(event) => { if (event.key === 'Escape') cancelQuantityEntry(); }} />
@@ -777,6 +837,36 @@ function PointOfSale({ products, storeId, run }) {
         <div className="cart-summary"><div className="summary-total"><span>Total pembayaran</span><strong>{money(total)}</strong></div><Field label="Uang diterima"><CurrencyInput value={paid} onChange={setPaid} placeholder="Masukkan nominal pembayaran" /></Field><div className="summary-line change-line"><span>Kembalian</span><strong>{money(change)}</strong></div><button className="button button-primary full-button checkout-button" disabled={!cart.length || Number(paid) < total || busy} onClick={checkout}><CreditCard size={17} />{busy ? 'Menyimpan transaksi...' : 'Selesaikan transaksi'}</button></div>
       </section>
     </div>
+    {receipt && <Modal title="Struk transaksi" className="receipt-print" onClose={() => setReceipt(null)}>
+      <div className="receipt-preview-wrap">
+        <article className="receipt-paper">
+          <header className="receipt-header">
+            <img src={`${import.meta.env.BASE_URL}paint-store-logo.png`} alt={`Logo ${receipt.storeName}`} />
+            <h3>{receipt.storeName}</h3>
+            {receipt.address && <p>{receipt.address}</p>}
+            {receipt.phone && <p>{receipt.phone}</p>}
+          </header>
+          <div className="receipt-rule" />
+          <div className="receipt-meta"><span>No. transaksi</span><strong>{receipt.code}</strong></div>
+          <div className="receipt-meta"><span>Waktu</span><strong>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(receipt.createdAt))}</strong></div>
+          <div className="receipt-rule receipt-rule-dashed" />
+          <div className="receipt-items">{receipt.items.map((item, index) => <div className="receipt-item" key={`${item.name}-${index}`}>
+            <strong>{item.name}</strong>
+            <div><span>{quantity(item.quantity)} {item.unit} × {money(item.unitPrice)}</span><strong>{money(item.lineTotal)}</strong></div>
+          </div>)}</div>
+          <div className="receipt-rule receipt-rule-dashed" />
+          <div className="receipt-total"><span>TOTAL</span><strong>{money(receipt.total)}</strong></div>
+          <div className="receipt-meta"><span>Tunai</span><strong>{money(receipt.amountPaid)}</strong></div>
+          <div className="receipt-meta"><span>Kembalian</span><strong>{money(receipt.change)}</strong></div>
+          <footer className="receipt-footer">{receipt.footer || 'Terima kasih atas kunjungan Anda.'}</footer>
+        </article>
+        <p className="receipt-print-note">Struk disiapkan untuk kertas thermal 58 mm.</p>
+        <div className="modal-actions receipt-actions">
+          <button type="button" className="button button-secondary" onClick={() => setReceipt(null)}>Tutup</button>
+          <button type="button" className="button button-primary" onClick={() => window.print()}><Printer size={16} />Cetak struk</button>
+        </div>
+      </div>
+    </Modal>}
   </>;
 }
 
@@ -976,19 +1066,15 @@ function ZakatPage({ sales }) {
     const date = sale.created_at ? localDate(sale.created_at) : '';
     return (!from || date >= from) && (!to || date <= to);
   }), [sales, from, to]);
-  const grossRevenue = filtered.reduce((sum, sale) => sum + Number(sale.subtotal), 0);
-  const discount = filtered.reduce((sum, sale) => sum + Number(sale.discount), 0);
-  const netRevenue = filtered.reduce((sum, sale) => sum + Number(sale.total), 0);
+  const revenue = filtered.reduce((sum, sale) => sum + Number(sale.total), 0);
   const cost = filtered.reduce((sum, sale) => sum + Number(sale.cost_total), 0);
-  const profit = netRevenue - cost;
+  const profit = revenue - cost;
   const zakat = Math.round(Math.max(0, profit) * 0.025);
   const exportCsv = () => downloadCsv([
-    'Tanggal,Nomor Transaksi,Omzet kotor (Rp),Diskon (Rp),Omzet bersih (Rp),HPP (Rp),Laba setelah HPP (Rp)',
+    'Tanggal,Nomor Transaksi,Omzet (Rp),HPP (Rp),Laba setelah HPP (Rp)',
     ...filtered.map((sale) => [
       sale.created_at?.slice(0, 10),
       sale.code,
-      sale.subtotal,
-      sale.discount,
       sale.total,
       sale.cost_total,
       Number(sale.total) - Number(sale.cost_total),
@@ -1011,9 +1097,7 @@ function ZakatPage({ sales }) {
       <section className="panel zakat-breakdown">
         <div className="panel-heading"><div><h2>Rincian perhitungan</h2><p>{filtered.length} transaksi dalam periode</p></div></div>
         <div className="zakat-calculation">
-          <div className="zakat-line"><span>Omzet kotor</span><strong>{money(grossRevenue)}</strong></div>
-          <div className="zakat-line zakat-deduction"><span>Diskon penjualan</span><strong>− {money(discount)}</strong></div>
-          <div className="zakat-line zakat-subtotal"><span>Omzet bersih</span><strong>{money(netRevenue)}</strong></div>
+          <div className="zakat-line zakat-subtotal"><span>Omzet penjualan</span><strong>{money(revenue)}</strong></div>
           <div className="zakat-line zakat-deduction"><span>Harga pokok penjualan (HPP)</span><strong>− {money(cost)}</strong></div>
           <div className="zakat-line zakat-profit"><span>Laba setelah HPP</span><strong>{money(profit)}</strong></div>
           <div className="zakat-line zakat-rate"><span>Tarif zakat</span><strong>2,5%</strong></div>
@@ -1030,8 +1114,8 @@ function ZakatPage({ sales }) {
 
     <section className="panel data-panel zakat-transactions">
       <div className="panel-heading"><div><h2>Rincian transaksi</h2></div></div>
-      <div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>NO. TRANSAKSI</th><th>OMZET KOTOR</th><th>DISKON</th><th>OMZET BERSIH</th><th>HPP</th><th className="align-right">LABA SETELAH HPP</th></tr></thead><tbody>
-        {filtered.map((sale, index) => <tr key={sale.id}><td className="row-number">{index + 1}</td><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.subtotal)}</td><td>{money(sale.discount)}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}
+      <div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>NO. TRANSAKSI</th><th>OMZET</th><th>HPP</th><th className="align-right">LABA SETELAH HPP</th></tr></thead><tbody>
+        {filtered.map((sale, index) => <tr key={sale.id}><td className="row-number">{index + 1}</td><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}
       </tbody></table>{!filtered.length && <EmptyState icon={CircleDollarSign} title="Belum ada transaksi pada periode ini" text="Pilih rentang tanggal lain untuk melihat rincian perhitungan zakat." />}</div>
     </section>
   </>;
@@ -1082,7 +1166,7 @@ function Modal({ title, children, onClose }) {
     document.addEventListener('keydown', closeOnEscape);
     return () => document.removeEventListener('keydown', closeOnEscape);
   }, [onClose]);
-  return <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div className="modal-heading"><h2 id="modal-title">{title}</h2><button className="icon-button" onClick={onClose} aria-label="Tutup"><X size={19} /></button></div>{children}</section></div>;
+  return <div className={`modal-backdrop ${className}`} onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section className={`modal${className ? ` ${className}-dialog` : ''}`} role="dialog" aria-modal="true" aria-labelledby="modal-title"><div className="modal-heading"><h2 id="modal-title">{title}</h2><button className="icon-button" onClick={onClose} aria-label="Tutup"><X size={19} /></button></div>{children}</section></div>;
 }
 
 function ModalActions({ onCancel, busy }) {
