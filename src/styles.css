@@ -1185,7 +1185,6 @@ body {
   border-radius: 18px 38px 14px 38px;
 }
 
-.quick-action:nth-child(even),
 .pos-product:nth-child(even) {
   border-radius: 38px 16px 38px 14px;
 }
@@ -1247,10 +1246,6 @@ body {
   border-radius: 12px 24px 11px 24px;
 }
 
-.quick-action:nth-child(even) {
-  border-radius: 24px 11px 24px 12px;
-}
-
 @media (max-height: 680px) and (min-width: 821px) {
   .topbar { height: 52px; margin-bottom: 12px; }
   .dashboard-content { min-height: calc(100dvh - 97px); }
@@ -1271,9 +1266,6 @@ body {
     border-radius: 11px 20px 10px 20px;
   }
 
-  .quick-action:nth-child(even) {
-    border-radius: 20px 10px 20px 11px;
-  }
 }
 
 .search-field,
