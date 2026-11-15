@@ -446,7 +446,6 @@ body {
 }
 
 .sidebar,
-.topbar,
 .panel,
 .stat-card,
 .vendor-card,
@@ -929,7 +928,7 @@ body {
 }
 
 :root {
-  --muted: #1a1205;
+  --muted: #000;
 }
 
 .nav-caption,
@@ -987,13 +986,13 @@ body {
 .full-screen,
 .auth-heading > p:last-child,
 .auth-security {
-  color: #1a1205 !important;
+  color: #000 !important;
 }
 
 .field input::placeholder,
 .field textarea::placeholder,
 .search-field input::placeholder {
-  color: #1a1205 !important;
+  color: #000 !important;
   opacity: 1;
 }
 
@@ -1070,7 +1069,6 @@ body {
 }
 
 .sidebar,
-.topbar,
 .panel,
 .stat-card,
 .vendor-card,
@@ -1126,7 +1124,6 @@ body {
 
 @media (max-width: 620px) {
   .sidebar,
-  .topbar,
   .panel,
   .stat-card,
   .vendor-card,
