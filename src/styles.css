@@ -836,7 +836,7 @@ body {
 .dashboard-grid > .low-stock-panel {
   color: #fff8df;
   background: rgba(23, 19, 13, .72);
-  border-color: rgba(255, 255, 255, .2);
+  border-color: rgba(255, 255, 255, .62);
   box-shadow: 0 12px 30px rgba(42, 26, 0, .2), inset 0 1px 0 rgba(255, 255, 255, .11);
   backdrop-filter: blur(18px) saturate(135%);
   -webkit-backdrop-filter: blur(18px) saturate(135%);
