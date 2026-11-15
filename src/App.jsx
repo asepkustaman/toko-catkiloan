@@ -671,7 +671,6 @@ function CurrencyInput({ value, onChange, ...inputProps }) {
 function PointOfSale({ products, storeId, run }) {
   const [search, setSearch] = useState('');
   const [cart, setCart] = useState([]);
-  const [discount, setDiscount] = useState('');
   const [paid, setPaid] = useState('');
   const [busy, setBusy] = useState(false);
   const [quantityEntryProductId, setQuantityEntryProductId] = useState(null);
@@ -680,7 +679,7 @@ function PointOfSale({ products, storeId, run }) {
   const quantityInputRef = useRef(null);
   const filtered = products.filter((product) => `${product.name} ${product.barcode ?? ''} ${product.category?.name ?? ''}`.toLowerCase().includes(search.toLowerCase()));
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const total = Math.max(0, subtotal - (Number(discount) || 0));
+  const total = subtotal;
   const change = Math.max(0, (Number(paid) || 0) - total);
   useEffect(() => {
     if (!quantityEntryProductId) return;
@@ -737,13 +736,12 @@ function PointOfSale({ products, storeId, run }) {
         const { error } = await supabase.rpc('checkout_sale', {
           p_store_id: storeId,
           p_items: cart.map((item) => ({ product_id: item.product.id, quantity: item.qty })),
-          p_discount: Number(discount) || 0,
+          p_discount: 0,
           p_amount_paid: Number(paid) || 0,
         });
         if (error) throw error;
       }, 'Transaksi berhasil disimpan.');
       setCart([]);
-      setDiscount('');
       setPaid('');
     } catch {
       // The shared action handler displays the Supabase error.
@@ -776,7 +774,7 @@ function PointOfSale({ products, storeId, run }) {
         <div className="cart-items">{cart.map((item) => <div className="cart-row" key={item.product.id}><div className="cart-item-copy"><strong>{item.product.name}</strong><small>{money(item.price)} / {item.product.unit}</small></div><div className="quantity-control"><button onClick={() => updateQty(item.product.id, -1)} aria-label="Kurangi">−</button><span>{quantity(item.qty)}</span><button onClick={() => updateQty(item.product.id, 1)} aria-label="Tambah">+</button></div><strong className="cart-line-total">{money(item.price * item.qty)}</strong><button className="remove-button" onClick={() => remove(item.product.id)} aria-label="Hapus"><X size={15} /></button></div>)}
           {!cart.length && <EmptyState icon={ShoppingCart} title="Keranjang masih kosong" text="Pilih produk dari daftar untuk mulai transaksi." />}
         </div>
-        <div className="cart-summary"><div className="summary-line"><span>Subtotal</span><strong>{money(subtotal)}</strong></div><Field label="Diskon"><CurrencyInput value={discount} onChange={setDiscount} placeholder="Masukkan nominal diskon" /></Field><div className="summary-total"><span>Total pembayaran</span><strong>{money(total)}</strong></div><Field label="Uang diterima"><CurrencyInput value={paid} onChange={setPaid} placeholder="Masukkan nominal pembayaran" /></Field><div className="summary-line change-line"><span>Kembalian</span><strong>{money(change)}</strong></div><button className="button button-primary full-button checkout-button" disabled={!cart.length || Number(paid) < total || busy} onClick={checkout}><CreditCard size={17} />{busy ? 'Menyimpan transaksi...' : 'Selesaikan transaksi'}</button></div>
+        <div className="cart-summary"><div className="summary-total"><span>Total pembayaran</span><strong>{money(total)}</strong></div><Field label="Uang diterima"><CurrencyInput value={paid} onChange={setPaid} placeholder="Masukkan nominal pembayaran" /></Field><div className="summary-line change-line"><span>Kembalian</span><strong>{money(change)}</strong></div><button className="button button-primary full-button checkout-button" disabled={!cart.length || Number(paid) < total || busy} onClick={checkout}><CreditCard size={17} />{busy ? 'Menyimpan transaksi...' : 'Selesaikan transaksi'}</button></div>
       </section>
     </div>
   </>;
