@@ -1494,10 +1494,11 @@ textarea::placeholder {
 }
 
 .zakat-transactions .pagination {
+  align-items: flex-end;
   min-height: 34px;
   justify-content: center;
   gap: 6px;
-  padding: 5px 12px;
+  padding: 4px 12px;
   border-top: 1px solid rgba(42, 26, 0, .1);
 }
 
