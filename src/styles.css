@@ -1467,30 +1467,43 @@ textarea::placeholder {
   overflow: hidden;
 }
 
-.zakat-transactions .pagination {
+.pagination {
   display: flex;
   min-height: 34px;
   align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
+  justify-content: center;
+  gap: 6px;
   padding: 5px 12px;
 }
 
-.zakat-transactions .pagination > span {
-  margin-right: auto;
+.pagination > span {
   color: #777e74;
   font-size: 9px;
+  white-space: nowrap;
 }
 
-.zakat-transactions .pagination > div {
-  display: flex;
-  gap: 5px;
+.pagination-arrow.button {
+  width: 25px;
+  min-width: 25px;
+  min-height: 25px;
+  padding: 4px;
+}
+
+.pagination-previous-icon {
+  transform: rotate(180deg);
+}
+
+.zakat-transactions .pagination {
+  min-height: 34px;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-top: 1px solid rgba(42, 26, 0, .1);
 }
 
 .zakat-transactions .pagination .button {
   min-height: 25px;
-  padding: 4px 9px;
-  font-size: 9px;
+  padding: 4px;
 }
 
 .zakat-breakdown {

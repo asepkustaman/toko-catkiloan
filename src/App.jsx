@@ -776,11 +776,9 @@ function Pagination({ page, total, onChange, loading = false, pageSize = PAGE_SI
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   if (pageCount <= 1) return null;
   return <nav className="pagination" aria-label="Navigasi halaman">
+    <button className="button button-quiet pagination-arrow" type="button" aria-label="Halaman sebelumnya" title="Sebelumnya" disabled={loading || page <= 1} onClick={() => onChange(page - 1)}><ArrowRight className="pagination-previous-icon" size={14} /></button>
     <span>Halaman {page} dari {pageCount} · {numberFormat.format(total)} data</span>
-    <div>
-      <button className="button button-quiet" type="button" disabled={loading || page <= 1} onClick={() => onChange(page - 1)}>Sebelumnya</button>
-      <button className="button button-quiet" type="button" disabled={loading || page >= pageCount} onClick={() => onChange(page + 1)}>Berikutnya</button>
-    </div>
+    <button className="button button-quiet pagination-arrow" type="button" aria-label="Halaman berikutnya" title="Berikutnya" disabled={loading || page >= pageCount} onClick={() => onChange(page + 1)}><ArrowRight size={14} /></button>
   </nav>;
 }
 
