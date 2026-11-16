@@ -306,7 +306,7 @@ function App() {
         <div className={`content ${page === 'dashboard' ? 'dashboard-content' : ''}`}>
           {loading && <div className="sync-indicator">Memperbarui data...</div>}
           {page === 'dashboard' && <Dashboard store={store} products={products} sales={sales} stockEntries={stockEntries} settings={settings} setPage={navigate} />}
-          {page === 'pos' && <PointOfSale products={products} store={store} settings={settings} storeId={store.id} run={run} />}
+          {page === 'pos' && <PointOfSale products={products} categories={categories} store={store} settings={settings} storeId={store.id} run={run} />}
           {page === 'sales' && <SalesPage sales={sales} />}
           {page === 'stock' && <StockPage products={products} vendors={vendors} stockEntries={stockEntries} storeId={store.id} run={run} />}
           {page === 'products' && <ProductsPage products={products} categories={categories} vendors={vendors} storeId={store.id} run={run} threshold={settings?.low_stock_threshold ?? 5} />}
@@ -696,8 +696,10 @@ function CurrencyInput({ value, onChange, ...inputProps }) {
   return <span className="currency-input"><span aria-hidden="true">Rp</span><input {...inputProps} ref={inputRef} type="text" inputMode="numeric" value={formattedValue} onChange={handleChange} /></span>;
 }
 
-function PointOfSale({ products, store, settings, storeId, run }) {
+function PointOfSale({ products, categories, store, settings, storeId, run }) {
   const [search, setSearch] = useState('');
+  const [categoryFilterEnabled, setCategoryFilterEnabled] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [cart, setCart] = useState([]);
   const [paid, setPaid] = useState('');
   const [receipt, setReceipt] = useState(null);
@@ -708,7 +710,20 @@ function PointOfSale({ products, store, settings, storeId, run }) {
   const searchInputRef = useRef(null);
   const quantityInputRef = useRef(null);
   const productButtonRefs = useRef(new Map());
-  const filtered = products.filter((product) => `${product.name} ${product.barcode ?? ''} ${product.category?.name ?? ''}`.toLowerCase().includes(search.toLowerCase()));
+  const categoryOptions = [
+    ...categories,
+    ...(products.some((product) => !product.category) ? [{ id: '__uncategorized__', name: 'Tanpa kategori' }] : []),
+  ];
+  const filtered = products.filter((product) => {
+    const matchesSearch = `${product.name} ${product.barcode ?? ''} ${product.category?.name ?? ''}`.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = !categoryFilterEnabled || !selectedCategoryId
+      || (selectedCategoryId === '__uncategorized__' ? !product.category : String(product.category?.id) === String(selectedCategoryId));
+    return matchesSearch && matchesCategory;
+  });
+  const toggleCategoryFilter = () => {
+    if (categoryFilterEnabled) setSelectedCategoryId('');
+    setCategoryFilterEnabled(!categoryFilterEnabled);
+  };
   const quantityEntryActive = quantityEntryProductId !== null;
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
   const total = subtotal;
@@ -848,7 +863,11 @@ function PointOfSale({ products, store, settings, storeId, run }) {
   };
   return <>
     <div className="pos-layout">
-      <section className="panel product-picker"><div className="pos-picker-header"><div className="search-field"><Search size={18} /><input ref={searchInputRef} value={search} disabled={quantityEntryActive} onChange={(event) => { setSearch(event.target.value); cancelQuantityEntry(); }} onKeyDown={handleSearchKeyDown} placeholder="Cari nama atau barcode produk..." />{search && <button className="search-clear" type="button" disabled={quantityEntryActive} onClick={() => { setSearch(''); cancelQuantityEntry(); }} aria-label="Hapus pencarian"><X size={15} /></button>}</div><div className="pos-transaction-total" aria-live="polite"><span>Nominal transaksi</span><strong>{money(total)}</strong></div></div>
+      <section className="panel product-picker"><div className="pos-picker-header"><div className="pos-picker-controls"><div className="search-field"><Search size={18} /><input ref={searchInputRef} value={search} disabled={quantityEntryActive} onChange={(event) => { setSearch(event.target.value); cancelQuantityEntry(); }} onKeyDown={handleSearchKeyDown} placeholder="Cari nama atau barcode produk..." />{search && <button className="search-clear" type="button" disabled={quantityEntryActive} onClick={() => { setSearch(''); cancelQuantityEntry(); }} aria-label="Hapus pencarian"><X size={15} /></button>}</div><div className="pos-category-switch"><span>Filter kategori</span><button className={`pos-switch${categoryFilterEnabled ? ' is-on' : ''}`} type="button" role="switch" aria-checked={categoryFilterEnabled} aria-label="Filter kategori" disabled={quantityEntryActive} onClick={toggleCategoryFilter}><span /></button></div></div><div className="pos-transaction-total" aria-live="polite"><span>Nominal transaksi</span><strong>{money(total)}</strong></div></div>
+        {categoryFilterEnabled && <div className="pos-category-filters" aria-label="Pilih kategori produk">
+          <button className={`pos-category-chip${selectedCategoryId ? '' : ' is-active'}`} type="button" aria-pressed={!selectedCategoryId} disabled={quantityEntryActive} onClick={() => setSelectedCategoryId('')}>Semua</button>
+          {categoryOptions.map((category) => <button className={`pos-category-chip${String(selectedCategoryId) === String(category.id) ? ' is-active' : ''}`} key={category.id} type="button" aria-pressed={String(selectedCategoryId) === String(category.id)} disabled={quantityEntryActive} onClick={() => setSelectedCategoryId(String(category.id))}>{category.name}</button>)}
+        </div>}
         <div className="product-grid">{filtered.map((product) => {
           const available = getAvailableQuantity(product);
           const isEnteringQuantity = quantityEntryProductId === product.id;
@@ -865,7 +884,7 @@ function PointOfSale({ products, store, settings, storeId, run }) {
             </form>}
           </div>;
         })}</div>
-        {!filtered.length && <EmptyState icon={Search} title="Produk tidak ditemukan" text="Coba kata kunci yang berbeda." />}
+        {!filtered.length && <EmptyState icon={Search} title="Produk tidak ditemukan" text={selectedCategoryId ? 'Tidak ada produk pada kategori dan pencarian ini.' : 'Coba kata kunci yang berbeda.'} />}
       </section>
       <section className="panel cart-panel"><div className="cart-heading"><span className="cart-icon"><ShoppingCart size={18} /></span><div><h2>Keranjang</h2><p>{cart.length} jenis produk</p></div><button className="icon-button" disabled={!cart.length} onClick={() => setCart([])} title="Kosongkan keranjang"><Trash2 size={17} /></button></div>
         <div className="cart-items">{cart.map((item) => <div className="cart-row" key={item.product.id}><div className="cart-item-copy"><strong>{item.product.name}</strong><small>{money(item.price)} / {item.product.unit}</small></div><div className="quantity-control"><button onClick={() => updateQty(item.product.id, -1)} aria-label="Kurangi">−</button><span>{quantity(item.qty)}</span><button onClick={() => updateQty(item.product.id, 1)} aria-label="Tambah">+</button></div><strong className="cart-line-total">{money(item.price * item.qty)}</strong><button className="remove-button" onClick={() => remove(item.product.id)} aria-label="Hapus"><X size={15} /></button></div>)}
