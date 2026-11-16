@@ -715,24 +715,27 @@ async function requestSalesPage({ storeId, from = '', to = '', search = '', page
 }
 
 function useSalesPage({ storeId, from = '', to = '', search = '', page = 1, pageSize = PAGE_SIZE }) {
-  const [data, setData] = useState({ rows: [], total_count: 0, revenue: 0, cost: 0, stock_expense: 0, queryKey: '' });
+  const [data, setData] = useState({ rows: [], total_count: 0, revenue: 0, cost: 0, stock_expense: 0, queryKey: '', filterKey: '', page: 1 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [errorQueryKey, setErrorQueryKey] = useState('');
   const [reloadId, setReloadId] = useState(0);
   const queryKey = JSON.stringify([storeId, from, to, search, page, pageSize]);
+  const filterKey = JSON.stringify([storeId, from, to, search, pageSize]);
 
   useEffect(() => {
     let active = true;
     setLoading(true);
     setError('');
+    setErrorQueryKey('');
     requestSalesPage({ storeId, from, to, search, page, limit: pageSize })
       .then((result) => {
-        if (active) setData({ ...(result ?? { rows: [], total_count: 0, revenue: 0, cost: 0, stock_expense: 0 }), queryKey });
+        if (active) setData({ ...(result ?? { rows: [], total_count: 0, revenue: 0, cost: 0, stock_expense: 0 }), queryKey, filterKey, page });
       })
       .catch((requestError) => {
         if (active) {
-          setData((current) => ({ ...current, rows: [], queryKey }));
           setError(errorMessage(requestError));
+          setErrorQueryKey(queryKey);
         }
       })
       .finally(() => {
@@ -742,11 +745,12 @@ function useSalesPage({ storeId, from = '', to = '', search = '', page = 1, page
   }, [storeId, from, to, search, page, pageSize, reloadId]);
 
   const hasCurrentPage = data.queryKey === queryKey;
+  const hasSameFilter = data.filterKey === filterKey;
   return {
     ...data,
-    rows: hasCurrentPage ? data.rows : [],
-    loading: loading || !hasCurrentPage,
-    error: hasCurrentPage ? error : '',
+    rows: hasSameFilter ? data.rows : [],
+    loading: loading || !hasSameFilter,
+    error: error && (hasCurrentPage || errorQueryKey === queryKey) ? error : '',
     reload: () => setReloadId((id) => id + 1),
   };
 }
@@ -1301,7 +1305,7 @@ function SalesPage({ storeId }) {
       </div>
       {salesPage.error && <p className="inline-error" role="alert">Gagal memuat transaksi: {salesPage.error}</p>}
       {exportError && <p className="inline-error" role="alert">{exportError}</p>}
-      <div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>NO. TRANSAKSI</th><th>TANGGAL</th><th>JUMLAH ITEM</th><th>SUBTOTAL</th><th className="align-right">TOTAL</th></tr></thead><tbody>{salesPage.rows.map((sale, index) => <tr className="clickable-row" key={sale.id} onClick={() => openSale(sale)}><td className="row-number">{(page - 1) * PAGE_SIZE + index + 1}</td><td><strong className="mono">{sale.code}</strong></td><td>{shortDate(sale.created_at)}</td><td>{sale.item_count} produk</td><td>{money(sale.subtotal)}</td><td className="align-right"><strong>{money(sale.total)}</strong></td></tr>)}</tbody></table>{!salesPage.loading && !salesPage.error && !salesPage.rows.length && <EmptyState icon={ClipboardList} title="Transaksi tidak ditemukan" text="Belum ada transaksi yang sesuai." />}</div><Pagination page={page} total={Number(salesPage.total_count)} onChange={setPage} loading={salesPage.loading} /></section>
+      <div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>NO. TRANSAKSI</th><th>TANGGAL</th><th>JUMLAH ITEM</th><th>SUBTOTAL</th><th className="align-right">TOTAL</th></tr></thead><tbody>{salesPage.rows.map((sale, index) => <tr className="clickable-row" key={sale.id} onClick={() => openSale(sale)}><td className="row-number">{(salesPage.page - 1) * PAGE_SIZE + index + 1}</td><td><strong className="mono">{sale.code}</strong></td><td>{shortDate(sale.created_at)}</td><td>{sale.item_count} produk</td><td>{money(sale.subtotal)}</td><td className="align-right"><strong>{money(sale.total)}</strong></td></tr>)}</tbody></table>{!salesPage.loading && !salesPage.error && !salesPage.rows.length && <EmptyState icon={ClipboardList} title="Transaksi tidak ditemukan" text="Belum ada transaksi yang sesuai." />}</div><Pagination page={salesPage.page} total={Number(salesPage.total_count)} onChange={setPage} loading={salesPage.loading} /></section>
     {selected && <Modal title="Detail transaksi" onClose={() => setSelected(null)}><div className="sale-detail"><div className="sale-detail-top"><span className="badge badge-success">Selesai</span><strong className="mono">{selected.code}</strong><span>{shortDate(selected.created_at)}</span></div>{detailError && <p className="inline-error" role="alert">{detailError}</p>}{detailLoading ? <p>Memuat detail transaksi...</p> : <div className="sale-items">{selectedItems.map((item) => <div className="sale-item" key={item.id}><span>{item.product_name}<small>{quantity(item.quantity)} × {money(item.unit_price)}</small></span><strong>{money(Number(item.quantity) * Number(item.unit_price))}</strong></div>)}</div>}<div className="summary-total"><span>Total</span><strong>{money(selected.total)}</strong></div><div className="summary-line"><span>Dibayar</span><strong>{money(selected.amount_paid)}</strong></div><div className="summary-line"><span>Kembalian</span><strong>{money(selected.change_amount)}</strong></div></div></Modal>}
   </>;
 }
@@ -1336,7 +1340,7 @@ function ReportsPage({ storeId }) {
     {salesPage.error && <p className="inline-error" role="alert">Gagal memuat laporan: {salesPage.error}</p>}
     {exportError && <p className="inline-error" role="alert">{exportError}</p>}
     <div className="stats-grid report-stats"><StatCard label="Omzet bersih" value={money(revenue)} note={`${Number(salesPage.total_count)} transaksi`} icon={CircleDollarSign} tone="gold" artwork /><StatCard label="Harga pokok terjual" value={money(cost)} note="Dihitung dari harga beli saat transaksi" icon={Boxes} tone="blue" artwork /><StatCard label="Laba bersih" value={money(profit)} note="Omzet dikurangi harga pokok" icon={TrendingUp} tone="green" artwork /><StatCard label="Pembelian stok" value={money(expense)} note="Nilai stok masuk pada periode ini" icon={ArrowDownToLine} tone="purple" artwork /></div>
-    <section className="panel data-panel report-transactions"><div className="panel-heading report-table-heading"><div><h2>Rincian laba per transaksi</h2></div></div><div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>NO. TRANSAKSI</th><th>OMZET</th><th>HARGA POKOK</th><th className="align-right">LABA BERSIH</th></tr></thead><tbody>{salesPage.rows.map((sale, index) => <tr key={sale.id}><td className="row-number">{(page - 1) * pageSize + index + 1}</td><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}{salesPage.rows.length > 0 && Array.from({ length: Math.max(0, pageSize - salesPage.rows.length) }, (_, index) => <tr className="table-spacer-row" aria-hidden="true" key={`report-spacer-${page}-${index}`}><td colSpan="6" /></tr>)}</tbody></table>{!salesPage.loading && !salesPage.error && !salesPage.rows.length && <EmptyState icon={BarChart3} title="Belum ada data laporan" text="Transaksi pada periode ini akan muncul di sini." />}</div><Pagination page={page} pageSize={pageSize} total={Number(salesPage.total_count)} onChange={setPage} loading={salesPage.loading} /></section>
+    <section className="panel data-panel report-transactions"><div className="panel-heading report-table-heading"><div><h2>Rincian laba per transaksi</h2></div></div><div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>NO. TRANSAKSI</th><th>OMZET</th><th>HARGA POKOK</th><th className="align-right">LABA BERSIH</th></tr></thead><tbody>{salesPage.rows.map((sale, index) => <tr key={sale.id}><td className="row-number">{(salesPage.page - 1) * pageSize + index + 1}</td><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}{salesPage.rows.length > 0 && Array.from({ length: Math.max(0, pageSize - salesPage.rows.length) }, (_, index) => <tr className="table-spacer-row" aria-hidden="true" key={`report-spacer-${salesPage.page}-${index}`}><td colSpan="6" /></tr>)}</tbody></table>{!salesPage.loading && !salesPage.error && !salesPage.rows.length && <EmptyState icon={BarChart3} title="Belum ada data laporan" text="Transaksi pada periode ini akan muncul di sini." />}</div><Pagination page={salesPage.page} pageSize={pageSize} total={Number(salesPage.total_count)} onChange={setPage} loading={salesPage.loading} /></section>
   </>;
 }
 
@@ -1411,9 +1415,9 @@ function ZakatPage({ storeId }) {
     <section className="panel data-panel zakat-transactions">
       <div className="panel-heading"><div><h2>Rincian transaksi</h2></div></div>
       <div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>NO. TRANSAKSI</th><th>OMZET</th><th>HPP</th><th className="align-right">LABA SETELAH HPP</th></tr></thead><tbody>
-        {salesPage.rows.map((sale, index) => <tr key={sale.id}><td className="row-number">{(page - 1) * pageSize + index + 1}</td><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}
+        {salesPage.rows.map((sale, index) => <tr key={sale.id}><td className="row-number">{(salesPage.page - 1) * pageSize + index + 1}</td><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}
         {salesPage.rows.length > 0 && Array.from({ length: Math.max(0, pageSize - salesPage.rows.length) }, (_, index) => <tr className="table-spacer-row" aria-hidden="true" key={`spacer-${page}-${index}`}><td colSpan="6" /></tr>)}
-      </tbody></table>{!salesPage.loading && !salesPage.error && !salesPage.rows.length && <EmptyState icon={CircleDollarSign} title="Belum ada transaksi pada periode ini" text="Pilih rentang tanggal lain untuk melihat rincian perhitungan zakat." />}</div><Pagination page={page} pageSize={pageSize} total={Number(salesPage.total_count)} onChange={setPage} loading={salesPage.loading} />
+      </tbody></table>{!salesPage.loading && !salesPage.error && !salesPage.rows.length && <EmptyState icon={CircleDollarSign} title="Belum ada transaksi pada periode ini" text="Pilih rentang tanggal lain untuk melihat rincian perhitungan zakat." />}</div><Pagination page={salesPage.page} pageSize={pageSize} total={Number(salesPage.total_count)} onChange={setPage} loading={salesPage.loading} />
     </section>
   </>;
 }
