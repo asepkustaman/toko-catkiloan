@@ -1463,6 +1463,36 @@ textarea::placeholder {
   margin-bottom: 16px;
 }
 
+.zakat-transactions .table-wrap {
+  overflow: hidden;
+}
+
+.zakat-transactions .pagination {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 5px 12px;
+}
+
+.zakat-transactions .pagination > span {
+  margin-right: auto;
+  color: #777e74;
+  font-size: 9px;
+}
+
+.zakat-transactions .pagination > div {
+  display: flex;
+  gap: 5px;
+}
+
+.zakat-transactions .pagination .button {
+  min-height: 25px;
+  padding: 4px 9px;
+  font-size: 9px;
+}
+
 .zakat-breakdown {
   padding: 18px;
 }
