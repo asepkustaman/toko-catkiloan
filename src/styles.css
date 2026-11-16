@@ -367,8 +367,10 @@ form.form-stack:has(.product-category-row) > .form-row:has(.currency-input) { gr
 .summary-line strong { color: #41473e; font-weight: 600; }
 .summary-total { padding: 13px 0; color: #3f453c; border-top: 1px dashed #e6e9e2; font-size: 12px; font-weight: 700; }
 .summary-total strong { color: #262b24; font-family: Manrope, sans-serif; font-size: 23px; font-variant-numeric: tabular-nums; }
-.cart-summary .field { gap: 5px; }
-.cart-summary .field input { min-height: 34px; }
+.cart-summary > .field { gap: 7px; color: #2a1a00; font-size: 12px; font-weight: 800; }
+.cart-summary > .field .currency-input { min-height: 44px; }
+.cart-summary > .field .currency-input > span { font-size: 13px; }
+.cart-summary > .field .currency-input input { min-height: 42px; font-size: 15px; font-weight: 700; }
 .change-line { padding-top: 4px; }
 .change-line strong { color: #397853; }
 .checkout-button { min-height: 42px; margin-top: 1px; }
@@ -403,7 +405,7 @@ form.form-stack:has(.product-category-row) > .form-row:has(.currency-input) { gr
 @keyframes toast-enter { from { opacity: 0; transform: translate3d(0, -8px, 0) scale(.985); } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
 @keyframes toast-countdown { to { transform: scaleX(0); } }
 @media (max-width: 620px) { .toast { top: 72px; right: 12px; width: calc(100vw - 24px); } }
-.sync-indicator { margin: -20px 0 15px; color: #92998e; font-size: 9px; }
+.sync-indicator { position: absolute; z-index: 9; top: -14px; right: 6px; margin: 0; color: #92998e; font-size: 9px; pointer-events: none; }
 .modal-backdrop { position: fixed; z-index: 60; inset: 0; display: grid; align-items: center; justify-items: center; overflow-y: auto; padding: 20px; background: #20241f66; backdrop-filter: blur(3px); }
 .modal { width: min(490px, 100%); max-height: min(90vh, 780px); overflow-y: auto; padding: 20px; background: white; border: 1px solid #eaebe6; border-radius: 13px; box-shadow: 0 25px 90px #171c1426; }
 .receipt-print-dialog { width: min(420px, 100%); }
@@ -748,6 +750,7 @@ body {
 }
 
 .content {
+  position: relative;
   padding: 6px 6px clamp(10px, 2.4dvh, 38px);
 }
 
