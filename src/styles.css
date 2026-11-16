@@ -159,8 +159,8 @@ td strong { color: #373c35; font-weight: 600; }
 .full-button { width: 100%; }
 .data-panel { padding: 0; }
 .data-panel > .table-wrap { border-radius: 0 0 14px 38px; }
-.sales-panel-heading { position: relative; display: flex; align-items: center; justify-content: space-between; padding: 12px 18px 10px; }
-.sales-panel-heading::after { position: absolute; right: 18px; bottom: 0; left: 18px; height: 3px; background: linear-gradient(90deg, #986500 0 25%, #d89c10 25% 50%, #f2bf35 50% 75%, #ffe1a0 75%); border-radius: 999px; content: ''; }
+.sales-panel-heading { position: relative; display: flex; align-items: center; justify-content: space-between; padding: 12px 18px 10px; background: rgba(255, 255, 255, .18); border-radius: 38px 14px 0 0; }
+.sales-panel-heading::after { position: absolute; right: 18px; bottom: 0; left: 18px; height: 3px; background: #986500; border-radius: 999px; content: ''; }
 .sales-panel-heading h2 { margin: 0; font-family: Manrope, sans-serif; font-size: 14px; font-weight: 800; }
 .panel-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 15px 18px; border-bottom: 1px solid var(--line); }
 .panel-toolbar-title { font-size: 11px; }
