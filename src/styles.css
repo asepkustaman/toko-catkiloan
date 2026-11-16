@@ -1471,6 +1471,16 @@ textarea::placeholder {
   overflow: hidden;
 }
 
+.report-transactions th {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.report-transactions tbody td {
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+
 .zakat-transactions .table-spacer-row td,
 .report-transactions .table-spacer-row td {
   height: 37px;
