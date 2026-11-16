@@ -1400,6 +1400,7 @@ function ZakatPage({ storeId }) {
       <div className="panel-heading"><div><h2>Rincian transaksi</h2></div></div>
       <div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>NO. TRANSAKSI</th><th>OMZET</th><th>HPP</th><th className="align-right">LABA SETELAH HPP</th></tr></thead><tbody>
         {salesPage.rows.map((sale, index) => <tr key={sale.id}><td className="row-number">{(page - 1) * pageSize + index + 1}</td><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}
+        {salesPage.rows.length > 0 && Array.from({ length: Math.max(0, pageSize - salesPage.rows.length) }, (_, index) => <tr className="table-spacer-row" aria-hidden="true" key={`spacer-${page}-${index}`}><td colSpan="6" /></tr>)}
       </tbody></table>{!salesPage.loading && !salesPage.error && !salesPage.rows.length && <EmptyState icon={CircleDollarSign} title="Belum ada transaksi pada periode ini" text="Pilih rentang tanggal lain untuk melihat rincian perhitungan zakat." />}</div><Pagination page={page} pageSize={pageSize} total={Number(salesPage.total_count)} onChange={setPage} loading={salesPage.loading} />
     </section>
   </>;

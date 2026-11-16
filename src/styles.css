@@ -1467,6 +1467,12 @@ textarea::placeholder {
   overflow: hidden;
 }
 
+.zakat-transactions .table-spacer-row td {
+  height: 37px;
+  padding: 0;
+  border-bottom: 1px solid rgba(42, 26, 0, .08);
+}
+
 .pagination {
   display: flex;
   min-height: 34px;
