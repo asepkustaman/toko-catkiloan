@@ -1258,10 +1258,10 @@ body {
   color: #000 !important;
 }
 
-.field input::placeholder,
-.field textarea::placeholder,
-.search-field input::placeholder {
-  color: #000 !important;
+input::placeholder,
+textarea::placeholder {
+  color: #a6aaa2 !important;
+  font-weight: 400;
   opacity: 1;
 }
 
