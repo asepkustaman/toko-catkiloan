@@ -1,4 +1,4 @@
-const CACHE_NAME = 'paintstore-shell-v3';
+const CACHE_NAME = 'paintstore-shell-v4';
 const APP_ROOT = new URL('./', self.registration.scope);
 const APP_SHELL = [
   APP_ROOT.href,
@@ -27,6 +27,20 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url);
   if (event.request.method !== 'GET' || requestUrl.origin !== self.location.origin) return;
+
+  const isHashedAsset = /\/assets\/.+-[\w-]{8,}\.(?:js|css|woff2?|ttf|otf|svg|png|jpe?g|webp|avif)$/i.test(requestUrl.pathname);
+  if (isHashedAsset) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        }
+        return response;
+      })),
+    );
+    return;
+  }
 
   event.respondWith(
     fetch(event.request)

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ArrowDownToLine, ArrowRight, BarChart3, Boxes, BriefcaseBusiness, CalendarDays, Check,
   CircleDollarSign, ClipboardList, CreditCard, LayoutDashboard,
@@ -42,11 +42,11 @@ const currency = new Intl.NumberFormat('id-ID', {
 });
 const currencyInputFormat = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 });
 const NOTICE_DURATION = 3500;
+const PAGE_SIZE = 50;
 const numberFormat = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 });
 const today = () => new Date().toLocaleDateString('en-CA');
 const money = (value) => currency.format(Number(value) || 0);
 const quantity = (value) => numberFormat.format(Number(value) || 0);
-const localDate = (value) => new Date(value).toLocaleDateString('en-CA');
 const isPaintCategory = (value) => /^cat/i.test(value.trim());
 const shortDate = (value) => {
   if (!value) return '-';
@@ -77,8 +77,7 @@ function App() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [vendors, setVendors] = useState([]);
-  const [sales, setSales] = useState([]);
-  const [stockEntries, setStockEntries] = useState([]);
+  const [dashboardSummary, setDashboardSummary] = useState(null);
   const [settings, setSettings] = useState(null);
 
   const notify = (type, text) => setNotice({ id: ++noticeSequence.current, type, text });
@@ -175,36 +174,34 @@ function App() {
     return () => { active = false; };
   }, [session]);
 
-  const loadData = useCallback(async (showIndicator = true) => {
+  const loadData = useCallback(async (showIndicator = true, keys = ['products', 'categories', 'vendors', 'settings', 'dashboard']) => {
     if (!store?.id) return;
     if (showIndicator) setLoading(true);
-    let results;
     try {
-      results = await Promise.all([
-        supabase.from('products')
+      const loaders = {
+        products: () => supabase.from('products')
           .select('*, category:categories(id, name), vendor:vendors(id, name)')
           .eq('store_id', store.id).order('name'),
-        supabase.from('categories').select('id, name').eq('store_id', store.id).order('name'),
-        supabase.from('vendors').select('*').eq('store_id', store.id).order('name'),
-        supabase.from('sales')
-          .select('*, sale_items(*)')
-          .eq('store_id', store.id).order('created_at', { ascending: false }).limit(1000),
-        supabase.from('stock_entries')
-          .select('*, product:products(name), vendor:vendors(name)')
-          .eq('store_id', store.id).order('occurred_on', { ascending: false }).limit(500),
-        supabase.from('store_settings').select('*').eq('store_id', store.id).single(),
-      ]);
+        categories: () => supabase.from('categories').select('id, name').eq('store_id', store.id).order('name'),
+        vendors: () => supabase.from('vendors').select('id, name, contact, address').eq('store_id', store.id).order('name'),
+        settings: () => supabase.from('store_settings').select('*').eq('store_id', store.id).single(),
+        dashboard: () => supabase.rpc('get_dashboard_summary', { p_store_id: store.id }),
+      };
+      const selectedKeys = [...new Set(keys)];
+      const results = await Promise.all(selectedKeys.map((key) => loaders[key]()));
+      const failed = results.find((result) => result.error);
+      if (failed) throw failed.error;
+      results.forEach((result, index) => {
+        const key = selectedKeys[index];
+        if (key === 'products') setProducts(result.data ?? []);
+        if (key === 'categories') setCategories(result.data ?? []);
+        if (key === 'vendors') setVendors(result.data ?? []);
+        if (key === 'settings') setSettings(result.data ?? null);
+        if (key === 'dashboard') setDashboardSummary(result.data ?? null);
+      });
     } finally {
       if (showIndicator) setLoading(false);
     }
-    const failed = results.find((result) => result.error);
-    if (failed) throw failed.error;
-    setProducts(results[0].data ?? []);
-    setCategories(results[1].data ?? []);
-    setVendors(results[2].data ?? []);
-    setSales(results[3].data ?? []);
-    setStockEntries(results[4].data ?? []);
-    setSettings(results[5].data ?? null);
   }, [store]);
 
   useEffect(() => {
@@ -212,11 +209,11 @@ function App() {
     loadData(false).catch((error) => notify('error', `Gagal memuat data: ${errorMessage(error)}`));
   }, [store, loadData]);
 
-  const run = async (action, successText) => {
+  const run = async (action, successText, refreshKeys = ['products', 'categories', 'vendors', 'settings', 'dashboard']) => {
     try {
       const result = await action();
       if (successText) notify('success', successText);
-      await loadData();
+      if (refreshKeys.length) await loadData(true, refreshKeys);
       return result;
     } catch (error) {
       notify('error', errorMessage(error));
@@ -305,15 +302,15 @@ function App() {
         </div>}
         <div className={`content ${page === 'dashboard' ? 'dashboard-content' : ''}`}>
           {loading && <div className="sync-indicator">Memperbarui data...</div>}
-          {page === 'dashboard' && <Dashboard store={store} products={products} sales={sales} stockEntries={stockEntries} settings={settings} setPage={navigate} />}
+          {page === 'dashboard' && <Dashboard store={store} products={products} summary={dashboardSummary} settings={settings} setPage={navigate} />}
           {page === 'pos' && <PointOfSale products={products} categories={categories} store={store} settings={settings} storeId={store.id} run={run} />}
-          {page === 'sales' && <SalesPage sales={sales} />}
-          {page === 'stock' && <StockPage products={products} vendors={vendors} stockEntries={stockEntries} storeId={store.id} run={run} />}
+          {page === 'sales' && <SalesPage storeId={store.id} />}
+          {page === 'stock' && <StockPage products={products} vendors={vendors} storeId={store.id} run={run} />}
           {page === 'products' && <ProductsPage products={products} categories={categories} vendors={vendors} storeId={store.id} run={run} threshold={settings?.low_stock_threshold ?? 5} />}
           {page === 'vendors' && <VendorsPage vendors={vendors} storeId={store.id} run={run} />}
-          {page === 'reports' && <ReportsPage sales={sales} stockEntries={stockEntries} />}
+          {page === 'reports' && <ReportsPage storeId={store.id} />}
           {page === 'settings' && <SettingsPage store={store} settings={settings} storeId={store.id} run={run} onStoreUpdated={(updatedStore) => setStore((current) => ({ ...current, ...updatedStore }))} />}
-          {page === 'zakat' && canManage && <ZakatPage sales={sales} />}
+          {page === 'zakat' && canManage && <ZakatPage storeId={store.id} />}
           {!canManage && ['stock', 'products', 'vendors', 'reports', 'zakat', 'settings'].includes(page) && <EmptyState icon={ShieldCheck} title="Akses terbatas" text="Halaman ini hanya tersedia untuk pemilik atau pengelola toko." />}
         </div>
       </main>
@@ -524,20 +521,22 @@ function StatCard({ label, value, note, icon: Icon, tone = 'gold', artwork = fal
   return <article className={`stat-card${artwork ? ' stat-card-art' : ''}`}><div className="stat-top"><span>{label}</span><span className={`stat-icon icon-${tone}${artwork ? ' stat-icon-art' : ''}`}><Icon size={artwork ? 76 : 19} /></span></div><strong className="stat-value">{value}</strong><span className="stat-note">{note}</span></article>;
 }
 
-function Dashboard({ store, products, sales, stockEntries, settings, setPage }) {
+function Dashboard({ store, products, summary, settings, setPage }) {
   const start = today();
-  const todaySales = sales.filter((sale) => sale.created_at && localDate(sale.created_at) === start);
-  const revenue = todaySales.reduce((sum, sale) => sum + Number(sale.total), 0);
-  const lowStock = products.filter((product) => Number(product.stock) <= Number(settings?.low_stock_threshold ?? 5));
-  const recent = [...sales]
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 5);
-  const week = Array.from({ length: 7 }, (_, index) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (6 - index));
-    const key = date.toLocaleDateString('en-CA');
-    return { key, label: new Intl.DateTimeFormat('id-ID', { weekday: 'short' }).format(date), total: sales.filter((sale) => sale.created_at && localDate(sale.created_at) === key).reduce((sum, sale) => sum + Number(sale.total), 0) };
-  });
+  const revenue = Number(summary?.today_total ?? 0);
+  const todaySalesCount = Number(summary?.today_count ?? 0);
+  const lowStockThreshold = Number(settings?.low_stock_threshold ?? 5);
+  const inventory = products.reduce((result, product) => {
+    result.totalStock += Number(product.stock);
+    if (Number(product.stock) <= lowStockThreshold) result.lowStock.push(product);
+    return result;
+  }, { totalStock: 0, lowStock: [] });
+  const lowStock = inventory.lowStock;
+  const recent = summary?.recent ?? [];
+  const week = (summary?.week ?? []).map((day) => ({
+    ...day,
+    label: new Intl.DateTimeFormat('id-ID', { weekday: 'short' }).format(new Date(`${day.key}T12:00:00`)),
+  }));
   const max = Math.max(...week.map((day) => day.total), 1);
   const chartPoints = week.map((day, index) => ({
     ...day,
@@ -546,12 +545,12 @@ function Dashboard({ store, products, sales, stockEntries, settings, setPage }) 
   }));
   const chartLine = chartPoints.map((point) => `${point.x},${point.y}`).join(' ');
   const chartArea = `M ${chartPoints[0].x},104 L ${chartLine.replaceAll(' ', ' L ')} L ${chartPoints.at(-1).x},104 Z`;
-  const average = todaySales.length ? revenue / todaySales.length : 0;
+  const average = todaySalesCount ? revenue / todaySalesCount : 0;
   return <>
     <div className="stats-grid">
-      <StatCard label="Penjualan hari ini" value={money(revenue)} note={`${todaySales.length} transaksi tercatat`} icon={CircleDollarSign} tone="gold" artwork />
+      <StatCard label="Penjualan hari ini" value={money(revenue)} note={`${todaySalesCount} transaksi tercatat`} icon={CircleDollarSign} tone="gold" artwork />
       <StatCard label="Rata-rata transaksi" value={money(average)} note="Nilai rata-rata hari ini" icon={CreditCard} tone="blue" artwork />
-      <StatCard label="Jumlah produk" value={numberFormat.format(products.length)} note={`${products.reduce((sum, product) => sum + Number(product.stock), 0).toLocaleString('id-ID')} unit tersedia`} icon={Boxes} tone="green" artwork />
+      <StatCard label="Jumlah produk" value={numberFormat.format(products.length)} note={`${inventory.totalStock.toLocaleString('id-ID')} unit tersedia`} icon={Boxes} tone="green" artwork />
       <StatCard label="Stok menipis" value={numberFormat.format(lowStock.length)} note="Perlu segera diperiksa" icon={Package} tone="red" artwork />
     </div>
     <div className="dashboard-grid">
@@ -575,7 +574,7 @@ function Dashboard({ store, products, sales, stockEntries, settings, setPage }) 
         {lowStock.length ? <div className="compact-list">{lowStock.slice(0, 5).map((product) => <div className="compact-row" key={product.id}><ProductMarker product={product} /><span className="compact-copy"><strong>{product.name}</strong><small>{product.category?.name || 'Tanpa kategori'}</small></span><span className="stock-warning">{quantity(product.stock)} {product.unit}</span></div>)}</div> : <EmptyState icon={Check} title="Stok aman" text="Tidak ada produk yang stoknya menipis." /> }
       </section>
       <section className="panel recent-panel"><div className="panel-heading"><div><h2>Transaksi terbaru</h2><p>Aktivitas penjualan terkini</p></div><button className="button button-primary header-action-button recent-all-button" onClick={() => setPage('sales')}>Lihat semua <ArrowRight size={15} /></button></div>
-        {recent.length ? <div className="table-wrap"><table><thead><tr><th>No. transaksi</th><th>Tanggal</th><th>Item</th><th className="align-right">Total</th></tr></thead><tbody>{recent.map((sale) => <tr key={sale.id}><td><strong className="mono">{sale.code}</strong></td><td>{shortDate(sale.created_at)}</td><td>{sale.sale_items?.length ?? 0} produk</td><td className="align-right"><strong>{money(sale.total)}</strong></td></tr>)}</tbody></table></div> : <EmptyState icon={ClipboardList} title="Belum ada transaksi" text="Transaksi penjualan akan tampil di sini." /> }
+        {recent.length ? <div className="table-wrap"><table><thead><tr><th>No. transaksi</th><th>Tanggal</th><th>Item</th><th className="align-right">Total</th></tr></thead><tbody>{recent.map((sale) => <tr key={sale.id}><td><strong className="mono">{sale.code}</strong></td><td>{shortDate(sale.created_at)}</td><td>{sale.item_count} produk</td><td className="align-right"><strong>{money(sale.total)}</strong></td></tr>)}</tbody></table></div> : <EmptyState icon={ClipboardList} title="Belum ada transaksi" text="Transaksi penjualan akan tampil di sini." /> }
       </section>
       <section className="panel quick-actions"><div className="panel-heading"><div><h2>Aktivitas cepat</h2><p>Akses pekerjaan yang sering dilakukan</p></div></div><div className="quick-action-grid"><QuickAction iconId="pos" label="Transaksi baru" tone="gold" onClick={() => setPage('pos')} /><QuickAction iconId="products" label="Tambah produk" tone="blue" onClick={() => setPage('products')} /><QuickAction iconId="stock" label="Catat stok masuk" tone="green" onClick={() => setPage('stock')} /><QuickAction iconId="reports" label="Lihat laporan" tone="purple" onClick={() => setPage('reports')} /></div></section>
     </div>
@@ -694,6 +693,100 @@ function CurrencyInput({ value, onChange, ...inputProps }) {
     });
   };
   return <span className="currency-input"><span aria-hidden="true">Rp</span><input {...inputProps} ref={inputRef} type="text" inputMode="numeric" value={formattedValue} onChange={handleChange} /></span>;
+}
+
+async function requestSalesPage({ storeId, from = '', to = '', search = '', page = 1, limit = PAGE_SIZE }) {
+  const { data, error } = await supabase.rpc('get_sales_page', {
+    p_store_id: storeId,
+    p_from: from || null,
+    p_to: to || null,
+    p_search: search,
+    p_offset: (page - 1) * limit,
+    p_limit: limit,
+  });
+  if (error) throw error;
+  return data;
+}
+
+function useSalesPage({ storeId, from = '', to = '', search = '', page = 1 }) {
+  const [data, setData] = useState({ rows: [], total_count: 0, revenue: 0, cost: 0, stock_expense: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [reloadId, setReloadId] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError('');
+    requestSalesPage({ storeId, from, to, search, page })
+      .then((result) => {
+        if (active) setData(result ?? { rows: [], total_count: 0, revenue: 0, cost: 0, stock_expense: 0 });
+      })
+      .catch((requestError) => {
+        if (active) setError(errorMessage(requestError));
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, [storeId, from, to, search, page, reloadId]);
+
+  return { ...data, loading, error, reload: () => setReloadId((id) => id + 1) };
+}
+
+function useStockEntriesPage({ storeId, date = '', page = 1 }) {
+  const [data, setData] = useState({ rows: [], total_count: 0, total_cost: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [reloadId, setReloadId] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError('');
+    supabase.rpc('get_stock_entries_page', {
+      p_store_id: storeId,
+      p_date: date || null,
+      p_offset: (page - 1) * PAGE_SIZE,
+      p_limit: PAGE_SIZE,
+    })
+      .then(({ data: result, error: requestError }) => {
+        if (requestError) throw requestError;
+        if (active) setData(result ?? { rows: [], total_count: 0, total_cost: 0 });
+      })
+      .catch((requestError) => {
+        if (active) setError(errorMessage(requestError));
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, [storeId, date, page, reloadId]);
+
+  return { ...data, loading, error, reload: () => setReloadId((id) => id + 1) };
+}
+
+function Pagination({ page, total, onChange, loading = false }) {
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (pageCount <= 1) return null;
+  return <nav className="pagination" aria-label="Navigasi halaman">
+    <span>Halaman {page} dari {pageCount} · {numberFormat.format(total)} data</span>
+    <div>
+      <button className="button button-quiet" type="button" disabled={loading || page <= 1} onClick={() => onChange(page - 1)}>Sebelumnya</button>
+      <button className="button button-quiet" type="button" disabled={loading || page >= pageCount} onClick={() => onChange(page + 1)}>Berikutnya</button>
+    </div>
+  </nav>;
+}
+
+async function loadAllSales({ storeId, from = '', to = '', search = '' }) {
+  const rows = [];
+  let total = 0;
+  for (let offset = 0; offset === 0 || offset < total; offset += 500) {
+    const data = await requestSalesPage({ storeId, from, to, search, page: offset / 500 + 1, limit: 500 });
+    total = Number(data?.total_count ?? 0);
+    rows.push(...(data?.rows ?? []));
+  }
+  return rows;
 }
 
 function PointOfSale({ products, categories, store, settings, storeId, run }) {
@@ -831,7 +924,7 @@ function PointOfSale({ products, categories, store, settings, storeId, run }) {
         });
         if (error) throw error;
         return data;
-      }, 'Transaksi berhasil disimpan.');
+      }, 'Transaksi berhasil disimpan.', ['products', 'dashboard']);
       const { data: savedSale, error: saleLookupError } = await supabase
         .from('sales')
         .select('code, created_at')
@@ -966,7 +1059,7 @@ function ProductsPage({ products, categories, vendors, storeId, run, threshold }
           ? await supabase.from('products').update(payload).eq('id', editing.id).eq('store_id', storeId)
           : await supabase.from('products').insert(payload);
         if (result.error) throw result.error;
-      }, editing ? 'Produk berhasil diperbarui.' : 'Produk berhasil ditambahkan.');
+      }, editing ? 'Produk berhasil diperbarui.' : 'Produk berhasil ditambahkan.', ['products', 'categories']);
       setModal(false);
     } catch {
       // The shared action handler displays the Supabase error.
@@ -979,7 +1072,7 @@ function ProductsPage({ products, categories, vendors, storeId, run, threshold }
     await run(async () => {
       const { error } = await supabase.from('products').delete().eq('id', product.id).eq('store_id', storeId);
       if (error) throw error;
-    }, 'Produk berhasil dihapus.');
+    }, 'Produk berhasil dihapus.', ['products', 'categories']);
   };
   return <>
     <section className="panel data-panel"><div className="panel-toolbar product-toolbar"><div className="search-field compact-search"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari produk..." /></div><span className="result-count">{filtered.length} produk</span><button className="button button-primary header-action-button product-add-button" onClick={() => open()}><span className="header-action-icon"><Package size={17} /><Plus size={10} strokeWidth={3} /></span><span>Tambah produk</span></button></div>
@@ -1005,7 +1098,7 @@ function VendorsPage({ vendors, storeId, run }) {
         const payload = { store_id: storeId, name: form.name.trim(), contact: form.contact.trim() || null, address: form.address.trim() || null };
         const result = editing ? await supabase.from('vendors').update(payload).eq('id', editing.id).eq('store_id', storeId) : await supabase.from('vendors').insert(payload);
         if (result.error) throw result.error;
-      }, editing ? 'Data vendor diperbarui.' : 'Vendor berhasil ditambahkan.');
+      }, editing ? 'Data vendor diperbarui.' : 'Vendor berhasil ditambahkan.', ['vendors', 'products']);
       setModal(false);
     } catch {
       // The shared action handler displays the Supabase error.
@@ -1016,7 +1109,7 @@ function VendorsPage({ vendors, storeId, run }) {
     await run(async () => {
       const { error } = await supabase.from('vendors').delete().eq('id', vendor.id).eq('store_id', storeId);
       if (error) throw error;
-    }, 'Vendor berhasil dihapus.');
+    }, 'Vendor berhasil dihapus.', ['vendors', 'products']);
   };
   return <>
     <section className="panel data-panel"><div className="panel-toolbar"><strong className="panel-toolbar-title">{vendors.length} vendor terdaftar</strong><button className="button button-primary header-action-button" onClick={() => open()}><span className="header-action-icon"><BriefcaseBusiness size={17} /><Plus size={10} strokeWidth={3} /></span><span>Tambah vendor</span></button></div><div className="vendor-grid">{vendors.map((vendor) => <article className="vendor-row" key={vendor.id}><div className="vendor-row-identity"><span className="vendor-row-icon"><BriefcaseBusiness size={16} /></span><strong>{vendor.name}</strong></div><div className="vendor-row-detail"><span>Kontak</span><strong>{vendor.contact || 'Belum tersedia'}</strong></div><div className="vendor-row-detail vendor-row-address"><span>Alamat</span><strong>{vendor.address || 'Belum tersedia'}</strong></div><div className="row-actions"><button className="icon-button" onClick={() => open(vendor)} aria-label={`Edit ${vendor.name}`} title="Edit"><Pencil size={15} /></button><button className="icon-button danger-icon" onClick={() => remove(vendor)} aria-label={`Hapus ${vendor.name}`} title="Hapus"><Trash2 size={15} /></button></div></article>)}</div>{!vendors.length && <EmptyState icon={Truck} title="Belum ada vendor" text="Tambahkan vendor untuk menghubungkan pemasok dengan stok masuk." />}</section>
@@ -1071,10 +1164,11 @@ function StockProductSelect({ products, value, onChange }) {
   </div>;
 }
 
-function StockPage({ products, vendors, stockEntries, storeId, run }) {
+function StockPage({ products, vendors, storeId, run }) {
   const [productId, setProductId] = useState('');
   const [productError, setProductError] = useState('');
   const [historyDate, setHistoryDate] = useState('');
+  const [historyPage, setHistoryPage] = useState(1);
   const [vendorId, setVendorId] = useState('');
   const [amount, setAmount] = useState('');
   const [unitCost, setUnitCost] = useState('');
@@ -1082,8 +1176,8 @@ function StockPage({ products, vendors, stockEntries, storeId, run }) {
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const selectedProduct = products.find((product) => product.id === productId);
-  const filteredStockEntries = stockEntries.filter((entry) => !historyDate || entry.occurred_on === historyDate);
-  const filteredStockTotal = filteredStockEntries.reduce((sum, entry) => sum + Number(entry.quantity) * Number(entry.unit_cost), 0);
+  const stockHistory = useStockEntriesPage({ storeId, date: historyDate, page: historyPage });
+  useEffect(() => setHistoryPage(1), [historyDate]);
   const save = async (event) => {
     event.preventDefault();
     if (!productId) {
@@ -1104,7 +1198,8 @@ function StockPage({ products, vendors, stockEntries, storeId, run }) {
           p_note: note.trim() || null,
         });
         if (error) throw error;
-      }, 'Stok masuk berhasil dicatat.');
+      }, 'Stok masuk berhasil dicatat.', ['products', 'dashboard']);
+      stockHistory.reload();
       setProductId('');
       setVendorId('');
       setAmount('');
@@ -1118,27 +1213,64 @@ function StockPage({ products, vendors, stockEntries, storeId, run }) {
   };
   return <>
     <div className="stock-layout"><section className="panel form-panel"><div className="panel-heading"><div><h2>Detail penerimaan barang</h2><p>Stok akan bertambah otomatis setelah disimpan.</p></div></div><form className="form-stack" onSubmit={save}><Field label="Produk"><StockProductSelect products={products} value={productId} onChange={(value) => { setProductId(value); setProductError(''); const product = products.find((item) => item.id === value); if (product) setUnitCost(String(product.buy_price)); }} />{productError && <small className="stock-product-error" role="alert">{productError}</small>}</Field><Field label="Vendor"><select value={vendorId} onChange={(event) => setVendorId(event.target.value)}><option value="">Tanpa vendor</option>{vendors.map((vendor) => <option key={vendor.id} value={vendor.id}>{vendor.name}</option>)}</select></Field><div className="form-row"><Field label={`Jumlah${selectedProduct ? ` (${selectedProduct.unit})` : ''}`}><input type="number" min="0.001" step="0.001" required value={amount} onChange={(event) => setAmount(event.target.value)} /></Field><Field label="Harga beli per unit"><CurrencyInput required value={unitCost} onChange={setUnitCost} /></Field></div><div className="stock-total"><span>Total nilai pembelian</span><strong>{money(Number(amount) * Number(unitCost))}</strong></div><div className="form-row"><Field label="Tanggal penerimaan"><input type="date" required value={date} onChange={(event) => setDate(event.target.value)} /></Field><Field label="Catatan"><input value={note} onChange={(event) => setNote(event.target.value)} placeholder="Opsional" /></Field></div><button className="button button-primary full-button" disabled={busy || !products.length}><ArrowDownToLine size={17} />{busy ? 'Menyimpan...' : 'Simpan stok masuk'}</button></form></section>
-      <section className="panel stock-history"><div className="panel-heading"><div><h2>Riwayat stok masuk</h2><p>{filteredStockEntries.length} penerimaan{historyDate ? ` pada ${shortDate(historyDate)}` : ' terbaru'}</p></div><div className="stock-history-filters">{historyDate && <div className="stock-history-total"><span>Total belanja</span><strong>{money(filteredStockTotal)}</strong></div>}<DatePickerField label="Tanggal" value={historyDate} onChange={setHistoryDate} />{historyDate && <button className="stock-date-reset" type="button" onClick={() => setHistoryDate('')}>Semua tanggal</button>}</div></div><div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>PRODUK</th><th>VENDOR</th><th>JUMLAH</th><th className="align-right">TOTAL</th></tr></thead><tbody>{filteredStockEntries.map((entry, index) => <tr key={entry.id}><td className="row-number">{index + 1}</td><td>{shortDate(entry.occurred_on)}</td><td><strong>{entry.product?.name || 'Produk dihapus'}</strong></td><td>{entry.vendor?.name || '-'}</td><td>{quantity(entry.quantity)} unit</td><td className="align-right">{money(Number(entry.quantity) * Number(entry.unit_cost))}</td></tr>)}</tbody></table>{!filteredStockEntries.length && <EmptyState icon={Boxes} title={historyDate ? 'Tidak ada penerimaan pada tanggal ini' : 'Belum ada penerimaan'} text={historyDate ? 'Pilih tanggal lain atau tampilkan semua tanggal.' : 'Riwayat stok masuk akan tampil setelah dicatat.'} />}</div></section></div>
+      <section className="panel stock-history"><div className="panel-heading"><div><h2>Riwayat stok masuk</h2><p>{stockHistory.total_count} penerimaan{historyDate ? ` pada ${shortDate(historyDate)}` : ' terbaru'}</p></div><div className="stock-history-filters">{historyDate && <div className="stock-history-total"><span>Total belanja</span><strong>{money(stockHistory.total_cost)}</strong></div>}<DatePickerField label="Tanggal" value={historyDate} onChange={setHistoryDate} />{historyDate && <button className="stock-date-reset" type="button" onClick={() => setHistoryDate('')}>Semua tanggal</button>}</div></div>{stockHistory.error && <p className="inline-error" role="alert">Gagal memuat riwayat stok: {stockHistory.error}</p>}<div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>PRODUK</th><th>VENDOR</th><th>JUMLAH</th><th className="align-right">TOTAL</th></tr></thead><tbody>{stockHistory.rows.map((entry, index) => <tr key={entry.id}><td className="row-number">{(historyPage - 1) * PAGE_SIZE + index + 1}</td><td>{shortDate(entry.occurred_on)}</td><td><strong>{entry.product_name || 'Produk dihapus'}</strong></td><td>{entry.vendor_name || '-'}</td><td>{quantity(entry.quantity)} unit</td><td className="align-right">{money(Number(entry.quantity) * Number(entry.unit_cost))}</td></tr>)}</tbody></table>{!stockHistory.loading && !stockHistory.error && !stockHistory.rows.length && <EmptyState icon={Boxes} title={historyDate ? 'Tidak ada penerimaan pada tanggal ini' : 'Belum ada penerimaan'} text={historyDate ? 'Pilih tanggal lain atau tampilkan semua tanggal.' : 'Riwayat stok masuk akan tampil setelah dicatat.'} />}</div><Pagination page={historyPage} total={Number(stockHistory.total_count)} onChange={setHistoryPage} loading={stockHistory.loading} /></section></div>
   </>;
 }
 
-function SalesPage({ sales }) {
+function SalesPage({ storeId }) {
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
+  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(null);
-  const filtered = sales.filter((sale) => {
-    const date = sale.created_at ? localDate(sale.created_at) : '';
-    return sale.code.toLowerCase().includes(search.toLowerCase())
-      && (!from || date >= from)
-      && (!to || date <= to);
-  });
-  const exportCsv = () => downloadCsv(['Nomor Transaksi,Tanggal,Subtotal (Rp),Total (Rp),Dibayar (Rp),Kembalian (Rp)', ...filtered.map((sale) => [sale.code, sale.created_at?.slice(0, 10), sale.subtotal, sale.total, sale.amount_paid, sale.change_amount].join(','))].join('\n'), 'laporan-penjualan.csv');
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState('');
+  const detailRequestId = useRef(0);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
+  const salesPage = useSalesPage({ storeId, from, to, search: debouncedSearch, page });
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setDebouncedSearch(search.trim()), 250);
+    return () => window.clearTimeout(timeout);
+  }, [search]);
+  useEffect(() => setPage(1), [debouncedSearch, from, to]);
+
+  const openSale = async (sale) => {
+    const requestId = ++detailRequestId.current;
+    setSelected(sale);
+    setSelectedItems([]);
+    setDetailError('');
+    setDetailLoading(true);
+    try {
+      const { data, error } = await supabase.from('sale_items').select('*')
+        .eq('store_id', storeId).eq('sale_id', sale.id).order('created_at');
+      if (error) throw error;
+      if (requestId === detailRequestId.current) setSelectedItems(data ?? []);
+    } catch (error) {
+      if (requestId === detailRequestId.current) setDetailError(`Gagal memuat detail transaksi: ${errorMessage(error)}`);
+    } finally {
+      if (requestId === detailRequestId.current) setDetailLoading(false);
+    }
+  };
+  const exportCsv = async () => {
+    setExporting(true);
+    setExportError('');
+    try {
+      const rows = await loadAllSales({ storeId, from, to, search: search.trim() });
+      downloadCsv(['Nomor Transaksi,Tanggal,Subtotal (Rp),Total (Rp),Dibayar (Rp),Kembalian (Rp)', ...rows.map((sale) => [sale.code, sale.created_at?.slice(0, 10), sale.subtotal, sale.total, sale.amount_paid, sale.change_amount].join(','))].join('\n'), 'laporan-penjualan.csv');
+    } catch (error) {
+      setExportError(`Gagal mengekspor transaksi: ${errorMessage(error)}`);
+    } finally {
+      setExporting(false);
+    }
+  };
   return <>
     <section className="panel data-panel">
       <div className="sales-panel-heading">
         <h2>Transaksi</h2>
-        <span className="result-count">{filtered.length} transaksi</span>
+        <span className="result-count">{salesPage.total_count} transaksi</span>
       </div>
       <div className="panel-toolbar sales-toolbar">
         <div className="sales-search-controls">
@@ -1150,53 +1282,81 @@ function SalesPage({ sales }) {
             <button className="button button-quiet sales-date-reset" type="button" aria-label="Reset filter tanggal" disabled={!from && !to} onClick={() => { setFrom(''); setTo(''); }}><X size={14} /><span>Reset</span></button>
           </div>
         </div>
-        <button className="button button-primary header-action-button export-action-button" onClick={exportCsv} aria-label="Ekspor CSV" title="Ekspor CSV"><span className="header-action-icon"><ArrowDownToLine size={17} /></span><span>Ekspor</span></button>
+        <button className="button button-primary header-action-button export-action-button" onClick={exportCsv} disabled={exporting} aria-label="Ekspor CSV" title="Ekspor CSV"><span className="header-action-icon"><ArrowDownToLine size={17} /></span><span>{exporting ? 'Menyiapkan...' : 'Ekspor'}</span></button>
       </div>
-      <div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>NO. TRANSAKSI</th><th>TANGGAL</th><th>JUMLAH ITEM</th><th>SUBTOTAL</th><th className="align-right">TOTAL</th></tr></thead><tbody>{filtered.map((sale, index) => <tr className="clickable-row" key={sale.id} onClick={() => setSelected(sale)}><td className="row-number">{index + 1}</td><td><strong className="mono">{sale.code}</strong></td><td>{shortDate(sale.created_at)}</td><td>{sale.sale_items?.length ?? 0} produk</td><td>{money(sale.subtotal)}</td><td className="align-right"><strong>{money(sale.total)}</strong></td></tr>)}</tbody></table>{!filtered.length && <EmptyState icon={ClipboardList} title="Transaksi tidak ditemukan" text="Belum ada transaksi yang sesuai." />}</div></section>
-    {selected && <Modal title="Detail transaksi" onClose={() => setSelected(null)}><div className="sale-detail"><div className="sale-detail-top"><span className="badge badge-success">Selesai</span><strong className="mono">{selected.code}</strong><span>{shortDate(selected.created_at)}</span></div><div className="sale-items">{selected.sale_items?.map((item) => <div className="sale-item" key={item.id}><span>{item.product_name}<small>{quantity(item.quantity)} × {money(item.unit_price)}</small></span><strong>{money(Number(item.quantity) * Number(item.unit_price))}</strong></div>)}</div><div className="summary-total"><span>Total</span><strong>{money(selected.total)}</strong></div><div className="summary-line"><span>Dibayar</span><strong>{money(selected.amount_paid)}</strong></div><div className="summary-line"><span>Kembalian</span><strong>{money(selected.change_amount)}</strong></div></div></Modal>}
+      {salesPage.error && <p className="inline-error" role="alert">Gagal memuat transaksi: {salesPage.error}</p>}
+      {exportError && <p className="inline-error" role="alert">{exportError}</p>}
+      <div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>NO. TRANSAKSI</th><th>TANGGAL</th><th>JUMLAH ITEM</th><th>SUBTOTAL</th><th className="align-right">TOTAL</th></tr></thead><tbody>{salesPage.rows.map((sale, index) => <tr className="clickable-row" key={sale.id} onClick={() => openSale(sale)}><td className="row-number">{(page - 1) * PAGE_SIZE + index + 1}</td><td><strong className="mono">{sale.code}</strong></td><td>{shortDate(sale.created_at)}</td><td>{sale.item_count} produk</td><td>{money(sale.subtotal)}</td><td className="align-right"><strong>{money(sale.total)}</strong></td></tr>)}</tbody></table>{!salesPage.loading && !salesPage.error && !salesPage.rows.length && <EmptyState icon={ClipboardList} title="Transaksi tidak ditemukan" text="Belum ada transaksi yang sesuai." />}</div><Pagination page={page} total={Number(salesPage.total_count)} onChange={setPage} loading={salesPage.loading} /></section>
+    {selected && <Modal title="Detail transaksi" onClose={() => setSelected(null)}><div className="sale-detail"><div className="sale-detail-top"><span className="badge badge-success">Selesai</span><strong className="mono">{selected.code}</strong><span>{shortDate(selected.created_at)}</span></div>{detailError && <p className="inline-error" role="alert">{detailError}</p>}{detailLoading ? <p>Memuat detail transaksi...</p> : <div className="sale-items">{selectedItems.map((item) => <div className="sale-item" key={item.id}><span>{item.product_name}<small>{quantity(item.quantity)} × {money(item.unit_price)}</small></span><strong>{money(Number(item.quantity) * Number(item.unit_price))}</strong></div>)}</div>}<div className="summary-total"><span>Total</span><strong>{money(selected.total)}</strong></div><div className="summary-line"><span>Dibayar</span><strong>{money(selected.amount_paid)}</strong></div><div className="summary-line"><span>Kembalian</span><strong>{money(selected.change_amount)}</strong></div></div></Modal>}
   </>;
 }
 
-function ReportsPage({ sales, stockEntries }) {
+function ReportsPage({ storeId }) {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
-  const filtered = useMemo(() => sales.filter((sale) => {
-    const date = sale.created_at ? localDate(sale.created_at) : '';
-    return (!from || date >= from) && (!to || date <= to);
-  }), [sales, from, to]);
-  const revenue = filtered.reduce((sum, sale) => sum + Number(sale.total), 0);
-  const cost = filtered.reduce((sum, sale) => sum + Number(sale.cost_total), 0);
+  const [page, setPage] = useState(1);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
+  const salesPage = useSalesPage({ storeId, from, to, page });
+  useEffect(() => setPage(1), [from, to]);
+  const revenue = Number(salesPage.revenue);
+  const cost = Number(salesPage.cost);
   const profit = revenue - cost;
-  const expense = stockEntries.filter((entry) => (!from || entry.occurred_on >= from) && (!to || entry.occurred_on <= to)).reduce((sum, entry) => sum + Number(entry.quantity) * Number(entry.unit_cost), 0);
-  const exportCsv = () => downloadCsv(['Tanggal,Transaksi,Omzet (Rp),Harga Pokok (Rp),Laba Bersih (Rp)', ...filtered.map((sale) => [sale.created_at?.slice(0, 10), sale.code, sale.total, sale.cost_total, Number(sale.total) - Number(sale.cost_total)].join(','))].join('\n'), 'laporan-laba-rugi.csv');
+  const expense = Number(salesPage.stock_expense);
+  const exportCsv = async () => {
+    setExporting(true);
+    setExportError('');
+    try {
+      const rows = await loadAllSales({ storeId, from, to });
+      downloadCsv(['Tanggal,Transaksi,Omzet (Rp),Harga Pokok (Rp),Laba Bersih (Rp)', ...rows.map((sale) => [sale.created_at?.slice(0, 10), sale.code, sale.total, sale.cost_total, Number(sale.total) - Number(sale.cost_total)].join(','))].join('\n'), 'laporan-laba-rugi.csv');
+    } catch (error) {
+      setExportError(`Gagal mengekspor laporan: ${errorMessage(error)}`);
+    } finally {
+      setExporting(false);
+    }
+  };
   return <>
-    <section className="panel filter-panel"><span className="filter-label">Periode laporan</span><div className="sales-date-filters report-date-filters"><DatePickerField label="Dari" value={from} max={to || undefined} onChange={setFrom} /><span className="sales-date-separator" aria-hidden="true">-</span><DatePickerField label="Sampai" value={to} min={from || undefined} onChange={setTo} /><button className="button button-quiet sales-date-reset" type="button" aria-label="Reset filter tanggal" disabled={!from && !to} onClick={() => { setFrom(''); setTo(''); }}><X size={14} /><span>Reset</span></button></div><button className="button button-secondary" onClick={exportCsv}><ArrowDownToLine size={16} /> Ekspor CSV</button></section>
-    <div className="stats-grid report-stats"><StatCard label="Omzet bersih" value={money(revenue)} note={`${filtered.length} transaksi`} icon={CircleDollarSign} tone="gold" artwork /><StatCard label="Harga pokok terjual" value={money(cost)} note="Dihitung dari harga beli saat transaksi" icon={Boxes} tone="blue" artwork /><StatCard label="Laba bersih" value={money(profit)} note="Omzet dikurangi harga pokok" icon={TrendingUp} tone="green" artwork /><StatCard label="Pembelian stok" value={money(expense)} note="Nilai stok masuk pada periode ini" icon={ArrowDownToLine} tone="purple" artwork /></div>
-    <section className="panel data-panel"><div className="panel-heading report-table-heading"><div><h2>Rincian laba per transaksi</h2></div></div><div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>NO. TRANSAKSI</th><th>OMZET</th><th>HARGA POKOK</th><th className="align-right">LABA BERSIH</th></tr></thead><tbody>{filtered.map((sale, index) => <tr key={sale.id}><td className="row-number">{index + 1}</td><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}</tbody></table>{!filtered.length && <EmptyState icon={BarChart3} title="Belum ada data laporan" text="Transaksi pada periode ini akan muncul di sini." />}</div></section>
+    <section className="panel filter-panel"><span className="filter-label">Periode laporan</span><div className="sales-date-filters report-date-filters"><DatePickerField label="Dari" value={from} max={to || undefined} onChange={setFrom} /><span className="sales-date-separator" aria-hidden="true">-</span><DatePickerField label="Sampai" value={to} min={from || undefined} onChange={setTo} /><button className="button button-quiet sales-date-reset" type="button" aria-label="Reset filter tanggal" disabled={!from && !to} onClick={() => { setFrom(''); setTo(''); }}><X size={14} /><span>Reset</span></button></div><button className="button button-secondary" onClick={exportCsv} disabled={exporting}><ArrowDownToLine size={16} /> {exporting ? 'Menyiapkan...' : 'Ekspor CSV'}</button></section>
+    {salesPage.error && <p className="inline-error" role="alert">Gagal memuat laporan: {salesPage.error}</p>}
+    {exportError && <p className="inline-error" role="alert">{exportError}</p>}
+    <div className="stats-grid report-stats"><StatCard label="Omzet bersih" value={money(revenue)} note={`${Number(salesPage.total_count)} transaksi`} icon={CircleDollarSign} tone="gold" artwork /><StatCard label="Harga pokok terjual" value={money(cost)} note="Dihitung dari harga beli saat transaksi" icon={Boxes} tone="blue" artwork /><StatCard label="Laba bersih" value={money(profit)} note="Omzet dikurangi harga pokok" icon={TrendingUp} tone="green" artwork /><StatCard label="Pembelian stok" value={money(expense)} note="Nilai stok masuk pada periode ini" icon={ArrowDownToLine} tone="purple" artwork /></div>
+    <section className="panel data-panel"><div className="panel-heading report-table-heading"><div><h2>Rincian laba per transaksi</h2></div></div><div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>NO. TRANSAKSI</th><th>OMZET</th><th>HARGA POKOK</th><th className="align-right">LABA BERSIH</th></tr></thead><tbody>{salesPage.rows.map((sale, index) => <tr key={sale.id}><td className="row-number">{(page - 1) * PAGE_SIZE + index + 1}</td><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}</tbody></table>{!salesPage.loading && !salesPage.error && !salesPage.rows.length && <EmptyState icon={BarChart3} title="Belum ada data laporan" text="Transaksi pada periode ini akan muncul di sini." />}</div><Pagination page={page} total={Number(salesPage.total_count)} onChange={setPage} loading={salesPage.loading} /></section>
   </>;
 }
 
-function ZakatPage({ sales }) {
+function ZakatPage({ storeId }) {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
-  const filtered = useMemo(() => sales.filter((sale) => {
-    const date = sale.created_at ? localDate(sale.created_at) : '';
-    return (!from || date >= from) && (!to || date <= to);
-  }), [sales, from, to]);
-  const revenue = filtered.reduce((sum, sale) => sum + Number(sale.total), 0);
-  const cost = filtered.reduce((sum, sale) => sum + Number(sale.cost_total), 0);
+  const [page, setPage] = useState(1);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
+  const salesPage = useSalesPage({ storeId, from, to, page });
+  useEffect(() => setPage(1), [from, to]);
+  const revenue = Number(salesPage.revenue);
+  const cost = Number(salesPage.cost);
   const profit = revenue - cost;
   const zakat = Math.round(Math.max(0, profit) * 0.025);
-  const exportCsv = () => downloadCsv([
-    'Tanggal,Nomor Transaksi,Omzet (Rp),HPP (Rp),Laba setelah HPP (Rp)',
-    ...filtered.map((sale) => [
-      sale.created_at?.slice(0, 10),
-      sale.code,
-      sale.total,
-      sale.cost_total,
-      Number(sale.total) - Number(sale.cost_total),
-    ].join(',')),
-  ].join('\n'), 'perhitungan-zakat.csv');
+  const exportCsv = async () => {
+    setExporting(true);
+    setExportError('');
+    try {
+      const rows = await loadAllSales({ storeId, from, to });
+      downloadCsv([
+        'Tanggal,Nomor Transaksi,Omzet (Rp),HPP (Rp),Laba setelah HPP (Rp)',
+        ...rows.map((sale) => [
+          sale.created_at?.slice(0, 10),
+          sale.code,
+          sale.total,
+          sale.cost_total,
+          Number(sale.total) - Number(sale.cost_total),
+        ].join(',')),
+      ].join('\n'), 'perhitungan-zakat.csv');
+    } catch (error) {
+      setExportError(`Gagal mengekspor perhitungan zakat: ${errorMessage(error)}`);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return <>
     <section className="panel filter-panel">
@@ -1207,12 +1367,14 @@ function ZakatPage({ sales }) {
         <DatePickerField label="Sampai" value={to} min={from || undefined} onChange={setTo} />
         <button className="button button-quiet sales-date-reset" type="button" aria-label="Reset filter tanggal" disabled={!from && !to} onClick={() => { setFrom(''); setTo(''); }}><X size={14} /><span>Reset</span></button>
       </div>
-      <button className="button button-secondary" onClick={exportCsv}><ArrowDownToLine size={16} /> Ekspor CSV</button>
+      <button className="button button-secondary" onClick={exportCsv} disabled={exporting}><ArrowDownToLine size={16} /> {exporting ? 'Menyiapkan...' : 'Ekspor CSV'}</button>
     </section>
 
+    {salesPage.error && <p className="inline-error" role="alert">Gagal memuat perhitungan zakat: {salesPage.error}</p>}
+    {exportError && <p className="inline-error" role="alert">{exportError}</p>}
     <div className="zakat-summary-grid">
       <section className="panel zakat-breakdown">
-        <div className="panel-heading"><div><h2>Rincian perhitungan</h2><p>{filtered.length} transaksi dalam periode</p></div></div>
+        <div className="panel-heading"><div><h2>Rincian perhitungan</h2><p>{Number(salesPage.total_count)} transaksi dalam periode</p></div></div>
         <div className="zakat-calculation">
           <div className="zakat-line zakat-subtotal"><span>Omzet penjualan</span><strong>{money(revenue)}</strong></div>
           <div className="zakat-line zakat-deduction"><span>Harga pokok penjualan (HPP)</span><strong>− {money(cost)}</strong></div>
@@ -1232,8 +1394,8 @@ function ZakatPage({ sales }) {
     <section className="panel data-panel zakat-transactions">
       <div className="panel-heading"><div><h2>Rincian transaksi</h2></div></div>
       <div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>NO. TRANSAKSI</th><th>OMZET</th><th>HPP</th><th className="align-right">LABA SETELAH HPP</th></tr></thead><tbody>
-        {filtered.map((sale, index) => <tr key={sale.id}><td className="row-number">{index + 1}</td><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}
-      </tbody></table>{!filtered.length && <EmptyState icon={CircleDollarSign} title="Belum ada transaksi pada periode ini" text="Pilih rentang tanggal lain untuk melihat rincian perhitungan zakat." />}</div>
+        {salesPage.rows.map((sale, index) => <tr key={sale.id}><td className="row-number">{(page - 1) * PAGE_SIZE + index + 1}</td><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}
+      </tbody></table>{!salesPage.loading && !salesPage.error && !salesPage.rows.length && <EmptyState icon={CircleDollarSign} title="Belum ada transaksi pada periode ini" text="Pilih rentang tanggal lain untuk melihat rincian perhitungan zakat." />}</div><Pagination page={page} total={Number(salesPage.total_count)} onChange={setPage} loading={salesPage.loading} />
     </section>
   </>;
 }
@@ -1267,7 +1429,7 @@ function SettingsPage({ store, settings, storeId, run, onStoreUpdated }) {
           low_stock_threshold: Number(threshold),
         }).eq('store_id', storeId);
         if (settingsResult.error) throw settingsResult.error;
-      }, 'Pengaturan toko berhasil disimpan.');
+      }, 'Pengaturan toko berhasil disimpan.', ['settings']);
     } catch {
       // The shared action handler displays the Supabase error.
     } finally { setBusy(false); }
