@@ -97,7 +97,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .stat-value { display: block; overflow: hidden; margin-top: 12px; font-family: Manrope, sans-serif; font-size: clamp(18px, 2vw, 23px); font-weight: 700; letter-spacing: -.8px; text-overflow: ellipsis; white-space: nowrap; }
 .stat-note { display: block; margin-top: 5px; color: #9a9f97; font-size: 9px; }
 .dashboard-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 15px; }
-.chart-panel { grid-column: span 7; }
+.chart-panel { position: relative; isolation: isolate; grid-column: span 7; }
+.chart-panel-artwork { position: absolute; z-index: 0; right: 10px; bottom: -12px; width: clamp(170px, 23vw, 290px); height: auto; color: #fff; opacity: .24; pointer-events: none; transform: rotate(-12deg); }
+.chart-panel > .panel-heading,
+.chart-panel > .chart-summary,
+.chart-panel > .line-chart { position: relative; z-index: 1; }
 .low-stock-panel { grid-column: span 5; }
 .panel { min-width: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; }
 .chart-panel, .low-stock-panel, .recent-panel, .quick-actions { padding: clamp(10px, 2dvh, 15px); }
@@ -109,11 +113,15 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .chart-summary { display: flex; align-items: baseline; gap: 9px; margin: clamp(7px, 1.5dvh, 12px) 0 clamp(6px, 1.3dvh, 11px); }
 .chart-summary strong { font-family: Manrope, sans-serif; font-size: 22px; letter-spacing: -.7px; }
 .chart-summary span { color: #999e96; font-size: 10px; }
-.bar-chart { display: flex; height: clamp(64px, 12dvh, 122px); gap: 13px; padding-top: 2px; }
-.bar-column { display: flex; flex: 1; flex-direction: column; align-items: center; gap: 8px; min-width: 0; color: #999e96; font-size: 9px; }
-.bar-track { display: flex; flex: 1; align-items: flex-end; width: 100%; max-width: 38px; overflow: hidden; background: #f7f7f4; border-radius: 6px 6px 3px 3px; }
-.bar { width: 100%; background: #f4d276; border-radius: 6px 6px 3px 3px; transition: height .25s ease; }
-.bar-today { background: var(--gold); }
+.line-chart { height: clamp(76px, 14dvh, 132px); color: #8a5a00; }
+.line-chart-plot { display: block; width: 100%; height: calc(100% - 18px); overflow: visible; }
+.line-chart-grid { stroke: rgba(90, 58, 0, .12); stroke-dasharray: 3 6; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.line-chart-area { fill: url(#sales-chart-area); }
+.line-chart-line { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; vector-effect: non-scaling-stroke; }
+.line-chart-point { fill: #fff5d5; stroke: currentColor; stroke-width: 2.5; transition: r .18s ease, fill .18s ease; vector-effect: non-scaling-stroke; }
+.line-chart-point:hover { fill: #fff; r: 6; }
+.line-chart-point-today { fill: var(--gold); stroke: #684300; }
+.line-chart-labels { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); margin-top: 2px; color: #765000; font-size: 9px; text-align: center; }
 .text-button { display: inline-flex; align-items: center; gap: 5px; padding: 5px 0; color: #a27b17; background: none; border: 0; white-space: nowrap; font-size: 10px; font-weight: 600; }
 .compact-list { display: grid; }
 .compact-row { display: flex; align-items: center; gap: 9px; min-width: 0; padding: 11px 0; border-top: 1px solid #f0f1ee; }
@@ -867,18 +875,7 @@ body {
   border-color: rgba(42, 26, 0, .14);
 }
 
-.bar-track {
-  background: rgba(255, 255, 255, .42);
-}
 
-.bar,
-.bar-today {
-  background: rgba(42, 26, 0, .42);
-}
-
-.bar-today {
-  background: #2a1a00;
-}
 
 .chart-period,
 .date-chip {
@@ -1095,7 +1092,7 @@ body {
 .panel-heading p,
 .cart-heading p,
 .chart-summary span,
-.bar-column,
+.line-chart-labels,
 .compact-copy small,
 .quick-action,
 .table-wrap th,
@@ -1316,7 +1313,7 @@ body {
   .chart-panel, .low-stock-panel, .recent-panel, .quick-actions { padding: 10px; }
   .panel-heading { margin-bottom: 7px; }
   .chart-summary { margin: 7px 0; }
-  .bar-chart { height: clamp(56px, 9dvh, 78px); }
+  .line-chart { height: clamp(68px, 10dvh, 86px); }
   .empty-state { min-height: 76px; padding: 10px; }
   .quick-action-grid { gap: 3px; }
   .quick-action { padding: 4px; }

@@ -539,6 +539,13 @@ function Dashboard({ store, products, sales, stockEntries, settings, setPage }) 
     return { key, label: new Intl.DateTimeFormat('id-ID', { weekday: 'short' }).format(date), total: sales.filter((sale) => sale.created_at && localDate(sale.created_at) === key).reduce((sum, sale) => sum + Number(sale.total), 0) };
   });
   const max = Math.max(...week.map((day) => day.total), 1);
+  const chartPoints = week.map((day, index) => ({
+    ...day,
+    x: 20 + index * 110,
+    y: 104 - (day.total / max) * 78,
+  }));
+  const chartLine = chartPoints.map((point) => `${point.x},${point.y}`).join(' ');
+  const chartArea = `M ${chartPoints[0].x},104 L ${chartLine.replaceAll(' ', ' L ')} L ${chartPoints.at(-1).x},104 Z`;
   const average = todaySales.length ? revenue / todaySales.length : 0;
   return <>
     <div className="stats-grid">
@@ -548,14 +555,23 @@ function Dashboard({ store, products, sales, stockEntries, settings, setPage }) 
       <StatCard label="Stok menipis" value={numberFormat.format(lowStock.length)} note="Perlu segera diperiksa" icon={Package} tone="red" artwork />
     </div>
     <div className="dashboard-grid">
-      <section className="panel chart-panel"><div className="panel-heading"><div><h2>Tren penjualan</h2><p>Omzet 7 hari terakhir</p></div><span className="chart-period"><span className="live-dot" /> Minggu ini</span></div>
+      <section className="panel chart-panel"><TrendingUp className="chart-panel-artwork" size={190} strokeWidth={1} aria-hidden="true" /><div className="panel-heading"><div><h2>Tren penjualan</h2><p>Omzet 7 hari terakhir</p></div><span className="chart-period"><span className="live-dot" /> Minggu ini</span></div>
         <div className="chart-summary"><strong>{money(week.reduce((sum, day) => sum + day.total, 0))}</strong><span>Total omzet</span></div>
-        <div className="bar-chart">{week.map((day) => <div className="bar-column" key={day.key} title={`${day.label}: ${money(day.total)}`}><div className="bar-track"><div className={`bar ${day.key === start ? 'bar-today' : ''}`} style={{ height: `${Math.max((day.total / max) * 100, day.total ? 8 : 2)}%` }} /></div><span>{day.label}</span></div>)}</div>
+        <div className="line-chart">
+          <svg className="line-chart-plot" viewBox="0 0 700 120" role="img" aria-label={`Tren omzet 7 hari terakhir, total ${money(week.reduce((sum, day) => sum + day.total, 0))}`}>
+            <defs><linearGradient id="sales-chart-area" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="currentColor" stopOpacity=".2" /><stop offset="100%" stopColor="currentColor" stopOpacity="0" /></linearGradient></defs>
+            {[26, 65, 104].map((y) => <line className="line-chart-grid" key={y} x1="20" x2="680" y1={y} y2={y} />)}
+            <path className="line-chart-area" d={chartArea} />
+            <polyline className="line-chart-line" points={chartLine} />
+            {chartPoints.map((point) => <circle className={`line-chart-point${point.key === start ? ' line-chart-point-today' : ''}`} key={point.key} cx={point.x} cy={point.y} r={point.key === start ? 5 : 4}><title>{`${point.label}: ${money(point.total)}`}</title></circle>)}
+          </svg>
+          <div className="line-chart-labels">{week.map((day) => <span key={day.key}>{day.label}</span>)}</div>
+        </div>
       </section>
       <section className="panel low-stock-panel"><div className="panel-heading"><div><h2>Perhatian stok</h2><p>Produk di bawah ambang minimum</p></div><button className="text-button" onClick={() => setPage('products')}>Lihat semua <ArrowRight size={15} /></button></div>
         {lowStock.length ? <div className="compact-list">{lowStock.slice(0, 5).map((product) => <div className="compact-row" key={product.id}><ProductMarker product={product} /><span className="compact-copy"><strong>{product.name}</strong><small>{product.category?.name || 'Tanpa kategori'}</small></span><span className="stock-warning">{quantity(product.stock)} {product.unit}</span></div>)}</div> : <EmptyState icon={Check} title="Stok aman" text="Tidak ada produk yang stoknya menipis." /> }
       </section>
-      <section className="panel recent-panel"><div className="panel-heading"><div><h2>Transaksi terbaru</h2><p>Aktivitas penjualan terkini</p></div><button className="text-button" onClick={() => setPage('sales')}>Semua transaksi <ArrowRight size={15} /></button></div>
+      <section className="panel recent-panel"><div className="panel-heading"><div><h2>Transaksi terbaru</h2><p>Aktivitas penjualan terkini</p></div><button className="button button-primary header-action-button recent-all-button" onClick={() => setPage('sales')}>Lihat semua <ArrowRight size={15} /></button></div>
         {recent.length ? <div className="table-wrap"><table><thead><tr><th>No. transaksi</th><th>Tanggal</th><th>Item</th><th className="align-right">Total</th></tr></thead><tbody>{recent.map((sale) => <tr key={sale.id}><td><strong className="mono">{sale.code}</strong></td><td>{shortDate(sale.created_at)}</td><td>{sale.sale_items?.length ?? 0} produk</td><td className="align-right"><strong>{money(sale.total)}</strong></td></tr>)}</tbody></table></div> : <EmptyState icon={ClipboardList} title="Belum ada transaksi" text="Transaksi penjualan akan tampil di sini." /> }
       </section>
       <section className="panel quick-actions"><div className="panel-heading"><div><h2>Aktivitas cepat</h2><p>Akses pekerjaan yang sering dilakukan</p></div></div><div className="quick-action-grid"><QuickAction iconId="pos" label="Transaksi baru" tone="gold" onClick={() => setPage('pos')} /><QuickAction iconId="products" label="Tambah produk" tone="blue" onClick={() => setPage('products')} /><QuickAction iconId="stock" label="Catat stok masuk" tone="green" onClick={() => setPage('stock')} /><QuickAction iconId="reports" label="Lihat laporan" tone="purple" onClick={() => setPage('reports')} /></div></section>
