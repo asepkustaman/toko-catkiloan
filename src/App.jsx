@@ -295,7 +295,7 @@ function App() {
         <header className="topbar">
           <button className="icon-button mobile-menu-button" onClick={() => setMobileMenu(true)} aria-label="Buka menu"><Menu size={21} /></button>
           <div className="breadcrumb"><SidebarIcon id={activeNav?.id} /><strong>{activeNav?.label}</strong></div>
-          <div className="topbar-right"><span className="live-dot" /> Data tersinkron <span className="topbar-date">{new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())}</span></div>
+          <div className="topbar-right"><span className="live-dot" /> Data tersinkron <span className="topbar-date">{new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date())}</span></div>
         </header>
         {notice && <div key={notice.id} className={`toast toast-${notice.type}`} style={{ '--toast-duration': `${NOTICE_DURATION}ms` }} role={notice.type === 'error' ? 'alert' : 'status'}>
           <span className="toast-icon" aria-hidden="true">{notice.type === 'success' ? <Check size={17} /> : <X size={17} />}</span>
