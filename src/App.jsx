@@ -848,7 +848,7 @@ function PointOfSale({ products, store, settings, storeId, run }) {
   };
   return <>
     <div className="pos-layout">
-      <section className="panel product-picker"><div className="search-field"><Search size={18} /><input ref={searchInputRef} value={search} disabled={quantityEntryActive} onChange={(event) => { setSearch(event.target.value); cancelQuantityEntry(); }} onKeyDown={handleSearchKeyDown} placeholder="Cari nama atau barcode produk..." />{search && <button className="search-clear" type="button" disabled={quantityEntryActive} onClick={() => { setSearch(''); cancelQuantityEntry(); }} aria-label="Hapus pencarian"><X size={15} /></button>}</div>
+      <section className="panel product-picker"><div className="pos-picker-header"><div className="search-field"><Search size={18} /><input ref={searchInputRef} value={search} disabled={quantityEntryActive} onChange={(event) => { setSearch(event.target.value); cancelQuantityEntry(); }} onKeyDown={handleSearchKeyDown} placeholder="Cari nama atau barcode produk..." />{search && <button className="search-clear" type="button" disabled={quantityEntryActive} onClick={() => { setSearch(''); cancelQuantityEntry(); }} aria-label="Hapus pencarian"><X size={15} /></button>}</div><div className="pos-transaction-total" aria-live="polite"><span>Nominal transaksi</span><strong>{money(total)}</strong></div></div>
         <div className="product-grid">{filtered.map((product) => {
           const available = getAvailableQuantity(product);
           const isEnteringQuantity = quantityEntryProductId === product.id;
