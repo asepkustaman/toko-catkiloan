@@ -1265,6 +1265,10 @@ textarea::placeholder {
   opacity: 1;
 }
 
+.category-input:focus::placeholder {
+  opacity: 0;
+}
+
 .stats-grid > .stat-card:first-child .stat-top,
 .stats-grid > .stat-card:first-child .stat-value,
 .stats-grid > .stat-card:first-child .stat-note,
