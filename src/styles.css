@@ -1013,6 +1013,19 @@ body {
   color: #ffd66b;
 }
 
+.dashboard-grid > .recent-panel .recent-all-button {
+  color: #2a1a00;
+  background: rgba(42, 26, 0, .14);
+  border-color: rgba(42, 26, 0, .22);
+  border-radius: 999px;
+  box-shadow: none;
+}
+
+.dashboard-grid > .recent-panel .recent-all-button:hover:not(:disabled) {
+  color: #211400;
+  background: rgba(42, 26, 0, .22);
+}
+
 .dashboard-grid > .low-stock-panel .compact-row {
   border-color: rgba(255, 248, 223, .16);
 }
