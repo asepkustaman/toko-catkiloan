@@ -429,9 +429,6 @@ form.form-stack:has(.product-category-row) > .form-row:has(.currency-input) { gr
 .auth-submit-ring circle { fill: none; stroke: #fff0c0; stroke-width: 1.35; stroke-linecap: round; stroke-dasharray: 118 52; }
 .auth-security { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 24px 0 0; padding-top: 18px; color: rgba(42, 26, 0, .62); border-top: 1px solid rgba(42, 26, 0, .16); font-size: 11px; }
 .auth-flow-panel { position: absolute; z-index: 4; top: 0; left: 0; display: flex; width: 50%; height: 100%; flex-direction: column; align-items: center; justify-content: center; gap: clamp(18px, 3vh, 28px); overflow: hidden; padding: clamp(28px, 4vw, 52px); color: #2a1a00; background: transparent; text-align: center; transition: transform .6s ease-in-out .6s; }
-.auth-flow-panel::before, .auth-flow-panel::after { position: absolute; z-index: 0; width: min(42vw, 520px); aspect-ratio: 1; border: 1px solid rgba(90, 58, 0, .2); border-radius: 50%; content: ''; pointer-events: none; }
-.auth-flow-panel::before { top: -34%; left: -21%; }
-.auth-flow-panel::after { right: -25%; bottom: -48%; width: min(35vw, 420px); }
 .auth-shell.auth-success .auth-flow-panel { transform: translateX(100%); transition: transform .6s ease-in-out; }
 .auth-flow-logo { position: relative; z-index: 1; display: block; width: clamp(210px, 30vw, 320px); height: auto; object-fit: contain; }
 .auth-flow-copy { position: relative; z-index: 1; max-width: 58ch; }

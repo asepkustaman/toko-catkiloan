@@ -368,7 +368,7 @@ function AuthScreen({ setupError = '', signedInEmail = '', onSignOut, transition
         </section>
 
         <aside className="auth-flow-panel" aria-live="polite" aria-label="Informasi Paint Store">
-          <img className="auth-flow-logo" src={`${import.meta.env.BASE_URL}paint-store-logo.png`} alt="Logo Paint Store" />
+          <img className="auth-flow-logo" src={`${import.meta.env.BASE_URL}paint-store-logo-login.png`} alt="Logo Paint Store" fetchPriority="high" decoding="async" />
           <div className="auth-flow-copy">
             <p className="auth-flow-eyebrow">{transitioning ? 'AKSES TERVERIFIKASI' : 'SISTEM KASIR & INVENTARIS'}</p>
             <h2>{transitioning ? 'Selamat datang' : 'Kelola Penjualan & Stok Secara Aman dan Terintegrasi'}</h2>
