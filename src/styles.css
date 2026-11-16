@@ -1606,6 +1606,7 @@ body {
 .table-wrap th {
   color: rgba(42, 26, 0, .9);
   font-family: Manrope, sans-serif;
+  font-size: 9px;
   font-weight: 800;
 }
 
