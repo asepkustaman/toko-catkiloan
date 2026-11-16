@@ -74,7 +74,6 @@ create table if not exists public.sales (
   store_id uuid not null references public.stores(id) on delete cascade,
   code text not null,
   subtotal numeric(14, 2) not null check (subtotal >= 0),
-  discount numeric(14, 2) not null default 0 check (discount >= 0),
   total numeric(14, 2) not null check (total >= 0),
   cost_total numeric(14, 2) not null check (cost_total >= 0),
   amount_paid numeric(14, 2) not null check (amount_paid >= total),
@@ -222,7 +221,6 @@ create trigger on_auth_user_created_paintstore
 create or replace function public.checkout_sale(
   p_store_id uuid,
   p_items jsonb,
-  p_discount numeric default 0,
   p_amount_paid numeric default 0
 )
 returns uuid
@@ -237,7 +235,6 @@ declare
   v_subtotal numeric(14, 2) := 0;
   v_cost_total numeric(14, 2) := 0;
   v_total numeric(14, 2);
-  v_discount numeric(14, 2) := coalesce(p_discount, 0);
   v_amount_paid numeric(14, 2) := coalesce(p_amount_paid, 0);
   v_sale_date date := (now() at time zone 'Asia/Jakarta')::date;
   v_sale_prefix text;
@@ -252,8 +249,8 @@ begin
   if jsonb_array_length(p_items) = 0 then
     raise exception 'Keranjang transaksi kosong';
   end if;
-  if v_discount < 0 or v_amount_paid < 0 then
-    raise exception 'Diskon dan pembayaran tidak boleh negatif';
+  if v_amount_paid < 0 then
+    raise exception 'Pembayaran tidak boleh negatif';
   end if;
 
   for v_item in
@@ -280,10 +277,7 @@ begin
     v_cost_total := v_cost_total + (v_product.buy_price * v_item.quantity);
   end loop;
 
-  if v_discount > v_subtotal then
-    raise exception 'Diskon melebihi subtotal';
-  end if;
-  v_total := v_subtotal - v_discount;
+  v_total := v_subtotal;
   if v_amount_paid < v_total then
     raise exception 'Pembayaran kurang dari total transaksi';
   end if;
@@ -298,13 +292,13 @@ begin
       and substring(code from length(v_sale_prefix) + 1) ~ '^[0-9]+$';
 
   insert into public.sales (
-    id, store_id, code, subtotal, discount, total, cost_total,
+    id, store_id, code, subtotal, total, cost_total,
     amount_paid, change_amount, created_by
   )
   values (
     v_sale_id, p_store_id,
     v_sale_prefix || lpad(v_sale_number::text, 3, '0'),
-    v_subtotal, v_discount, v_total, v_cost_total, v_amount_paid, v_amount_paid - v_total, (select auth.uid())
+    v_subtotal, v_total, v_cost_total, v_amount_paid, v_amount_paid - v_total, (select auth.uid())
   );
 
   for v_item in
@@ -397,9 +391,9 @@ begin
 end;
 $$;
 
-revoke all on function public.checkout_sale(uuid, jsonb, numeric, numeric) from public;
+revoke all on function public.checkout_sale(uuid, jsonb, numeric) from public;
 revoke all on function public.record_stock_entry(uuid, uuid, uuid, numeric, numeric, date, text) from public;
-grant execute on function public.checkout_sale(uuid, jsonb, numeric, numeric) to authenticated;
+grant execute on function public.checkout_sale(uuid, jsonb, numeric) to authenticated;
 grant execute on function public.record_stock_entry(uuid, uuid, uuid, numeric, numeric, date, text) to authenticated;
 
 alter table public.stores enable row level security;

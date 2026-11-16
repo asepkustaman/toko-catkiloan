@@ -32,7 +32,7 @@ URL dan key publishable/anon akan masuk ke bundle browser saat build; itu memang
 
 ## Skema database
 
-Skema membuat tabel `stores`, `store_members`, `store_settings`, `categories`, `vendors`, `products`, `sales`, `sale_items`, `stock_entries`, dan `inventory_movements`. Fungsi `checkout_sale` menyimpan transaksi, snapshot harga pokok, dan pengurangan stok dalam satu transaksi database. Nomor transaksi menggunakan format `S-YYMMDD-001`, dengan nomor urut harian per toko. Fungsi `record_stock_entry` mencatat pembelian dan menambah stok secara atomik. Untuk proyek Supabase yang sudah aktif, jalankan [`supabase/migrations/20261115_transaction_code_format.sql`](./supabase/migrations/20261115_transaction_code_format.sql) di **SQL Editor** agar format nomor transaksi yang baru berlaku.
+Skema membuat tabel `stores`, `store_members`, `store_settings`, `categories`, `vendors`, `products`, `sales`, `sale_items`, `stock_entries`, dan `inventory_movements`. Fungsi `checkout_sale` menyimpan transaksi, snapshot harga pokok, dan pengurangan stok dalam satu transaksi database. Nomor transaksi menggunakan format `S-YYMMDD-001`, dengan nomor urut harian per toko. Fungsi `record_stock_entry` mencatat pembelian dan menambah stok secara atomik. Untuk proyek Supabase yang sudah aktif, jalankan [`supabase/migrations/20261115_transaction_code_format.sql`](./supabase/migrations/20261115_transaction_code_format.sql), lalu [`supabase/migrations/20261116_remove_discount.sql`](./supabase/migrations/20261116_remove_discount.sql) di **SQL Editor**. Migrasi kedua menghapus parameter diskon dari RPC checkout; nilai diskon historis yang mungkin tersimpan tetap dipertahankan dan tidak memengaruhi transaksi baru.
 
 ## Data aplikasi lama
 

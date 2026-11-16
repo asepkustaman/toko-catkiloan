@@ -827,7 +827,6 @@ function PointOfSale({ products, categories, store, settings, storeId, run }) {
         const { data, error } = await supabase.rpc('checkout_sale', {
           p_store_id: storeId,
           p_items: cart.map((item) => ({ product_id: item.product.id, quantity: item.qty })),
-          p_discount: 0,
           p_amount_paid: amountPaid,
         });
         if (error) throw error;
@@ -1134,7 +1133,7 @@ function SalesPage({ sales }) {
       && (!from || date >= from)
       && (!to || date <= to);
   });
-  const exportCsv = () => downloadCsv(['Nomor Transaksi,Tanggal,Subtotal (Rp),Diskon (Rp),Total (Rp),Dibayar (Rp),Kembalian (Rp)', ...filtered.map((sale) => [sale.code, sale.created_at?.slice(0, 10), sale.subtotal, sale.discount, sale.total, sale.amount_paid, sale.change_amount].join(','))].join('\n'), 'laporan-penjualan.csv');
+  const exportCsv = () => downloadCsv(['Nomor Transaksi,Tanggal,Subtotal (Rp),Total (Rp),Dibayar (Rp),Kembalian (Rp)', ...filtered.map((sale) => [sale.code, sale.created_at?.slice(0, 10), sale.subtotal, sale.total, sale.amount_paid, sale.change_amount].join(','))].join('\n'), 'laporan-penjualan.csv');
   return <>
     <section className="panel data-panel">
       <div className="sales-panel-heading">
@@ -1153,8 +1152,8 @@ function SalesPage({ sales }) {
         </div>
         <span className="result-count">{filtered.length} transaksi</span>
       </div>
-      <div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>NO. TRANSAKSI</th><th>TANGGAL</th><th>JUMLAH ITEM</th><th>SUBTOTAL</th><th>DISKON</th><th className="align-right">TOTAL</th></tr></thead><tbody>{filtered.map((sale, index) => <tr className="clickable-row" key={sale.id} onClick={() => setSelected(sale)}><td className="row-number">{index + 1}</td><td><strong className="mono">{sale.code}</strong></td><td>{shortDate(sale.created_at)}</td><td>{sale.sale_items?.length ?? 0} produk</td><td>{money(sale.subtotal)}</td><td>{money(sale.discount)}</td><td className="align-right"><strong>{money(sale.total)}</strong></td></tr>)}</tbody></table>{!filtered.length && <EmptyState icon={ClipboardList} title="Transaksi tidak ditemukan" text="Belum ada transaksi yang sesuai." />}</div></section>
-    {selected && <Modal title="Detail transaksi" onClose={() => setSelected(null)}><div className="sale-detail"><div className="sale-detail-top"><span className="badge badge-success">Selesai</span><strong className="mono">{selected.code}</strong><span>{shortDate(selected.created_at)}</span></div><div className="sale-items">{selected.sale_items?.map((item) => <div className="sale-item" key={item.id}><span>{item.product_name}<small>{quantity(item.quantity)} × {money(item.unit_price)}</small></span><strong>{money(Number(item.quantity) * Number(item.unit_price))}</strong></div>)}</div><div className="summary-line"><span>Subtotal</span><strong>{money(selected.subtotal)}</strong></div><div className="summary-line"><span>Diskon</span><strong>{money(selected.discount)}</strong></div><div className="summary-total"><span>Total</span><strong>{money(selected.total)}</strong></div><div className="summary-line"><span>Dibayar</span><strong>{money(selected.amount_paid)}</strong></div><div className="summary-line"><span>Kembalian</span><strong>{money(selected.change_amount)}</strong></div></div></Modal>}
+      <div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>NO. TRANSAKSI</th><th>TANGGAL</th><th>JUMLAH ITEM</th><th>SUBTOTAL</th><th className="align-right">TOTAL</th></tr></thead><tbody>{filtered.map((sale, index) => <tr className="clickable-row" key={sale.id} onClick={() => setSelected(sale)}><td className="row-number">{index + 1}</td><td><strong className="mono">{sale.code}</strong></td><td>{shortDate(sale.created_at)}</td><td>{sale.sale_items?.length ?? 0} produk</td><td>{money(sale.subtotal)}</td><td className="align-right"><strong>{money(sale.total)}</strong></td></tr>)}</tbody></table>{!filtered.length && <EmptyState icon={ClipboardList} title="Transaksi tidak ditemukan" text="Belum ada transaksi yang sesuai." />}</div></section>
+    {selected && <Modal title="Detail transaksi" onClose={() => setSelected(null)}><div className="sale-detail"><div className="sale-detail-top"><span className="badge badge-success">Selesai</span><strong className="mono">{selected.code}</strong><span>{shortDate(selected.created_at)}</span></div><div className="sale-items">{selected.sale_items?.map((item) => <div className="sale-item" key={item.id}><span>{item.product_name}<small>{quantity(item.quantity)} × {money(item.unit_price)}</small></span><strong>{money(Number(item.quantity) * Number(item.unit_price))}</strong></div>)}</div><div className="summary-total"><span>Total</span><strong>{money(selected.total)}</strong></div><div className="summary-line"><span>Dibayar</span><strong>{money(selected.amount_paid)}</strong></div><div className="summary-line"><span>Kembalian</span><strong>{money(selected.change_amount)}</strong></div></div></Modal>}
   </>;
 }
 
