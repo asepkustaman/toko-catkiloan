@@ -166,8 +166,12 @@ td strong { color: #373c35; font-weight: 600; }
 .product-toolbar .result-count { flex: 0 0 auto; white-space: nowrap; }
 .button.header-action-button { min-height: 36px; gap: 8px; padding: 0 13px; color: #fff8df; background: rgba(23, 19, 13, .72); border: 1px solid rgba(255, 255, 255, .62); border-radius: 999px; box-shadow: none; font-size: 10px; white-space: nowrap; }
 .button.header-action-button:hover:not(:disabled) { color: #fff8df; background: rgba(23, 19, 13, .82); }
+.button.header-action-button.product-add-button { color: #2a1a00; background: #f5b503; border-color: rgba(90, 58, 0, .2); }
+.button.header-action-button.product-add-button:hover:not(:disabled) { color: #2a1a00; background: #e8aa00; }
 .header-action-button svg { flex: 0 0 auto; }
 .header-action-icon { position: relative; display: grid; width: 23px; height: 23px; flex: 0 0 auto; place-items: center; color: #fff1c8; background: rgba(255, 255, 255, .13); border: 1px solid rgba(255, 248, 223, .32); border-radius: 6px; }
+.product-add-button .header-action-icon { color: #5a3a00; background: rgba(255, 255, 255, .3); border-color: rgba(90, 58, 0, .18); }
+.product-add-button .header-action-icon > svg:last-child { color: #fff8df; background: #5a3a00; }
 .header-action-icon > svg:first-child { width: 14px; height: 14px; }
 .header-action-icon > svg:last-child { position: absolute; right: -4px; bottom: -3px; width: 11px; height: 11px; padding: 1px; color: #3e2900; background: #ffe6a0; border-radius: 4px; }
 .header-action-button:hover:not(:disabled) .header-action-icon { color: #fff1c8; background: rgba(255, 255, 255, .2); }
@@ -261,6 +265,8 @@ td strong { color: #373c35; font-weight: 600; }
 .product-color-marker { display: block; width: 31px; height: 31px; flex: 0 0 31px; background: var(--product-color); border: 1px solid rgba(42, 26, 0, .22); border-radius: 9px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22); }
 .form-row { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 13px; }
 .product-category-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.product-category-row > .field { align-content: start; }
+form.form-stack:has(.product-category-row) > .form-row:has(.currency-input) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .stock-total { display: flex; align-items: center; justify-content: space-between; padding: 13px; color: #656b61; background: #f7f8f5; border-radius: 8px; font-size: 10px; }
 .stock-total strong { color: #3c433a; font-family: Manrope, sans-serif; font-size: 15px; }
 .stock-history .panel-heading { margin-bottom: 13px; }
@@ -497,7 +503,8 @@ td strong { color: #373c35; font-weight: 600; }
   .vendor-row > .row-actions { grid-column: 2; grid-row: 1; }
   .vendor-row-detail { grid-column: span 1; padding-left: 39px; }
   .vendor-row-address { grid-column: 1 / -1; }
-  .form-row { grid-template-columns: 1fr; }
+  .form-row,
+  form.form-stack:has(.product-category-row) > .form-row:has(.currency-input) { grid-template-columns: 1fr; }
   .filter-panel { align-items: stretch; flex-wrap: wrap; }
   .filter-label { flex: 1 0 100%; }
   .filter-panel .field { flex: 1; width: auto; }
