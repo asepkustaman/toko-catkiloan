@@ -533,7 +533,13 @@ function Dashboard({ store, products, summary, settings, setPage }) {
   }, { totalStock: 0, lowStock: [] });
   const lowStock = inventory.lowStock;
   const recent = summary?.recent ?? [];
-  const week = (summary?.week ?? []).map((day) => ({
+  const weekData = summary?.week?.length ? summary.week : Array.from({ length: 7 }, (_, index) => {
+    const date = new Date();
+    date.setHours(12, 0, 0, 0);
+    date.setDate(date.getDate() - 6 + index);
+    return { key: date.toLocaleDateString('en-CA'), total: 0 };
+  });
+  const week = weekData.map((day) => ({
     ...day,
     label: new Intl.DateTimeFormat('id-ID', { weekday: 'short' }).format(new Date(`${day.key}T12:00:00`)),
   }));
