@@ -563,7 +563,10 @@ function Dashboard({ store, products, sales, stockEntries, settings, setPage }) 
             {[26, 65, 104].map((y) => <line className="line-chart-grid" key={y} x1="20" x2="680" y1={y} y2={y} />)}
             <path className="line-chart-area" d={chartArea} />
             <polyline className="line-chart-line" points={chartLine} />
-            {chartPoints.map((point) => <circle className={`line-chart-point${point.key === start ? ' line-chart-point-today' : ''}`} key={point.key} cx={point.x} cy={point.y} r={point.key === start ? 5 : 4}><title>{`${point.label}: ${money(point.total)}`}</title></circle>)}
+            {chartPoints.map((point) => <g key={point.key}>
+              <text className="line-chart-value" x={point.x} y={Math.max(point.y - 13, 14)} textAnchor="middle">{numberFormat.format(point.total)}</text>
+              <circle className={`line-chart-point${point.key === start ? ' line-chart-point-today' : ''}`} cx={point.x} cy={point.y} r={point.key === start ? 5 : 4}><title>{`${point.label}: ${money(point.total)}`}</title></circle>
+            </g>)}
           </svg>
           <div className="line-chart-labels">{week.map((day) => <span key={day.key}>{day.label}</span>)}</div>
         </div>

@@ -118,6 +118,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .line-chart-grid { stroke: rgba(90, 58, 0, .12); stroke-dasharray: 3 6; stroke-width: 1; vector-effect: non-scaling-stroke; }
 .line-chart-area { fill: url(#sales-chart-area); }
 .line-chart-line { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; vector-effect: non-scaling-stroke; }
+.line-chart-value { fill: #5a3a00; font-size: 13px; font-weight: 700; paint-order: stroke; stroke: rgba(255, 227, 168, .9); stroke-linejoin: round; stroke-width: 3px; }
 .line-chart-point { fill: #fff5d5; stroke: currentColor; stroke-width: 2.5; transition: r .18s ease, fill .18s ease; vector-effect: non-scaling-stroke; }
 .line-chart-point:hover { fill: #fff; r: 6; }
 .line-chart-point-today { fill: var(--gold); stroke: #684300; }
@@ -1311,6 +1312,7 @@ body {
 }
 
 @media (max-width: 620px) {
+  .line-chart-value { font-size: 20px; }
   .sidebar,
   .panel,
   .stat-card,
