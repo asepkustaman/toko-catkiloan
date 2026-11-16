@@ -166,12 +166,8 @@ td strong { color: #373c35; font-weight: 600; }
 .product-toolbar .result-count { flex: 0 0 auto; white-space: nowrap; }
 .button.header-action-button { min-height: 36px; gap: 8px; padding: 0 13px; color: #fff8df; background: rgba(23, 19, 13, .72); border: 1px solid rgba(255, 255, 255, .62); border-radius: 999px; box-shadow: none; font-size: 10px; white-space: nowrap; }
 .button.header-action-button:hover:not(:disabled) { color: #fff8df; background: rgba(23, 19, 13, .82); }
-.button.header-action-button.product-add-button { color: #2a1a00; background: #f5b503; border-color: rgba(90, 58, 0, .2); }
-.button.header-action-button.product-add-button:hover:not(:disabled) { color: #2a1a00; background: #e8aa00; }
 .header-action-button svg { flex: 0 0 auto; }
 .header-action-icon { position: relative; display: grid; width: 23px; height: 23px; flex: 0 0 auto; place-items: center; color: #fff1c8; background: rgba(255, 255, 255, .13); border: 1px solid rgba(255, 248, 223, .32); border-radius: 6px; }
-.product-add-button .header-action-icon { color: #5a3a00; background: rgba(255, 255, 255, .3); border-color: rgba(90, 58, 0, .18); }
-.product-add-button .header-action-icon > svg:last-child { color: #fff8df; background: #5a3a00; }
 .header-action-icon > svg:first-child { width: 14px; height: 14px; }
 .header-action-icon > svg:last-child { position: absolute; right: -4px; bottom: -3px; width: 11px; height: 11px; padding: 1px; color: #3e2900; background: #ffe6a0; border-radius: 4px; }
 .header-action-button:hover:not(:disabled) .header-action-icon { color: #fff1c8; background: rgba(255, 255, 255, .2); }
