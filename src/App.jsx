@@ -300,7 +300,7 @@ function App() {
           <button onClick={() => setNotice(null)} aria-label="Tutup notifikasi" title="Tutup"><X size={16} /></button>
           <span key={notice.id} className="toast-progress" aria-hidden="true" />
         </div>}
-        <div className={`content ${page === 'dashboard' ? 'dashboard-content' : ''}`}>
+        <div className={`content ${page === 'dashboard' ? 'dashboard-content' : ''} ${['reports', 'zakat'].includes(page) ? 'compact-screen-content' : ''}`}>
           {loading && <div className="sync-indicator">Memperbarui data...</div>}
           {page === 'dashboard' && <Dashboard store={store} products={products} summary={dashboardSummary} settings={settings} setPage={navigate} />}
           {page === 'pos' && <PointOfSale products={products} categories={categories} store={store} settings={settings} storeId={store.id} run={run} />}

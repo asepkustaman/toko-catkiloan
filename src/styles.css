@@ -1058,6 +1058,89 @@ body {
   }
 }
 
+@media (min-width: 821px) and (min-height: 700px) {
+  .main-area:has(.compact-screen-content) {
+    height: calc(100dvh - 32px);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .compact-screen-content {
+    display: flex;
+    height: calc(100% - 72px);
+    min-height: 0;
+    flex-direction: column;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+
+  .compact-screen-content > .filter-panel {
+    flex: 0 0 auto;
+    margin-bottom: 10px;
+    padding: 10px 12px;
+  }
+
+  .compact-screen-content > .stats-grid {
+    flex: 0 0 auto;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .compact-screen-content .stat-card {
+    padding: 8px 14px;
+  }
+
+  .compact-screen-content .stat-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .compact-screen-content .stat-value {
+    margin-top: 7px;
+  }
+
+  .compact-screen-content .stat-note {
+    margin-top: 3px;
+  }
+
+  .compact-screen-content > .zakat-summary-grid {
+    flex: 0 0 auto;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .compact-screen-content .zakat-breakdown {
+    padding: 14px;
+  }
+
+  .compact-screen-content .zakat-line {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .compact-screen-content .zakat-method-note {
+    margin-top: 5px;
+  }
+
+  .compact-screen-content .zakat-total-panel {
+    padding: 16px;
+  }
+
+  .compact-screen-content > .report-transactions,
+  .compact-screen-content > .zakat-transactions {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  .compact-screen-content .report-transactions .table-wrap,
+  .compact-screen-content .zakat-transactions .table-wrap {
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+}
+
 .auth-page,
 .auth-shell {
   background: transparent;
