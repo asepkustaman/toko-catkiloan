@@ -715,10 +715,11 @@ async function requestSalesPage({ storeId, from = '', to = '', search = '', page
 }
 
 function useSalesPage({ storeId, from = '', to = '', search = '', page = 1, pageSize = PAGE_SIZE }) {
-  const [data, setData] = useState({ rows: [], total_count: 0, revenue: 0, cost: 0, stock_expense: 0 });
+  const [data, setData] = useState({ rows: [], total_count: 0, revenue: 0, cost: 0, stock_expense: 0, queryKey: '' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [reloadId, setReloadId] = useState(0);
+  const queryKey = JSON.stringify([storeId, from, to, search, page, pageSize]);
 
   useEffect(() => {
     let active = true;
@@ -726,10 +727,13 @@ function useSalesPage({ storeId, from = '', to = '', search = '', page = 1, page
     setError('');
     requestSalesPage({ storeId, from, to, search, page, limit: pageSize })
       .then((result) => {
-        if (active) setData(result ?? { rows: [], total_count: 0, revenue: 0, cost: 0, stock_expense: 0 });
+        if (active) setData({ ...(result ?? { rows: [], total_count: 0, revenue: 0, cost: 0, stock_expense: 0 }), queryKey });
       })
       .catch((requestError) => {
-        if (active) setError(errorMessage(requestError));
+        if (active) {
+          setData((current) => ({ ...current, rows: [], queryKey }));
+          setError(errorMessage(requestError));
+        }
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -737,7 +741,14 @@ function useSalesPage({ storeId, from = '', to = '', search = '', page = 1, page
     return () => { active = false; };
   }, [storeId, from, to, search, page, pageSize, reloadId]);
 
-  return { ...data, loading, error, reload: () => setReloadId((id) => id + 1) };
+  const hasCurrentPage = data.queryKey === queryKey;
+  return {
+    ...data,
+    rows: hasCurrentPage ? data.rows : [],
+    loading: loading || !hasCurrentPage,
+    error: hasCurrentPage ? error : '',
+    reload: () => setReloadId((id) => id + 1),
+  };
 }
 
 function useStockEntriesPage({ storeId, date = '', page = 1 }) {
