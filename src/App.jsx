@@ -518,7 +518,7 @@ function Brand() {
 }
 
 function StatCard({ label, value, note, icon: Icon, tone = 'gold', artwork = false }) {
-  return <article className={`stat-card${artwork ? ' stat-card-art' : ''}`}><div className="stat-top"><span>{label}</span><span className={`stat-icon icon-${tone}${artwork ? ' stat-icon-art' : ''}`}><Icon size={artwork ? 76 : 19} /></span></div><strong className="stat-value">{value}</strong><span className="stat-note">{note}</span></article>;
+  return <article className={`stat-card${artwork ? ' stat-card-art' : ''}`}><div className="stat-top"><span>{label}</span><span className={`stat-icon icon-${tone}${artwork ? ' stat-icon-art' : ''}`}><Icon size={artwork ? 76 : 19} /></span></div><div className="stat-value-row"><strong className="stat-value">{value}</strong><span className="stat-note">{note}</span></div></article>;
 }
 
 function Dashboard({ store, products, summary, settings, setPage }) {
