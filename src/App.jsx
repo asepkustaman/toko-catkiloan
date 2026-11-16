@@ -1296,12 +1296,13 @@ function SalesPage({ storeId }) {
 }
 
 function ReportsPage({ storeId }) {
+  const pageSize = 10;
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [page, setPage] = useState(1);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState('');
-  const salesPage = useSalesPage({ storeId, from, to, page });
+  const salesPage = useSalesPage({ storeId, from, to, page, pageSize });
   useEffect(() => setPage(1), [from, to]);
   const revenue = Number(salesPage.revenue);
   const cost = Number(salesPage.cost);
@@ -1324,7 +1325,7 @@ function ReportsPage({ storeId }) {
     {salesPage.error && <p className="inline-error" role="alert">Gagal memuat laporan: {salesPage.error}</p>}
     {exportError && <p className="inline-error" role="alert">{exportError}</p>}
     <div className="stats-grid report-stats"><StatCard label="Omzet bersih" value={money(revenue)} note={`${Number(salesPage.total_count)} transaksi`} icon={CircleDollarSign} tone="gold" artwork /><StatCard label="Harga pokok terjual" value={money(cost)} note="Dihitung dari harga beli saat transaksi" icon={Boxes} tone="blue" artwork /><StatCard label="Laba bersih" value={money(profit)} note="Omzet dikurangi harga pokok" icon={TrendingUp} tone="green" artwork /><StatCard label="Pembelian stok" value={money(expense)} note="Nilai stok masuk pada periode ini" icon={ArrowDownToLine} tone="purple" artwork /></div>
-    <section className="panel data-panel"><div className="panel-heading report-table-heading"><div><h2>Rincian laba per transaksi</h2></div></div><div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>NO. TRANSAKSI</th><th>OMZET</th><th>HARGA POKOK</th><th className="align-right">LABA BERSIH</th></tr></thead><tbody>{salesPage.rows.map((sale, index) => <tr key={sale.id}><td className="row-number">{(page - 1) * PAGE_SIZE + index + 1}</td><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}</tbody></table>{!salesPage.loading && !salesPage.error && !salesPage.rows.length && <EmptyState icon={BarChart3} title="Belum ada data laporan" text="Transaksi pada periode ini akan muncul di sini." />}</div><Pagination page={page} total={Number(salesPage.total_count)} onChange={setPage} loading={salesPage.loading} /></section>
+    <section className="panel data-panel report-transactions"><div className="panel-heading report-table-heading"><div><h2>Rincian laba per transaksi</h2></div></div><div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>NO. TRANSAKSI</th><th>OMZET</th><th>HARGA POKOK</th><th className="align-right">LABA BERSIH</th></tr></thead><tbody>{salesPage.rows.map((sale, index) => <tr key={sale.id}><td className="row-number">{(page - 1) * pageSize + index + 1}</td><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}{salesPage.rows.length > 0 && Array.from({ length: Math.max(0, pageSize - salesPage.rows.length) }, (_, index) => <tr className="table-spacer-row" aria-hidden="true" key={`report-spacer-${page}-${index}`}><td colSpan="6" /></tr>)}</tbody></table>{!salesPage.loading && !salesPage.error && !salesPage.rows.length && <EmptyState icon={BarChart3} title="Belum ada data laporan" text="Transaksi pada periode ini akan muncul di sini." />}</div><Pagination page={page} pageSize={pageSize} total={Number(salesPage.total_count)} onChange={setPage} loading={salesPage.loading} /></section>
   </>;
 }
 
