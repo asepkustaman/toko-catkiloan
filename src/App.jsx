@@ -714,7 +714,7 @@ async function requestSalesPage({ storeId, from = '', to = '', search = '', page
   return data;
 }
 
-function useSalesPage({ storeId, from = '', to = '', search = '', page = 1 }) {
+function useSalesPage({ storeId, from = '', to = '', search = '', page = 1, pageSize = PAGE_SIZE }) {
   const [data, setData] = useState({ rows: [], total_count: 0, revenue: 0, cost: 0, stock_expense: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -724,7 +724,7 @@ function useSalesPage({ storeId, from = '', to = '', search = '', page = 1 }) {
     let active = true;
     setLoading(true);
     setError('');
-    requestSalesPage({ storeId, from, to, search, page })
+    requestSalesPage({ storeId, from, to, search, page, limit: pageSize })
       .then((result) => {
         if (active) setData(result ?? { rows: [], total_count: 0, revenue: 0, cost: 0, stock_expense: 0 });
       })
@@ -735,7 +735,7 @@ function useSalesPage({ storeId, from = '', to = '', search = '', page = 1 }) {
         if (active) setLoading(false);
       });
     return () => { active = false; };
-  }, [storeId, from, to, search, page, reloadId]);
+  }, [storeId, from, to, search, page, pageSize, reloadId]);
 
   return { ...data, loading, error, reload: () => setReloadId((id) => id + 1) };
 }
@@ -772,8 +772,8 @@ function useStockEntriesPage({ storeId, date = '', page = 1 }) {
   return { ...data, loading, error, reload: () => setReloadId((id) => id + 1) };
 }
 
-function Pagination({ page, total, onChange, loading = false }) {
-  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+function Pagination({ page, total, onChange, loading = false, pageSize = PAGE_SIZE }) {
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
   if (pageCount <= 1) return null;
   return <nav className="pagination" aria-label="Navigasi halaman">
     <span>Halaman {page} dari {pageCount} · {numberFormat.format(total)} data</span>
@@ -1331,12 +1331,13 @@ function ReportsPage({ storeId }) {
 }
 
 function ZakatPage({ storeId }) {
+  const pageSize = 6;
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [page, setPage] = useState(1);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState('');
-  const salesPage = useSalesPage({ storeId, from, to, page });
+  const salesPage = useSalesPage({ storeId, from, to, page, pageSize });
   useEffect(() => setPage(1), [from, to]);
   const revenue = Number(salesPage.revenue);
   const cost = Number(salesPage.cost);
@@ -1400,8 +1401,8 @@ function ZakatPage({ storeId }) {
     <section className="panel data-panel zakat-transactions">
       <div className="panel-heading"><div><h2>Rincian transaksi</h2></div></div>
       <div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>NO. TRANSAKSI</th><th>OMZET</th><th>HPP</th><th className="align-right">LABA SETELAH HPP</th></tr></thead><tbody>
-        {salesPage.rows.map((sale, index) => <tr key={sale.id}><td className="row-number">{(page - 1) * PAGE_SIZE + index + 1}</td><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}
-      </tbody></table>{!salesPage.loading && !salesPage.error && !salesPage.rows.length && <EmptyState icon={CircleDollarSign} title="Belum ada transaksi pada periode ini" text="Pilih rentang tanggal lain untuk melihat rincian perhitungan zakat." />}</div><Pagination page={page} total={Number(salesPage.total_count)} onChange={setPage} loading={salesPage.loading} />
+        {salesPage.rows.map((sale, index) => <tr key={sale.id}><td className="row-number">{(page - 1) * pageSize + index + 1}</td><td>{shortDate(sale.created_at)}</td><td className="mono">{sale.code}</td><td>{money(sale.total)}</td><td>{money(sale.cost_total)}</td><td className="align-right"><strong className={Number(sale.total) - Number(sale.cost_total) >= 0 ? 'positive-value' : 'negative-value'}>{money(Number(sale.total) - Number(sale.cost_total))}</strong></td></tr>)}
+      </tbody></table>{!salesPage.loading && !salesPage.error && !salesPage.rows.length && <EmptyState icon={CircleDollarSign} title="Belum ada transaksi pada periode ini" text="Pilih rentang tanggal lain untuk melihat rincian perhitungan zakat." />}</div><Pagination page={page} pageSize={pageSize} total={Number(salesPage.total_count)} onChange={setPage} loading={salesPage.loading} />
     </section>
   </>;
 }
