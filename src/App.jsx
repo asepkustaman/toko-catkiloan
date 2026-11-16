@@ -367,13 +367,19 @@ function AuthScreen({ setupError = '', signedInEmail = '', onSignOut, transition
           </div>
         </section>
 
-        <div className="auth-flow-panel" aria-live="polite">
+        <aside className="auth-flow-panel" aria-live="polite" aria-label="Informasi Paint Store">
           <img className="auth-flow-logo" src={`${import.meta.env.BASE_URL}paint-store-logo.png`} alt="Logo Paint Store" />
-          <p className="auth-flow-caption">{transitioning ? 'Akses terverifikasi' : 'Sistem kasir & inventaris'}</p>
-          <div className="auth-flow-prompt">
-            <p>{transitioning ? 'Menyiapkan dashboard Anda.' : 'Penjualan dan stok tercatat rapi dalam satu ruang kerja.'}</p>
+          <div className="auth-flow-copy">
+            <p className="auth-flow-eyebrow">{transitioning ? 'AKSES TERVERIFIKASI' : 'SISTEM KASIR & INVENTARIS'}</p>
+            <h2>{transitioning ? 'Selamat datang' : 'Kelola Penjualan & Stok Secara Aman dan Terintegrasi'}</h2>
+            <p>{transitioning ? 'Menyiapkan dashboard Anda.' : 'Catat transaksi, pantau stok, dan kelola toko dalam satu ruang kerja.'}</p>
           </div>
-        </div>
+          <ul className="auth-flow-features" aria-label="Keunggulan Paint Store">
+            <li><ShieldCheck size={25} /><strong>Aman</strong><span>Data toko terlindungi</span></li>
+            <li><TrendingUp size={25} /><strong>Real-time</strong><span>Stok selalu terbarui</span></li>
+            <li><Boxes size={25} /><strong>Terintegrasi</strong><span>Kasir dan inventaris terhubung</span></li>
+          </ul>
+        </aside>
       </div>
     </div>
   );
