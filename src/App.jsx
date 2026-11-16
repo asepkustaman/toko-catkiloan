@@ -11,8 +11,8 @@ const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'pos', label: 'Kasir', icon: ShoppingCart },
   { id: 'sales', label: 'Penjualan', icon: ClipboardList },
-  { id: 'stock', label: 'Stok masuk', icon: ArrowDownToLine },
   { id: 'products', label: 'Produk', icon: Package },
+  { id: 'stock', label: 'Stok masuk', icon: ArrowDownToLine },
   { id: 'vendors', label: 'Vendor', icon: Truck },
   { id: 'reports', label: 'Laba rugi', icon: TrendingUp },
   { id: 'zakat', label: 'Zakat', icon: CircleDollarSign },
@@ -279,7 +279,7 @@ function App() {
         <p className="nav-caption">MENU UTAMA</p>
         <nav className="nav-list">
           {permittedNavItems.map(({ id, label }) => (
-            <button key={id} className={`nav-item ${page === id ? 'nav-active' : ''}`} aria-label={label} onClick={() => navigate(id)}>
+            <button key={id} className={`nav-item${id === 'zakat' ? ' nav-zakat' : ''} ${page === id ? 'nav-active' : ''}`} aria-label={label} onClick={() => navigate(id)}>
              <SidebarIcon id={id} /><span>{label}</span>
               {id === 'products' && products.some((product) => Number(product.stock) <= Number(settings?.low_stock_threshold ?? 5)) && <i className="nav-dot" />}
             </button>
@@ -710,9 +710,10 @@ function PointOfSale({ products, categories, store, settings, storeId, run }) {
   const searchInputRef = useRef(null);
   const quantityInputRef = useRef(null);
   const productButtonRefs = useRef(new Map());
+  const inStockProducts = products.filter((product) => Number(product.stock) > 0);
   const categoryOptions = [
-    ...categories,
-    ...(products.some((product) => !product.category) ? [{ id: '__uncategorized__', name: 'Tanpa kategori' }] : []),
+    ...categories.filter((category) => inStockProducts.some((product) => String(product.category?.id) === String(category.id))),
+    ...(inStockProducts.some((product) => !product.category) ? [{ id: '__uncategorized__', name: 'Tanpa kategori' }] : []),
   ];
   const filtered = products.filter((product) => {
     const matchesSearch = `${product.name} ${product.barcode ?? ''} ${product.category?.name ?? ''}`.toLowerCase().includes(search.toLowerCase());
@@ -863,7 +864,7 @@ function PointOfSale({ products, categories, store, settings, storeId, run }) {
   };
   return <>
     <div className="pos-layout">
-      <section className="panel product-picker"><div className="pos-picker-header"><div className="pos-picker-controls"><div className="search-field"><Search size={18} /><input ref={searchInputRef} value={search} disabled={quantityEntryActive} onChange={(event) => { setSearch(event.target.value); cancelQuantityEntry(); }} onKeyDown={handleSearchKeyDown} placeholder="Cari nama atau barcode produk..." />{search && <button className="search-clear" type="button" disabled={quantityEntryActive} onClick={() => { setSearch(''); cancelQuantityEntry(); }} aria-label="Hapus pencarian"><X size={15} /></button>}</div><div className="pos-category-switch"><span>Filter kategori</span><button className={`pos-switch${categoryFilterEnabled ? ' is-on' : ''}`} type="button" role="switch" aria-checked={categoryFilterEnabled} aria-label="Filter kategori" disabled={quantityEntryActive} onClick={toggleCategoryFilter}><span /></button></div></div><div className="pos-transaction-total" aria-live="polite"><span>Nominal transaksi</span><strong>{money(total)}</strong></div></div>
+      <section className="panel product-picker"><div className="pos-picker-header"><div className="pos-picker-controls"><div className="search-field"><Search size={18} /><input ref={searchInputRef} value={search} disabled={quantityEntryActive} onChange={(event) => { setSearch(event.target.value); cancelQuantityEntry(); }} onKeyDown={handleSearchKeyDown} placeholder="Cari nama atau barcode produk..." />{search && <button className="search-clear" type="button" disabled={quantityEntryActive} onClick={() => { setSearch(''); cancelQuantityEntry(); }} aria-label="Hapus pencarian"><X size={15} /></button>}</div><div className="pos-category-switch"><button className={`pos-switch${categoryFilterEnabled ? ' is-on' : ''}`} type="button" role="switch" aria-checked={categoryFilterEnabled} aria-label="Filter kategori" disabled={quantityEntryActive} onClick={toggleCategoryFilter}><span /></button></div></div><div className="pos-transaction-total" aria-live="polite"><span>Nominal transaksi</span><strong>{money(total)}</strong></div></div>
         {categoryFilterEnabled && <div className="pos-category-filters" aria-label="Pilih kategori produk">
           <button className={`pos-category-chip${selectedCategoryId ? '' : ' is-active'}`} type="button" aria-pressed={!selectedCategoryId} disabled={quantityEntryActive} onClick={() => setSelectedCategoryId('')}>Semua</button>
           {categoryOptions.map((category) => <button className={`pos-category-chip${String(selectedCategoryId) === String(category.id) ? ' is-active' : ''}`} key={category.id} type="button" aria-pressed={String(selectedCategoryId) === String(category.id)} disabled={quantityEntryActive} onClick={() => setSelectedCategoryId(String(category.id))}>{category.name}</button>)}
@@ -1024,8 +1025,56 @@ function VendorsPage({ vendors, storeId, run }) {
   </>;
 }
 
+function StockProductSelect({ products, value, onChange }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+  const triggerRef = useRef(null);
+  const selectedProduct = products.find((product) => product.id === value);
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const closeOnOutsideClick = (event) => {
+      if (!containerRef.current?.contains(event.target)) setIsOpen(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [isOpen]);
+  const selectProduct = (productId) => {
+    onChange(productId);
+    setIsOpen(false);
+    triggerRef.current?.focus();
+  };
+  return <div className="stock-product-select" ref={containerRef}>
+    <button className={`stock-product-trigger${isOpen ? ' is-open' : ''}`} ref={triggerRef} type="button" aria-haspopup="listbox" aria-expanded={isOpen} aria-controls="stock-product-options" onClick={() => setIsOpen((open) => !open)}>
+      {selectedProduct ? <><span className="stock-product-trigger-name">{selectedProduct.name}</span><span className={`stock-product-badge${Number(selectedProduct.stock) <= 0 ? ' is-empty' : ''}`}>{Number(selectedProduct.stock) <= 0 ? 'Stok kosong' : `${quantity(selectedProduct.stock)} ${selectedProduct.unit}`}</span></> : <span className="stock-product-placeholder">Pilih produk</span>}
+      <span className="stock-product-caret" aria-hidden="true" />
+    </button>
+    {isOpen && <div className="stock-product-options" id="stock-product-options" role="listbox" aria-label="Pilih produk">
+      <button className={`stock-product-option stock-product-option-placeholder${!value ? ' is-selected' : ''}`} type="button" role="option" aria-selected={!value} onClick={() => selectProduct('')}>Pilih produk</button>
+      {products.map((product) => {
+        const isEmpty = Number(product.stock) <= 0;
+        const isSelected = product.id === value;
+        return <button className={`stock-product-option${isSelected ? ' is-selected' : ''}`} type="button" role="option" aria-selected={isSelected} key={product.id} onClick={() => selectProduct(product.id)}>
+          <span className="stock-product-option-name">{product.name}</span>
+          <span className={`stock-product-badge${isEmpty ? ' is-empty' : ''}`}>{isEmpty ? 'Stok kosong' : `${quantity(product.stock)} ${product.unit}`}</span>
+        </button>;
+      })}
+    </div>}
+  </div>;
+}
+
 function StockPage({ products, vendors, stockEntries, storeId, run }) {
   const [productId, setProductId] = useState('');
+  const [productError, setProductError] = useState('');
   const [vendorId, setVendorId] = useState('');
   const [amount, setAmount] = useState('');
   const [unitCost, setUnitCost] = useState('');
@@ -1035,6 +1084,11 @@ function StockPage({ products, vendors, stockEntries, storeId, run }) {
   const selectedProduct = products.find((product) => product.id === productId);
   const save = async (event) => {
     event.preventDefault();
+    if (!productId) {
+      setProductError('Pilih produk terlebih dahulu.');
+      return;
+    }
+    setProductError('');
     setBusy(true);
     try {
       await run(async () => {
@@ -1056,7 +1110,7 @@ function StockPage({ products, vendors, stockEntries, storeId, run }) {
     } finally { setBusy(false); }
   };
   return <>
-    <div className="stock-layout"><section className="panel form-panel"><div className="panel-heading"><div><h2>Detail penerimaan barang</h2><p>Stok akan bertambah otomatis setelah disimpan.</p></div></div><form className="form-stack" onSubmit={save}><Field label="Produk"><select required value={productId} onChange={(event) => { setProductId(event.target.value); const product = products.find((item) => item.id === event.target.value); if (product) setUnitCost(String(product.buy_price)); }}><option value="">Pilih produk</option>{products.map((product) => <option key={product.id} value={product.id}>{product.name} — stok {quantity(product.stock)} {product.unit}</option>)}</select></Field><Field label="Vendor"><select value={vendorId} onChange={(event) => setVendorId(event.target.value)}><option value="">Tanpa vendor</option>{vendors.map((vendor) => <option key={vendor.id} value={vendor.id}>{vendor.name}</option>)}</select></Field><div className="form-row"><Field label={`Jumlah${selectedProduct ? ` (${selectedProduct.unit})` : ''}`}><input type="number" min="0.001" step="0.001" required value={amount} onChange={(event) => setAmount(event.target.value)} /></Field><Field label="Harga beli per unit"><CurrencyInput required value={unitCost} onChange={setUnitCost} /></Field></div><div className="stock-total"><span>Total nilai pembelian</span><strong>{money(Number(amount) * Number(unitCost))}</strong></div><div className="form-row"><Field label="Tanggal penerimaan"><input type="date" required value={date} onChange={(event) => setDate(event.target.value)} /></Field><Field label="Catatan"><input value={note} onChange={(event) => setNote(event.target.value)} placeholder="Opsional" /></Field></div><button className="button button-primary full-button" disabled={busy || !products.length}><ArrowDownToLine size={17} />{busy ? 'Menyimpan...' : 'Simpan stok masuk'}</button></form></section>
+    <div className="stock-layout"><section className="panel form-panel"><div className="panel-heading"><div><h2>Detail penerimaan barang</h2><p>Stok akan bertambah otomatis setelah disimpan.</p></div></div><form className="form-stack" onSubmit={save}><Field label="Produk"><StockProductSelect products={products} value={productId} onChange={(value) => { setProductId(value); setProductError(''); const product = products.find((item) => item.id === value); if (product) setUnitCost(String(product.buy_price)); }} />{productError && <small className="stock-product-error" role="alert">{productError}</small>}</Field><Field label="Vendor"><select value={vendorId} onChange={(event) => setVendorId(event.target.value)}><option value="">Tanpa vendor</option>{vendors.map((vendor) => <option key={vendor.id} value={vendor.id}>{vendor.name}</option>)}</select></Field><div className="form-row"><Field label={`Jumlah${selectedProduct ? ` (${selectedProduct.unit})` : ''}`}><input type="number" min="0.001" step="0.001" required value={amount} onChange={(event) => setAmount(event.target.value)} /></Field><Field label="Harga beli per unit"><CurrencyInput required value={unitCost} onChange={setUnitCost} /></Field></div><div className="stock-total"><span>Total nilai pembelian</span><strong>{money(Number(amount) * Number(unitCost))}</strong></div><div className="form-row"><Field label="Tanggal penerimaan"><input type="date" required value={date} onChange={(event) => setDate(event.target.value)} /></Field><Field label="Catatan"><input value={note} onChange={(event) => setNote(event.target.value)} placeholder="Opsional" /></Field></div><button className="button button-primary full-button" disabled={busy || !products.length}><ArrowDownToLine size={17} />{busy ? 'Menyimpan...' : 'Simpan stok masuk'}</button></form></section>
       <section className="panel stock-history"><div className="panel-heading"><div><h2>Riwayat stok masuk</h2><p>500 penerimaan terbaru</p></div></div><div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>PRODUK</th><th>VENDOR</th><th>JUMLAH</th><th className="align-right">TOTAL</th></tr></thead><tbody>{stockEntries.map((entry, index) => <tr key={entry.id}><td className="row-number">{index + 1}</td><td>{shortDate(entry.occurred_on)}</td><td><strong>{entry.product?.name || 'Produk dihapus'}</strong></td><td>{entry.vendor?.name || '-'}</td><td>{quantity(entry.quantity)} unit</td><td className="align-right">{money(Number(entry.quantity) * Number(entry.unit_cost))}</td></tr>)}</tbody></table>{!stockEntries.length && <EmptyState icon={Boxes} title="Belum ada penerimaan" text="Riwayat stok masuk akan tampil setelah dicatat." />}</div></section></div>
   </>;
 }
