@@ -283,6 +283,17 @@ form.form-stack:has(.product-category-row) > .form-row:has(.currency-input) { gr
 .stock-total { display: flex; align-items: center; justify-content: space-between; padding: 13px; color: #656b61; background: #f7f8f5; border-radius: 8px; font-size: 10px; }
 .stock-total strong { color: #3c433a; font-family: Manrope, sans-serif; font-size: 15px; }
 .stock-history .panel-heading { margin-bottom: 13px; }
+.stock-history .panel-heading:has(.date-calendar) { position: relative; z-index: 5; }
+.stock-history-filters { display: flex; flex: 0 0 auto; align-items: flex-end; gap: 7px; }
+.stock-history-total { display: grid; align-self: center; gap: 2px; padding: 0 5px; text-align: right; }
+.stock-history-total span { color: #80621a; font-size: 8px; font-weight: 600; }
+.stock-history-total strong { color: #3e2b08; font-family: Manrope, sans-serif; font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.stock-history-filters .field { width: 142px; gap: 4px; color: #6f644e; }
+.stock-history-filters .sales-date-input { position: relative; display: block; width: 100%; }
+.stock-history-filters .sales-date-picker { min-height: 32px; padding: 5px 7px; }
+.stock-history-filters .date-calendar { left: auto; right: 0; transform: none; }
+.stock-date-reset { min-height: 32px; padding: 0 9px; color: #6a5016; background: rgba(255, 255, 255, .42); border: 1px solid rgba(255, 255, 255, .68); border-radius: 8px 13px 7px 13px; font-size: 9px; font-weight: 600; white-space: nowrap; }
+.stock-date-reset:hover { background: rgba(255, 255, 255, .7); }
 .clickable-row { cursor: pointer; }
 .clickable-row:hover { background: #fbfbf7; }
 .pos-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(320px, .8fr); align-items: stretch; gap: 16px; }

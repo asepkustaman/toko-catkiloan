@@ -1075,6 +1075,7 @@ function StockProductSelect({ products, value, onChange }) {
 function StockPage({ products, vendors, stockEntries, storeId, run }) {
   const [productId, setProductId] = useState('');
   const [productError, setProductError] = useState('');
+  const [historyDate, setHistoryDate] = useState('');
   const [vendorId, setVendorId] = useState('');
   const [amount, setAmount] = useState('');
   const [unitCost, setUnitCost] = useState('');
@@ -1082,6 +1083,8 @@ function StockPage({ products, vendors, stockEntries, storeId, run }) {
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const selectedProduct = products.find((product) => product.id === productId);
+  const filteredStockEntries = stockEntries.filter((entry) => !historyDate || entry.occurred_on === historyDate);
+  const filteredStockTotal = filteredStockEntries.reduce((sum, entry) => sum + Number(entry.quantity) * Number(entry.unit_cost), 0);
   const save = async (event) => {
     event.preventDefault();
     if (!productId) {
@@ -1103,15 +1106,20 @@ function StockPage({ products, vendors, stockEntries, storeId, run }) {
         });
         if (error) throw error;
       }, 'Stok masuk berhasil dicatat.');
+      setProductId('');
+      setVendorId('');
       setAmount('');
+      setUnitCost('');
+      setDate(today());
       setNote('');
+      setProductError('');
     } catch {
       // The shared action handler displays the Supabase error.
     } finally { setBusy(false); }
   };
   return <>
     <div className="stock-layout"><section className="panel form-panel"><div className="panel-heading"><div><h2>Detail penerimaan barang</h2><p>Stok akan bertambah otomatis setelah disimpan.</p></div></div><form className="form-stack" onSubmit={save}><Field label="Produk"><StockProductSelect products={products} value={productId} onChange={(value) => { setProductId(value); setProductError(''); const product = products.find((item) => item.id === value); if (product) setUnitCost(String(product.buy_price)); }} />{productError && <small className="stock-product-error" role="alert">{productError}</small>}</Field><Field label="Vendor"><select value={vendorId} onChange={(event) => setVendorId(event.target.value)}><option value="">Tanpa vendor</option>{vendors.map((vendor) => <option key={vendor.id} value={vendor.id}>{vendor.name}</option>)}</select></Field><div className="form-row"><Field label={`Jumlah${selectedProduct ? ` (${selectedProduct.unit})` : ''}`}><input type="number" min="0.001" step="0.001" required value={amount} onChange={(event) => setAmount(event.target.value)} /></Field><Field label="Harga beli per unit"><CurrencyInput required value={unitCost} onChange={setUnitCost} /></Field></div><div className="stock-total"><span>Total nilai pembelian</span><strong>{money(Number(amount) * Number(unitCost))}</strong></div><div className="form-row"><Field label="Tanggal penerimaan"><input type="date" required value={date} onChange={(event) => setDate(event.target.value)} /></Field><Field label="Catatan"><input value={note} onChange={(event) => setNote(event.target.value)} placeholder="Opsional" /></Field></div><button className="button button-primary full-button" disabled={busy || !products.length}><ArrowDownToLine size={17} />{busy ? 'Menyimpan...' : 'Simpan stok masuk'}</button></form></section>
-      <section className="panel stock-history"><div className="panel-heading"><div><h2>Riwayat stok masuk</h2><p>500 penerimaan terbaru</p></div></div><div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>PRODUK</th><th>VENDOR</th><th>JUMLAH</th><th className="align-right">TOTAL</th></tr></thead><tbody>{stockEntries.map((entry, index) => <tr key={entry.id}><td className="row-number">{index + 1}</td><td>{shortDate(entry.occurred_on)}</td><td><strong>{entry.product?.name || 'Produk dihapus'}</strong></td><td>{entry.vendor?.name || '-'}</td><td>{quantity(entry.quantity)} unit</td><td className="align-right">{money(Number(entry.quantity) * Number(entry.unit_cost))}</td></tr>)}</tbody></table>{!stockEntries.length && <EmptyState icon={Boxes} title="Belum ada penerimaan" text="Riwayat stok masuk akan tampil setelah dicatat." />}</div></section></div>
+      <section className="panel stock-history"><div className="panel-heading"><div><h2>Riwayat stok masuk</h2><p>{filteredStockEntries.length} penerimaan{historyDate ? ` pada ${shortDate(historyDate)}` : ' terbaru'}</p></div><div className="stock-history-filters">{historyDate && <div className="stock-history-total"><span>Total belanja</span><strong>{money(filteredStockTotal)}</strong></div>}<DatePickerField label="Tanggal" value={historyDate} onChange={setHistoryDate} />{historyDate && <button className="stock-date-reset" type="button" onClick={() => setHistoryDate('')}>Semua tanggal</button>}</div></div><div className="table-wrap"><table><thead><tr><th className="row-number">NO.</th><th>TANGGAL</th><th>PRODUK</th><th>VENDOR</th><th>JUMLAH</th><th className="align-right">TOTAL</th></tr></thead><tbody>{filteredStockEntries.map((entry, index) => <tr key={entry.id}><td className="row-number">{index + 1}</td><td>{shortDate(entry.occurred_on)}</td><td><strong>{entry.product?.name || 'Produk dihapus'}</strong></td><td>{entry.vendor?.name || '-'}</td><td>{quantity(entry.quantity)} unit</td><td className="align-right">{money(Number(entry.quantity) * Number(entry.unit_cost))}</td></tr>)}</tbody></table>{!filteredStockEntries.length && <EmptyState icon={Boxes} title={historyDate ? 'Tidak ada penerimaan pada tanggal ini' : 'Belum ada penerimaan'} text={historyDate ? 'Pilih tanggal lain atau tampilkan semua tanggal.' : 'Riwayat stok masuk akan tampil setelah dicatat.'} />}</div></section></div>
   </>;
 }
 
